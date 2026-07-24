@@ -76,6 +76,10 @@ dev_dependencies:
   drift_dev: ^2.22.1
   riverpod_generator: ^2.6.3
 
+  # App icon and splash screen generation (dev-time only, no runtime dependency)
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -119,3 +123,37 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/appicon.png"
+  adaptive_icon_background: "assets/icon/appicon_background.png"
+  adaptive_icon_foreground: "assets/icon/appicon_foreground.png"
+  # appicon_foreground.svg already precisely scales the motif to fit within
+  # Android's 66x66dp safe zone (transparent padding baked into the 108x108
+  # canvas, computed and verified in research.md §4). The tool's default 16%
+  # inset would double-shrink it on top of that, so it's disabled here.
+  adaptive_icon_foreground_inset: 0
+  # The source SVG has no transparent regions (the background rect fills the
+  # full canvas), so removing alpha loses nothing visually while satisfying
+  # Apple's App Store requirement that the 1024x1024 marketing icon be opaque.
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#EBF5F0"
+  color_dark: "#0C2318"
+  image: "assets/icon/appicon.png"
+  android: true
+  ios: true
+  # Web/desktop are out of scope for this feature (spec.md Assumptions);
+  # web defaults to enabled unless explicitly disabled.
+  web: false
+  android_12:
+    # Android 12+ splash: the icon is clipped to a circle by the OS, so the
+    # foreground-only motif (already scaled to fit within a centered safe
+    # zone, same asset used for the adaptive launcher icon) is used instead
+    # of the full flat icon, with the brand green as its own circular backdrop.
+    image: "assets/icon/appicon_foreground.png"
+    icon_background_color: "#EBF5F0"
+    icon_background_color_dark: "#0C2318"

@@ -23,6 +23,7 @@ build/
 
 # Platform build artifacts
 **/android/.gradle/
+**/android/.kotlin/
 **/android/local.properties
 **/ios/Pods/
 **/ios/.symlinks/
