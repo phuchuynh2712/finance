@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/l10n/app_localizations.dart';
 import 'core/network/supabase_client_provider.dart';
+import 'core/theme/app_theme.dart';
 import 'features/connection_test/presentation/connection_test_screen.dart';
 
 Future<void> main() async {
@@ -29,7 +30,9 @@ class FinanceApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: const ConnectionTestScreen(),
     );
   }
