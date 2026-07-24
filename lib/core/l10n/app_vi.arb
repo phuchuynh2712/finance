@@ -1,0 +1,22 @@
+{
+  "@@locale": "vi",
+  "appTitle": "Quản lý tài chính",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "connectionTestTitle": "Kiểm tra kết nối",
+  "@connectionTestTitle": {
+    "description": "Title of the Supabase connection test screen"
+  },
+  "connectionStatusChecking": "Đang kiểm tra kết nối...",
+  "connectionStatusSuccess": "Kết nối Supabase thành công",
+  "connectionStatusFailure": "Kết nối Supabase thất bại: {error}",
+  "@connectionStatusFailure": {
+    "description": "Shown when the Supabase connectivity check fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}
