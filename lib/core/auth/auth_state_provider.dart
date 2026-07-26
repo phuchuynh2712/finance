@@ -23,3 +23,24 @@ final isSignedInProvider = Provider<bool>((ref) {
   final authState = ref.watch(authStateChangesProvider);
   return authState.valueOrNull?.session != null;
 });
+
+/// The signed-in user's ID, for scoping repository queries to the current
+/// user (RLS mirrors this scoping on the Supabase side). Feature code that
+/// reads this MUST only run once a user is confirmed signed in (i.e. behind
+/// the router's auth guard), so the exception here indicates a real bug
+/// rather than a state to handle gracefully.
+final currentUserIdProvider = Provider<String>((ref) {
+  final userId = ref
+      .watch(authStateChangesProvider)
+      .valueOrNull
+      ?.session
+      ?.user
+      .id;
+  if (userId == null) {
+    throw StateError(
+      'currentUserIdProvider read while signed out — this indicates a '
+      'screen reachable outside the router auth guard (FR-025)',
+    );
+  }
+  return userId;
+});

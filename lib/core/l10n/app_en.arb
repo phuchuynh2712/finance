@@ -9,5 +9,16 @@
   "signInEmailLabel": "Email",
   "signInPasswordLabel": "Password",
   "signInSubmit": "Sign In",
-  "signInError": "Sign-in failed: {error}"
+  "signInError": "Sign-in failed: {error}",
+  "overviewTitle": "Overview",
+  "overviewEmptyState": "No envelopes yet. Create one in the Envelopes tab first.",
+  "overviewPlanAction": "Plan",
+  "planTitle": "Plan",
+  "planIncomeLabel": "Income amount",
+  "planPreviewHeading": "Allocation preview",
+  "planOverAllocationWarning": "Total allocation exceeds income by {excess} ₫. Please adjust before confirming.",
+  "planMissingReceiverWarning": "There is leftover after allocation, but no envelope is set to receive it. Please set one in the Envelopes tab.",
+  "planNegativeBalanceWarning": "One or more envelopes will still be negative after this allocation.",
+  "planConfirmAction": "Confirm",
+  "planErrorPrefix": "Could not confirm the plan: {error}"
 }

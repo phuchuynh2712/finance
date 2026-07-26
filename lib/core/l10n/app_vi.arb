@@ -44,5 +44,59 @@
         "type": "String"
       }
     }
+  },
+  "overviewTitle": "Tổng quan",
+  "@overviewTitle": {
+    "description": "Title of the Overview screen"
+  },
+  "overviewEmptyState": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.",
+  "@overviewEmptyState": {
+    "description": "Shown on Overview when the user has no envelopes yet"
+  },
+  "overviewPlanAction": "Lập kế hoạch",
+  "@overviewPlanAction": {
+    "description": "Button/action on Overview that opens the income allocation (Plan) flow"
+  },
+  "planTitle": "Lập kế hoạch",
+  "@planTitle": {
+    "description": "Title of the Plan (income allocation) screen"
+  },
+  "planIncomeLabel": "Số tiền thu nhập",
+  "@planIncomeLabel": {
+    "description": "Label for the income amount input field on the Plan screen"
+  },
+  "planPreviewHeading": "Xem trước phân bổ",
+  "@planPreviewHeading": {
+    "description": "Heading above the per-envelope allocation preview list"
+  },
+  "planOverAllocationWarning": "Tổng phân bổ vượt quá thu nhập {excess} ₫. Vui lòng điều chỉnh trước khi xác nhận.",
+  "@planOverAllocationWarning": {
+    "description": "Shown when combined fixed+percentage allocations exceed the income entered (FR-011a)",
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      }
+    }
+  },
+  "planMissingReceiverWarning": "Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.",
+  "@planMissingReceiverWarning": {
+    "description": "Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)"
+  },
+  "planNegativeBalanceWarning": "Một hoặc nhiều khoản sẽ vẫn bị âm sau khi phân bổ.",
+  "@planNegativeBalanceWarning": {
+    "description": "Shown when any envelope's resulting balance would still be negative after this allocation (FR-011)"
+  },
+  "planConfirmAction": "Xác nhận",
+  "@planConfirmAction": {
+    "description": "Button to confirm and apply the allocation event"
+  },
+  "planErrorPrefix": "Không thể xác nhận kế hoạch: {error}",
+  "@planErrorPrefix": {
+    "description": "Shown when confirming the allocation event fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -39,4 +39,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String signInError(String error) {
     return 'Sign-in failed: $error';
   }
+
+  @override
+  String get overviewTitle => 'Overview';
+
+  @override
+  String get overviewEmptyState =>
+      'No envelopes yet. Create one in the Envelopes tab first.';
+
+  @override
+  String get overviewPlanAction => 'Plan';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get planIncomeLabel => 'Income amount';
+
+  @override
+  String get planPreviewHeading => 'Allocation preview';
+
+  @override
+  String planOverAllocationWarning(String excess) {
+    return 'Total allocation exceeds income by $excess ₫. Please adjust before confirming.';
+  }
+
+  @override
+  String get planMissingReceiverWarning =>
+      'There is leftover after allocation, but no envelope is set to receive it. Please set one in the Envelopes tab.';
+
+  @override
+  String get planNegativeBalanceWarning =>
+      'One or more envelopes will still be negative after this allocation.';
+
+  @override
+  String get planConfirmAction => 'Confirm';
+
+  @override
+  String planErrorPrefix(String error) {
+    return 'Could not confirm the plan: $error';
+  }
 }

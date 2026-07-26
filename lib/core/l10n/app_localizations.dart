@@ -157,6 +157,72 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đăng nhập thất bại: {error}'**
   String signInError(String error);
+
+  /// Title of the Overview screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng quan'**
+  String get overviewTitle;
+
+  /// Shown on Overview when the user has no envelopes yet
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.'**
+  String get overviewEmptyState;
+
+  /// Button/action on Overview that opens the income allocation (Plan) flow
+  ///
+  /// In vi, this message translates to:
+  /// **'Lập kế hoạch'**
+  String get overviewPlanAction;
+
+  /// Title of the Plan (income allocation) screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Lập kế hoạch'**
+  String get planTitle;
+
+  /// Label for the income amount input field on the Plan screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền thu nhập'**
+  String get planIncomeLabel;
+
+  /// Heading above the per-envelope allocation preview list
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem trước phân bổ'**
+  String get planPreviewHeading;
+
+  /// Shown when combined fixed+percentage allocations exceed the income entered (FR-011a)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng phân bổ vượt quá thu nhập {excess} ₫. Vui lòng điều chỉnh trước khi xác nhận.'**
+  String planOverAllocationWarning(String excess);
+
+  /// Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.'**
+  String get planMissingReceiverWarning;
+
+  /// Shown when any envelope's resulting balance would still be negative after this allocation (FR-011)
+  ///
+  /// In vi, this message translates to:
+  /// **'Một hoặc nhiều khoản sẽ vẫn bị âm sau khi phân bổ.'**
+  String get planNegativeBalanceWarning;
+
+  /// Button to confirm and apply the allocation event
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận'**
+  String get planConfirmAction;
+
+  /// Shown when confirming the allocation event fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể xác nhận kế hoạch: {error}'**
+  String planErrorPrefix(String error);
 }
 
 class _AppLocalizationsDelegate
