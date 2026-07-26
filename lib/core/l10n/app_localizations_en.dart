@@ -79,4 +79,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String planErrorPrefix(String error) {
     return 'Could not confirm the plan: $error';
   }
+
+  @override
+  String get spendingTitle => 'Spending';
+
+  @override
+  String get spendingEmptyState => 'No expenses yet.';
+
+  @override
+  String get spendingAddAction => 'Add expense';
+
+  @override
+  String get spendingNoEnvelopesWarning =>
+      'No envelopes yet. Create one in the Envelopes tab before recording an expense.';
+
+  @override
+  String get spendingDeleteConfirmTitle => 'Delete this expense?';
+
+  @override
+  String get spendingDeleteConfirmAction => 'Delete';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get expenseFormTitleCreate => 'Add Expense';
+
+  @override
+  String get expenseFormTitleEdit => 'Edit Expense';
+
+  @override
+  String get expenseFormAmountLabel => 'Amount';
+
+  @override
+  String get expenseFormEnvelopeLabel => 'Envelope';
+
+  @override
+  String get expenseFormNoteLabel => 'Note (optional)';
+
+  @override
+  String get expenseFormSaveAction => 'Save';
+
+  @override
+  String expenseFormErrorPrefix(String error) {
+    return 'Could not save the expense: $error';
+  }
+
+  @override
+  String get coveringPromptTitle => 'Choose a covering envelope';
+
+  @override
+  String coveringPromptMessage(String shortfall) {
+    return 'This expense exceeds the balance by $shortfall ₫. Choose another envelope to cover the shortfall.';
+  }
 }

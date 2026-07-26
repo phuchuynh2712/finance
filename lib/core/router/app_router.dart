@@ -6,6 +6,7 @@ import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
+import '../../features/expenses/presentation/spending_screen.dart';
 
 /// A bare [Listenable] that [GoRouter] watches to know when to re-evaluate
 /// its [GoRouterRedirect] — fired manually via [ping] rather than wrapping a
@@ -87,8 +88,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/spending',
-                builder: (context, state) =>
-                    const _ComingSoonScreen('Spending'),
+                builder: (context, state) => const SpendingScreen(),
               ),
             ],
           ),

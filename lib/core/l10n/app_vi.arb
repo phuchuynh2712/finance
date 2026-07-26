@@ -98,5 +98,79 @@
         "type": "String"
       }
     }
+  },
+  "spendingTitle": "Chi tiêu",
+  "@spendingTitle": {
+    "description": "Title of the Spending screen"
+  },
+  "spendingEmptyState": "Chưa có khoản chi nào.",
+  "@spendingEmptyState": {
+    "description": "Shown on Spending when no expenses exist yet"
+  },
+  "spendingAddAction": "Thêm khoản chi",
+  "@spendingAddAction": {
+    "description": "Action to open the expense entry form"
+  },
+  "spendingNoEnvelopesWarning": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.",
+  "@spendingNoEnvelopesWarning": {
+    "description": "Shown instead of the add-expense action when the user has zero envelopes (FR-030)"
+  },
+  "spendingDeleteConfirmTitle": "Xóa khoản chi?",
+  "@spendingDeleteConfirmTitle": {
+    "description": "Title of the confirmation dialog before deleting an expense entry"
+  },
+  "spendingDeleteConfirmAction": "Xóa",
+  "@spendingDeleteConfirmAction": {
+    "description": "Confirm button in the delete-expense dialog"
+  },
+  "cancelAction": "Hủy",
+  "@cancelAction": {
+    "description": "Generic cancel button label"
+  },
+  "expenseFormTitleCreate": "Ghi khoản chi",
+  "@expenseFormTitleCreate": {
+    "description": "Title of the expense form screen when creating a new entry"
+  },
+  "expenseFormTitleEdit": "Sửa khoản chi",
+  "@expenseFormTitleEdit": {
+    "description": "Title of the expense form screen when editing an existing entry"
+  },
+  "expenseFormAmountLabel": "Số tiền",
+  "@expenseFormAmountLabel": {
+    "description": "Label for the amount input field on the expense form"
+  },
+  "expenseFormEnvelopeLabel": "Khoản",
+  "@expenseFormEnvelopeLabel": {
+    "description": "Label for the envelope selector on the expense form"
+  },
+  "expenseFormNoteLabel": "Ghi chú (không bắt buộc)",
+  "@expenseFormNoteLabel": {
+    "description": "Label for the optional note field on the expense form"
+  },
+  "expenseFormSaveAction": "Lưu",
+  "@expenseFormSaveAction": {
+    "description": "Save button on the expense form"
+  },
+  "expenseFormErrorPrefix": "Không thể lưu khoản chi: {error}",
+  "@expenseFormErrorPrefix": {
+    "description": "Shown when saving the expense fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coveringPromptTitle": "Chọn khoản để bù",
+  "@coveringPromptTitle": {
+    "description": "Title of the covering-envelope prompt shown on overspend"
+  },
+  "coveringPromptMessage": "Khoản chi này vượt quá số dư {shortfall} ₫. Chọn một khoản khác để bù phần thiếu.",
+  "@coveringPromptMessage": {
+    "description": "Body text of the covering-envelope prompt, showing the shortfall",
+    "placeholders": {
+      "shortfall": {
+        "type": "String"
+      }
+    }
   }
 }

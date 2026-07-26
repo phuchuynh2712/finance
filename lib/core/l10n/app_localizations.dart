@@ -223,6 +223,102 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Không thể xác nhận kế hoạch: {error}'**
   String planErrorPrefix(String error);
+
+  /// Title of the Spending screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiêu'**
+  String get spendingTitle;
+
+  /// Shown on Spending when no expenses exist yet
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản chi nào.'**
+  String get spendingEmptyState;
+
+  /// Action to open the expense entry form
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm khoản chi'**
+  String get spendingAddAction;
+
+  /// Shown instead of the add-expense action when the user has zero envelopes (FR-030)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.'**
+  String get spendingNoEnvelopesWarning;
+
+  /// Title of the confirmation dialog before deleting an expense entry
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa khoản chi?'**
+  String get spendingDeleteConfirmTitle;
+
+  /// Confirm button in the delete-expense dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa'**
+  String get spendingDeleteConfirmAction;
+
+  /// Generic cancel button label
+  ///
+  /// In vi, this message translates to:
+  /// **'Hủy'**
+  String get cancelAction;
+
+  /// Title of the expense form screen when creating a new entry
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi khoản chi'**
+  String get expenseFormTitleCreate;
+
+  /// Title of the expense form screen when editing an existing entry
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa khoản chi'**
+  String get expenseFormTitleEdit;
+
+  /// Label for the amount input field on the expense form
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền'**
+  String get expenseFormAmountLabel;
+
+  /// Label for the envelope selector on the expense form
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản'**
+  String get expenseFormEnvelopeLabel;
+
+  /// Label for the optional note field on the expense form
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú (không bắt buộc)'**
+  String get expenseFormNoteLabel;
+
+  /// Save button on the expense form
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get expenseFormSaveAction;
+
+  /// Shown when saving the expense fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu khoản chi: {error}'**
+  String expenseFormErrorPrefix(String error);
+
+  /// Title of the covering-envelope prompt shown on overspend
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn khoản để bù'**
+  String get coveringPromptTitle;
+
+  /// Body text of the covering-envelope prompt, showing the shortfall
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản chi này vượt quá số dư {shortfall} ₫. Chọn một khoản khác để bù phần thiếu.'**
+  String coveringPromptMessage(String shortfall);
 }
 
 class _AppLocalizationsDelegate

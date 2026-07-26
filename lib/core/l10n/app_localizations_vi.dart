@@ -79,4 +79,57 @@ class AppLocalizationsVi extends AppLocalizations {
   String planErrorPrefix(String error) {
     return 'Không thể xác nhận kế hoạch: $error';
   }
+
+  @override
+  String get spendingTitle => 'Chi tiêu';
+
+  @override
+  String get spendingEmptyState => 'Chưa có khoản chi nào.';
+
+  @override
+  String get spendingAddAction => 'Thêm khoản chi';
+
+  @override
+  String get spendingNoEnvelopesWarning =>
+      'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.';
+
+  @override
+  String get spendingDeleteConfirmTitle => 'Xóa khoản chi?';
+
+  @override
+  String get spendingDeleteConfirmAction => 'Xóa';
+
+  @override
+  String get cancelAction => 'Hủy';
+
+  @override
+  String get expenseFormTitleCreate => 'Ghi khoản chi';
+
+  @override
+  String get expenseFormTitleEdit => 'Sửa khoản chi';
+
+  @override
+  String get expenseFormAmountLabel => 'Số tiền';
+
+  @override
+  String get expenseFormEnvelopeLabel => 'Khoản';
+
+  @override
+  String get expenseFormNoteLabel => 'Ghi chú (không bắt buộc)';
+
+  @override
+  String get expenseFormSaveAction => 'Lưu';
+
+  @override
+  String expenseFormErrorPrefix(String error) {
+    return 'Không thể lưu khoản chi: $error';
+  }
+
+  @override
+  String get coveringPromptTitle => 'Chọn khoản để bù';
+
+  @override
+  String coveringPromptMessage(String shortfall) {
+    return 'Khoản chi này vượt quá số dư $shortfall ₫. Chọn một khoản khác để bù phần thiếu.';
+  }
 }

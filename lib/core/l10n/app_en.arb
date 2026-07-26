@@ -20,5 +20,21 @@
   "planMissingReceiverWarning": "There is leftover after allocation, but no envelope is set to receive it. Please set one in the Envelopes tab.",
   "planNegativeBalanceWarning": "One or more envelopes will still be negative after this allocation.",
   "planConfirmAction": "Confirm",
-  "planErrorPrefix": "Could not confirm the plan: {error}"
+  "planErrorPrefix": "Could not confirm the plan: {error}",
+  "spendingTitle": "Spending",
+  "spendingEmptyState": "No expenses yet.",
+  "spendingAddAction": "Add expense",
+  "spendingNoEnvelopesWarning": "No envelopes yet. Create one in the Envelopes tab before recording an expense.",
+  "spendingDeleteConfirmTitle": "Delete this expense?",
+  "spendingDeleteConfirmAction": "Delete",
+  "cancelAction": "Cancel",
+  "expenseFormTitleCreate": "Add Expense",
+  "expenseFormTitleEdit": "Edit Expense",
+  "expenseFormAmountLabel": "Amount",
+  "expenseFormEnvelopeLabel": "Envelope",
+  "expenseFormNoteLabel": "Note (optional)",
+  "expenseFormSaveAction": "Save",
+  "expenseFormErrorPrefix": "Could not save the expense: {error}",
+  "coveringPromptTitle": "Choose a covering envelope",
+  "coveringPromptMessage": "This expense exceeds the balance by {shortfall} ₫. Choose another envelope to cover the shortfall."
 }
