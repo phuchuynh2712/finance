@@ -4,15 +4,41 @@
   "@appTitle": {
     "description": "The title of the application"
   },
-  "connectionTestTitle": "Kiểm tra kết nối",
-  "@connectionTestTitle": {
-    "description": "Title of the Supabase connection test screen"
+  "tabOverview": "Tổng quan",
+  "@tabOverview": {
+    "description": "Bottom navigation tab label for the Overview screen"
   },
-  "connectionStatusChecking": "Đang kiểm tra kết nối...",
-  "connectionStatusSuccess": "Kết nối Supabase thành công",
-  "connectionStatusFailure": "Kết nối Supabase thất bại: {error}",
-  "@connectionStatusFailure": {
-    "description": "Shown when the Supabase connectivity check fails",
+  "tabSpending": "Chi tiêu",
+  "@tabSpending": {
+    "description": "Bottom navigation tab label for the Spending screen"
+  },
+  "tabEnvelopes": "Khoản",
+  "@tabEnvelopes": {
+    "description": "Bottom navigation tab label for the Envelopes screen"
+  },
+  "tabAccount": "Cá nhân",
+  "@tabAccount": {
+    "description": "Bottom navigation tab label for the Account screen"
+  },
+  "signInTitle": "Đăng nhập",
+  "@signInTitle": {
+    "description": "Title of the sign-in screen"
+  },
+  "signInEmailLabel": "Email",
+  "@signInEmailLabel": {
+    "description": "Label for the email input field on the sign-in screen"
+  },
+  "signInPasswordLabel": "Mật khẩu",
+  "@signInPasswordLabel": {
+    "description": "Label for the password input field on the sign-in screen"
+  },
+  "signInSubmit": "Đăng nhập",
+  "@signInSubmit": {
+    "description": "Submit button label on the sign-in screen"
+  },
+  "signInError": "Đăng nhập thất bại: {error}",
+  "@signInError": {
+    "description": "Shown when sign-in fails",
     "placeholders": {
       "error": {
         "type": "String"

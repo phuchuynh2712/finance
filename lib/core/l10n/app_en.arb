@@ -1,8 +1,13 @@
 {
   "@@locale": "en",
   "appTitle": "Finance Manager",
-  "connectionTestTitle": "Connection Test",
-  "connectionStatusChecking": "Checking connection...",
-  "connectionStatusSuccess": "Supabase connection succeeded",
-  "connectionStatusFailure": "Supabase connection failed: {error}"
+  "tabOverview": "Overview",
+  "tabSpending": "Spending",
+  "tabEnvelopes": "Envelopes",
+  "tabAccount": "Account",
+  "signInTitle": "Sign In",
+  "signInEmailLabel": "Email",
+  "signInPasswordLabel": "Password",
+  "signInSubmit": "Sign In",
+  "signInError": "Sign-in failed: {error}"
 }

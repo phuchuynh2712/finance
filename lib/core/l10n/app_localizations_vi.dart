@@ -12,16 +12,31 @@ class AppLocalizationsVi extends AppLocalizations {
   String get appTitle => 'Quản lý tài chính';
 
   @override
-  String get connectionTestTitle => 'Kiểm tra kết nối';
+  String get tabOverview => 'Tổng quan';
 
   @override
-  String get connectionStatusChecking => 'Đang kiểm tra kết nối...';
+  String get tabSpending => 'Chi tiêu';
 
   @override
-  String get connectionStatusSuccess => 'Kết nối Supabase thành công';
+  String get tabEnvelopes => 'Khoản';
 
   @override
-  String connectionStatusFailure(String error) {
-    return 'Kết nối Supabase thất bại: $error';
+  String get tabAccount => 'Cá nhân';
+
+  @override
+  String get signInTitle => 'Đăng nhập';
+
+  @override
+  String get signInEmailLabel => 'Email';
+
+  @override
+  String get signInPasswordLabel => 'Mật khẩu';
+
+  @override
+  String get signInSubmit => 'Đăng nhập';
+
+  @override
+  String signInError(String error) {
+    return 'Đăng nhập thất bại: $error';
   }
 }

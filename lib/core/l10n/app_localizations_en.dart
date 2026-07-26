@@ -12,16 +12,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Finance Manager';
 
   @override
-  String get connectionTestTitle => 'Connection Test';
+  String get tabOverview => 'Overview';
 
   @override
-  String get connectionStatusChecking => 'Checking connection...';
+  String get tabSpending => 'Spending';
 
   @override
-  String get connectionStatusSuccess => 'Supabase connection succeeded';
+  String get tabEnvelopes => 'Envelopes';
 
   @override
-  String connectionStatusFailure(String error) {
-    return 'Supabase connection failed: $error';
+  String get tabAccount => 'Account';
+
+  @override
+  String get signInTitle => 'Sign In';
+
+  @override
+  String get signInEmailLabel => 'Email';
+
+  @override
+  String get signInPasswordLabel => 'Password';
+
+  @override
+  String get signInSubmit => 'Sign In';
+
+  @override
+  String signInError(String error) {
+    return 'Sign-in failed: $error';
   }
 }

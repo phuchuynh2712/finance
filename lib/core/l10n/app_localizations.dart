@@ -104,29 +104,59 @@ abstract class AppLocalizations {
   /// **'Quản lý tài chính'**
   String get appTitle;
 
-  /// Title of the Supabase connection test screen
+  /// Bottom navigation tab label for the Overview screen
   ///
   /// In vi, this message translates to:
-  /// **'Kiểm tra kết nối'**
-  String get connectionTestTitle;
+  /// **'Tổng quan'**
+  String get tabOverview;
 
-  /// No description provided for @connectionStatusChecking.
+  /// Bottom navigation tab label for the Spending screen
   ///
   /// In vi, this message translates to:
-  /// **'Đang kiểm tra kết nối...'**
-  String get connectionStatusChecking;
+  /// **'Chi tiêu'**
+  String get tabSpending;
 
-  /// No description provided for @connectionStatusSuccess.
+  /// Bottom navigation tab label for the Envelopes screen
   ///
   /// In vi, this message translates to:
-  /// **'Kết nối Supabase thành công'**
-  String get connectionStatusSuccess;
+  /// **'Khoản'**
+  String get tabEnvelopes;
 
-  /// Shown when the Supabase connectivity check fails
+  /// Bottom navigation tab label for the Account screen
   ///
   /// In vi, this message translates to:
-  /// **'Kết nối Supabase thất bại: {error}'**
-  String connectionStatusFailure(String error);
+  /// **'Cá nhân'**
+  String get tabAccount;
+
+  /// Title of the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập'**
+  String get signInTitle;
+
+  /// Label for the email input field on the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Email'**
+  String get signInEmailLabel;
+
+  /// Label for the password input field on the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu'**
+  String get signInPasswordLabel;
+
+  /// Submit button label on the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập'**
+  String get signInSubmit;
+
+  /// Shown when sign-in fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập thất bại: {error}'**
+  String signInError(String error);
 }
 
 class _AppLocalizationsDelegate
