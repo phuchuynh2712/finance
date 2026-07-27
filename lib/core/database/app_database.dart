@@ -23,6 +23,10 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'finance'));
 
+  /// For tests only — accepts an in-memory or otherwise custom executor
+  /// instead of the real on-device file, e.g. `NativeDatabase.memory()`.
+  AppDatabase.forTesting(super.executor);
+
   @override
   int get schemaVersion => 1;
 

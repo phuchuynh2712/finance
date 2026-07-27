@@ -135,6 +135,14 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   /// balance, and if a coverage record is linked, restores the covering
   /// envelope's balance and soft-deletes the coverage row (FR-018a). Used
   /// by both [update] and [delete].
+  ///
+  /// When a coverage exists, applying the original expense touched the
+  /// target envelope TWICE — once subtracting the raw expense amount, then
+  /// again adding the shortfall back to restore it to exactly 0 (see
+  /// [_applyExpenseEffects]). Both of those target-side adjustments must be
+  /// undone here, not just the first: net reversal to the target is
+  /// `+expenseRow.amount - coverageRow.amount`, not `+expenseRow.amount`
+  /// alone (which would overshoot by the coverage amount).
   Future<void> _reverseExpenseEffects(String expenseId) async {
     final expenseRow = await (_db.select(
       _db.expenseEntries,
@@ -148,6 +156,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
             ))
             .getSingleOrNull();
     if (coverageRow != null) {
+      await _adjustEnvelopeBalance(expenseRow.envelopeId, -coverageRow.amount);
       await _adjustEnvelopeBalance(
         coverageRow.coveringEnvelopeId,
         coverageRow.amount,
