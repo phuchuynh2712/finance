@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
+import '../../features/envelopes/presentation/envelopes_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
 import '../../features/expenses/presentation/spending_screen.dart';
 
@@ -96,8 +97,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/envelopes',
-                builder: (context, state) =>
-                    const _ComingSoonScreen('Envelopes'),
+                builder: (context, state) => const EnvelopesScreen(),
               ),
             ],
           ),

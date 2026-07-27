@@ -319,6 +319,120 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Khoản chi này vượt quá số dư {shortfall} ₫. Chọn một khoản khác để bù phần thiếu.'**
   String coveringPromptMessage(String shortfall);
+
+  /// Title of the Envelopes CRUD screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản'**
+  String get envelopesTitle;
+
+  /// Shown on the Envelopes screen when no envelopes exist yet
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.'**
+  String get envelopesEmptyState;
+
+  /// Action to open the envelope creation form
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm khoản'**
+  String get envelopesAddAction;
+
+  /// Badge shown on the envelope currently flagged as the rounding-remainder receiver
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận phần dư'**
+  String get envelopesReceiverBadge;
+
+  /// Title of the envelope form screen when creating a new envelope
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo khoản'**
+  String get envelopeFormTitleCreate;
+
+  /// Title of the envelope form screen when editing an existing envelope
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa khoản'**
+  String get envelopeFormTitleEdit;
+
+  /// Label for the envelope name input field
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên khoản'**
+  String get envelopeFormNameLabel;
+
+  /// Label for the allocation method selector (percentage or fixed)
+  ///
+  /// In vi, this message translates to:
+  /// **'Cách phân bổ'**
+  String get envelopeFormMethodLabel;
+
+  /// Option label for percentage-based allocation
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo phần trăm'**
+  String get envelopeFormMethodPercentage;
+
+  /// Option label for fixed-amount allocation
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền cố định'**
+  String get envelopeFormMethodFixed;
+
+  /// Label for the allocation value field when method is percentage
+  ///
+  /// In vi, this message translates to:
+  /// **'Phần trăm (%)'**
+  String get envelopeFormValueLabelPercentage;
+
+  /// Label for the allocation value field when method is fixed
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền cố định'**
+  String get envelopeFormValueLabelFixed;
+
+  /// Toggle label for flagging this envelope as the rounding-remainder receiver
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận phần dư khi làm tròn'**
+  String get envelopeFormReceiverToggle;
+
+  /// Save button on the envelope form
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get envelopeFormSaveAction;
+
+  /// Shown when saving the envelope fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu khoản: {error}'**
+  String envelopeFormErrorPrefix(String error);
+
+  /// Title of the delete-envelope confirmation dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa khoản \"{name}\"?'**
+  String envelopeDeleteConfirmTitle(String name);
+
+  /// Warning shown when deleting an envelope with a non-zero balance (FR-027)
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản này vẫn còn số dư {balance} ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.'**
+  String envelopeDeleteNonZeroWarning(String balance);
+
+  /// Confirm button in the delete-envelope dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa'**
+  String get envelopeDeleteConfirmAction;
+
+  /// Title of the dialog requiring a new rounding-remainder receiver before deleting the current one (FR-028)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn khoản nhận phần dư mới'**
+  String get envelopeReassignReceiverTitle;
 }
 
 class _AppLocalizationsDelegate

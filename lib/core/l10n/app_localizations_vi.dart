@@ -132,4 +132,68 @@ class AppLocalizationsVi extends AppLocalizations {
   String coveringPromptMessage(String shortfall) {
     return 'Khoản chi này vượt quá số dư $shortfall ₫. Chọn một khoản khác để bù phần thiếu.';
   }
+
+  @override
+  String get envelopesTitle => 'Khoản';
+
+  @override
+  String get envelopesEmptyState =>
+      'Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.';
+
+  @override
+  String get envelopesAddAction => 'Thêm khoản';
+
+  @override
+  String get envelopesReceiverBadge => 'Nhận phần dư';
+
+  @override
+  String get envelopeFormTitleCreate => 'Tạo khoản';
+
+  @override
+  String get envelopeFormTitleEdit => 'Sửa khoản';
+
+  @override
+  String get envelopeFormNameLabel => 'Tên khoản';
+
+  @override
+  String get envelopeFormMethodLabel => 'Cách phân bổ';
+
+  @override
+  String get envelopeFormMethodPercentage => 'Theo phần trăm';
+
+  @override
+  String get envelopeFormMethodFixed => 'Số tiền cố định';
+
+  @override
+  String get envelopeFormValueLabelPercentage => 'Phần trăm (%)';
+
+  @override
+  String get envelopeFormValueLabelFixed => 'Số tiền cố định';
+
+  @override
+  String get envelopeFormReceiverToggle => 'Nhận phần dư khi làm tròn';
+
+  @override
+  String get envelopeFormSaveAction => 'Lưu';
+
+  @override
+  String envelopeFormErrorPrefix(String error) {
+    return 'Không thể lưu khoản: $error';
+  }
+
+  @override
+  String envelopeDeleteConfirmTitle(String name) {
+    return 'Xóa khoản \"$name\"?';
+  }
+
+  @override
+  String envelopeDeleteNonZeroWarning(String balance) {
+    return 'Khoản này vẫn còn số dư $balance ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.';
+  }
+
+  @override
+  String get envelopeDeleteConfirmAction => 'Xóa';
+
+  @override
+  String get envelopeReassignReceiverTitle => 'Chọn khoản nhận phần dư mới';
 }

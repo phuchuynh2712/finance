@@ -172,5 +172,96 @@
         "type": "String"
       }
     }
+  },
+  "envelopesTitle": "Khoản",
+  "@envelopesTitle": {
+    "description": "Title of the Envelopes CRUD screen"
+  },
+  "envelopesEmptyState": "Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.",
+  "@envelopesEmptyState": {
+    "description": "Shown on the Envelopes screen when no envelopes exist yet"
+  },
+  "envelopesAddAction": "Thêm khoản",
+  "@envelopesAddAction": {
+    "description": "Action to open the envelope creation form"
+  },
+  "envelopesReceiverBadge": "Nhận phần dư",
+  "@envelopesReceiverBadge": {
+    "description": "Badge shown on the envelope currently flagged as the rounding-remainder receiver"
+  },
+  "envelopeFormTitleCreate": "Tạo khoản",
+  "@envelopeFormTitleCreate": {
+    "description": "Title of the envelope form screen when creating a new envelope"
+  },
+  "envelopeFormTitleEdit": "Sửa khoản",
+  "@envelopeFormTitleEdit": {
+    "description": "Title of the envelope form screen when editing an existing envelope"
+  },
+  "envelopeFormNameLabel": "Tên khoản",
+  "@envelopeFormNameLabel": {
+    "description": "Label for the envelope name input field"
+  },
+  "envelopeFormMethodLabel": "Cách phân bổ",
+  "@envelopeFormMethodLabel": {
+    "description": "Label for the allocation method selector (percentage or fixed)"
+  },
+  "envelopeFormMethodPercentage": "Theo phần trăm",
+  "@envelopeFormMethodPercentage": {
+    "description": "Option label for percentage-based allocation"
+  },
+  "envelopeFormMethodFixed": "Số tiền cố định",
+  "@envelopeFormMethodFixed": {
+    "description": "Option label for fixed-amount allocation"
+  },
+  "envelopeFormValueLabelPercentage": "Phần trăm (%)",
+  "@envelopeFormValueLabelPercentage": {
+    "description": "Label for the allocation value field when method is percentage"
+  },
+  "envelopeFormValueLabelFixed": "Số tiền cố định",
+  "@envelopeFormValueLabelFixed": {
+    "description": "Label for the allocation value field when method is fixed"
+  },
+  "envelopeFormReceiverToggle": "Nhận phần dư khi làm tròn",
+  "@envelopeFormReceiverToggle": {
+    "description": "Toggle label for flagging this envelope as the rounding-remainder receiver"
+  },
+  "envelopeFormSaveAction": "Lưu",
+  "@envelopeFormSaveAction": {
+    "description": "Save button on the envelope form"
+  },
+  "envelopeFormErrorPrefix": "Không thể lưu khoản: {error}",
+  "@envelopeFormErrorPrefix": {
+    "description": "Shown when saving the envelope fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteConfirmTitle": "Xóa khoản \"{name}\"?",
+  "@envelopeDeleteConfirmTitle": {
+    "description": "Title of the delete-envelope confirmation dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteNonZeroWarning": "Khoản này vẫn còn số dư {balance} ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.",
+  "@envelopeDeleteNonZeroWarning": {
+    "description": "Warning shown when deleting an envelope with a non-zero balance (FR-027)",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteConfirmAction": "Xóa",
+  "@envelopeDeleteConfirmAction": {
+    "description": "Confirm button in the delete-envelope dialog"
+  },
+  "envelopeReassignReceiverTitle": "Chọn khoản nhận phần dư mới",
+  "@envelopeReassignReceiverTitle": {
+    "description": "Title of the dialog requiring a new rounding-remainder receiver before deleting the current one (FR-028)"
   }
 }

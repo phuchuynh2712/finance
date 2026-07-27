@@ -132,4 +132,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String coveringPromptMessage(String shortfall) {
     return 'This expense exceeds the balance by $shortfall ₫. Choose another envelope to cover the shortfall.';
   }
+
+  @override
+  String get envelopesTitle => 'Envelopes';
+
+  @override
+  String get envelopesEmptyState =>
+      'No envelopes yet. Tap the button below to create your first one.';
+
+  @override
+  String get envelopesAddAction => 'Add envelope';
+
+  @override
+  String get envelopesReceiverBadge => 'Receives leftover';
+
+  @override
+  String get envelopeFormTitleCreate => 'Create Envelope';
+
+  @override
+  String get envelopeFormTitleEdit => 'Edit Envelope';
+
+  @override
+  String get envelopeFormNameLabel => 'Envelope name';
+
+  @override
+  String get envelopeFormMethodLabel => 'Allocation method';
+
+  @override
+  String get envelopeFormMethodPercentage => 'Percentage';
+
+  @override
+  String get envelopeFormMethodFixed => 'Fixed amount';
+
+  @override
+  String get envelopeFormValueLabelPercentage => 'Percentage (%)';
+
+  @override
+  String get envelopeFormValueLabelFixed => 'Fixed amount';
+
+  @override
+  String get envelopeFormReceiverToggle => 'Receives the rounding leftover';
+
+  @override
+  String get envelopeFormSaveAction => 'Save';
+
+  @override
+  String envelopeFormErrorPrefix(String error) {
+    return 'Could not save the envelope: $error';
+  }
+
+  @override
+  String envelopeDeleteConfirmTitle(String name) {
+    return 'Delete \"$name\"?';
+  }
+
+  @override
+  String envelopeDeleteNonZeroWarning(String balance) {
+    return 'This envelope still has a balance of $balance ₫. Deleting it will affect that balance and its related transaction history.';
+  }
+
+  @override
+  String get envelopeDeleteConfirmAction => 'Delete';
+
+  @override
+  String get envelopeReassignReceiverTitle =>
+      'Choose a new rounding-remainder receiver';
 }
