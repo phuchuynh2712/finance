@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../../features/account/presentation/account_screen.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
 import '../../features/envelopes/presentation/envelopes_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
@@ -15,22 +16,6 @@ import '../../features/expenses/presentation/spending_screen.dart';
 /// favor of watching/listening to the provider itself.
 class _RouterRefreshListenable extends ChangeNotifier {
   void ping() => notifyListeners();
-}
-
-/// Placeholder shown for a tab whose real screen hasn't been built yet
-/// (registered by later user-story tasks — see tasks.md T029/T040/T045/T050).
-class _ComingSoonScreen extends StatelessWidget {
-  const _ComingSoonScreen(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: const Center(child: Text('Coming soon')),
-    );
-  }
 }
 
 final _routerRefreshListenableProvider = Provider<_RouterRefreshListenable>((
@@ -105,7 +90,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/account',
-                builder: (context, state) => const _ComingSoonScreen('Account'),
+                builder: (context, state) => const AccountScreen(),
               ),
             ],
           ),

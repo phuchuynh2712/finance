@@ -263,5 +263,55 @@
   "envelopeReassignReceiverTitle": "Chọn khoản nhận phần dư mới",
   "@envelopeReassignReceiverTitle": {
     "description": "Title of the dialog requiring a new rounding-remainder receiver before deleting the current one (FR-028)"
+  },
+  "accountTitle": "Cá nhân",
+  "@accountTitle": {
+    "description": "Title of the Account screen"
+  },
+  "accountAvatarUrlLabel": "Đường dẫn ảnh đại diện",
+  "@accountAvatarUrlLabel": {
+    "description": "Label for the avatar URL input field"
+  },
+  "accountAvatarSaveAction": "Cập nhật ảnh đại diện",
+  "@accountAvatarSaveAction": {
+    "description": "Button to save the avatar URL"
+  },
+  "accountAvatarSavedMessage": "Đã cập nhật ảnh đại diện.",
+  "@accountAvatarSavedMessage": {
+    "description": "Confirmation shown after the avatar is saved"
+  },
+  "accountAvatarErrorPrefix": "Không thể cập nhật ảnh đại diện: {error}",
+  "@accountAvatarErrorPrefix": {
+    "description": "Shown when saving the avatar fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNewPasswordLabel": "Mật khẩu mới",
+  "@accountNewPasswordLabel": {
+    "description": "Label for the new password input field"
+  },
+  "accountPasswordSaveAction": "Đổi mật khẩu",
+  "@accountPasswordSaveAction": {
+    "description": "Button to change the password"
+  },
+  "accountPasswordSavedMessage": "Đã đổi mật khẩu.",
+  "@accountPasswordSavedMessage": {
+    "description": "Confirmation shown after the password is changed"
+  },
+  "accountPasswordErrorPrefix": "Không thể đổi mật khẩu: {error}",
+  "@accountPasswordErrorPrefix": {
+    "description": "Shown when changing the password fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSignOutAction": "Đăng xuất",
+  "@accountSignOutAction": {
+    "description": "Button to sign out of the account"
   }
 }

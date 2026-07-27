@@ -39,12 +39,22 @@ class OverviewScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final envelope = envelopes[index];
               final isNegative = envelope.balance < 0;
+              final errorColor = Theme.of(context).colorScheme.error;
               return ListTile(
                 title: Text(envelope.name),
+                // Negative balances are flagged with both an icon and color
+                // (FR-020, SC-005) — not color alone, so the signal reads
+                // for users who can't distinguish the color difference.
+                leading: isNegative
+                    ? Icon(Icons.warning_amber_rounded, color: errorColor)
+                    : null,
                 trailing: Text(
                   currency.format(envelope.balance),
                   style: isNegative
-                      ? TextStyle(color: Theme.of(context).colorScheme.error)
+                      ? TextStyle(
+                          color: errorColor,
+                          fontWeight: FontWeight.bold,
+                        )
                       : null,
                 ),
               );

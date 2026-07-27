@@ -147,12 +147,12 @@ Existing Flutter mobile-app scaffold at repository root: `lib/`, `test/`, `pubsp
 
 ### Implementation for User Story 4
 
-- [ ] T048 [US4] Enhance `overview_screen.dart` with visual negative-balance flagging (FR-020, SC-005 — identifiable within 5 seconds) (depends on T028)
-- [ ] T049 [US4] Create `lib/features/account/presentation/account_screen.dart` — avatar update, change password, and sign-out, built on T010's `auth_repository.dart` (depends on T010)
-- [ ] T050 [US4] Register `account_screen.dart` as the Account tab branch's screen in `app_router.dart` (depends on T014, T049)
-- [ ] T051 [P] [US4] Add l10n keys for Account screen and negative-balance flagging strings to `app_vi.arb`/`app_en.arb` (depends on T048, T049)
-- [ ] T052 [P] [US4] Widget test for Overview's negative-balance flagging in `test/widget/features/envelopes/overview_screen_test.dart` (depends on T048)
-- [ ] T053 [P] [US4] Widget test for the Account screen (avatar/password update, sign-out) in `test/widget/features/account/account_screen_test.dart` (depends on T049)
+- [X] T048 [US4] Enhance `overview_screen.dart` with visual negative-balance flagging (FR-020, SC-005 — identifiable within 5 seconds) (depends on T028) — flags with both a warning icon and bold error-colored text, not color alone, so the signal doesn't depend on color perception
+- [X] T049 [US4] Create `lib/features/account/presentation/account_screen.dart` — avatar update, change password, and sign-out, built on T010's `auth_repository.dart` (depends on T010) — avatar management is a URL text field (no image-picker/upload package exists in this project; adding one was judged out of scope for this task). Introduced a narrow `AccountAuthActions` interface in `core/auth/auth_repository.dart` (implemented by the concrete `AuthRepository`) so the Account controller depends on an interface rather than a class requiring a live `SupabaseClient` to construct — needed for T053 to be testable at all
+- [X] T050 [US4] Register `account_screen.dart` as the Account tab branch's screen in `app_router.dart` (depends on T014, T049) — also removed the now-fully-unused `_ComingSoonScreen` placeholder class (dead code once all 4 tabs have real screens)
+- [X] T051 [P] [US4] Add l10n keys for Account screen and negative-balance flagging strings to `app_vi.arb`/`app_en.arb` (depends on T048, T049)
+- [X] T052 [P] [US4] Widget test for Overview's negative-balance flagging in `test/widget/features/envelopes/overview_screen_test.dart` (depends on T048) — 2/2 passing
+- [X] T053 [P] [US4] Widget test for the Account screen (avatar/password update, sign-out) in `test/widget/features/account/account_screen_test.dart` (depends on T049) — 3/3 passing
 
 **Checkpoint**: All four user stories are independently functional — the full spec is covered.
 

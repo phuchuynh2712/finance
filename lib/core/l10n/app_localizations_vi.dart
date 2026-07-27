@@ -196,4 +196,38 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get envelopeReassignReceiverTitle => 'Chọn khoản nhận phần dư mới';
+
+  @override
+  String get accountTitle => 'Cá nhân';
+
+  @override
+  String get accountAvatarUrlLabel => 'Đường dẫn ảnh đại diện';
+
+  @override
+  String get accountAvatarSaveAction => 'Cập nhật ảnh đại diện';
+
+  @override
+  String get accountAvatarSavedMessage => 'Đã cập nhật ảnh đại diện.';
+
+  @override
+  String accountAvatarErrorPrefix(String error) {
+    return 'Không thể cập nhật ảnh đại diện: $error';
+  }
+
+  @override
+  String get accountNewPasswordLabel => 'Mật khẩu mới';
+
+  @override
+  String get accountPasswordSaveAction => 'Đổi mật khẩu';
+
+  @override
+  String get accountPasswordSavedMessage => 'Đã đổi mật khẩu.';
+
+  @override
+  String accountPasswordErrorPrefix(String error) {
+    return 'Không thể đổi mật khẩu: $error';
+  }
+
+  @override
+  String get accountSignOutAction => 'Đăng xuất';
 }

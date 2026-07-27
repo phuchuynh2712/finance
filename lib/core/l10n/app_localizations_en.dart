@@ -197,4 +197,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get envelopeReassignReceiverTitle =>
       'Choose a new rounding-remainder receiver';
+
+  @override
+  String get accountTitle => 'Account';
+
+  @override
+  String get accountAvatarUrlLabel => 'Avatar URL';
+
+  @override
+  String get accountAvatarSaveAction => 'Update avatar';
+
+  @override
+  String get accountAvatarSavedMessage => 'Avatar updated.';
+
+  @override
+  String accountAvatarErrorPrefix(String error) {
+    return 'Could not update the avatar: $error';
+  }
+
+  @override
+  String get accountNewPasswordLabel => 'New password';
+
+  @override
+  String get accountPasswordSaveAction => 'Change password';
+
+  @override
+  String get accountPasswordSavedMessage => 'Password changed.';
+
+  @override
+  String accountPasswordErrorPrefix(String error) {
+    return 'Could not change the password: $error';
+  }
+
+  @override
+  String get accountSignOutAction => 'Sign out';
 }

@@ -55,5 +55,15 @@
   "envelopeDeleteConfirmTitle": "Delete \"{name}\"?",
   "envelopeDeleteNonZeroWarning": "This envelope still has a balance of {balance} ₫. Deleting it will affect that balance and its related transaction history.",
   "envelopeDeleteConfirmAction": "Delete",
-  "envelopeReassignReceiverTitle": "Choose a new rounding-remainder receiver"
+  "envelopeReassignReceiverTitle": "Choose a new rounding-remainder receiver",
+  "accountTitle": "Account",
+  "accountAvatarUrlLabel": "Avatar URL",
+  "accountAvatarSaveAction": "Update avatar",
+  "accountAvatarSavedMessage": "Avatar updated.",
+  "accountAvatarErrorPrefix": "Could not update the avatar: {error}",
+  "accountNewPasswordLabel": "New password",
+  "accountPasswordSaveAction": "Change password",
+  "accountPasswordSavedMessage": "Password changed.",
+  "accountPasswordErrorPrefix": "Could not change the password: {error}",
+  "accountSignOutAction": "Sign out"
 }

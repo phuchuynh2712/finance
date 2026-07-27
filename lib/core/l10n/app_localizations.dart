@@ -433,6 +433,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chọn khoản nhận phần dư mới'**
   String get envelopeReassignReceiverTitle;
+
+  /// Title of the Account screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Cá nhân'**
+  String get accountTitle;
+
+  /// Label for the avatar URL input field
+  ///
+  /// In vi, this message translates to:
+  /// **'Đường dẫn ảnh đại diện'**
+  String get accountAvatarUrlLabel;
+
+  /// Button to save the avatar URL
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật ảnh đại diện'**
+  String get accountAvatarSaveAction;
+
+  /// Confirmation shown after the avatar is saved
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã cập nhật ảnh đại diện.'**
+  String get accountAvatarSavedMessage;
+
+  /// Shown when saving the avatar fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể cập nhật ảnh đại diện: {error}'**
+  String accountAvatarErrorPrefix(String error);
+
+  /// Label for the new password input field
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới'**
+  String get accountNewPasswordLabel;
+
+  /// Button to change the password
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu'**
+  String get accountPasswordSaveAction;
+
+  /// Confirmation shown after the password is changed
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đổi mật khẩu.'**
+  String get accountPasswordSavedMessage;
+
+  /// Shown when changing the password fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể đổi mật khẩu: {error}'**
+  String accountPasswordErrorPrefix(String error);
+
+  /// Button to sign out of the account
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng xuất'**
+  String get accountSignOutAction;
 }
 
 class _AppLocalizationsDelegate
