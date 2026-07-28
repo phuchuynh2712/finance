@@ -4,19 +4,314 @@
   "@appTitle": {
     "description": "The title of the application"
   },
-  "connectionTestTitle": "Kiểm tra kết nối",
-  "@connectionTestTitle": {
-    "description": "Title of the Supabase connection test screen"
+  "tabOverview": "Tổng quan",
+  "@tabOverview": {
+    "description": "Bottom navigation tab label for the Overview screen"
   },
-  "connectionStatusChecking": "Đang kiểm tra kết nối...",
-  "connectionStatusSuccess": "Kết nối Supabase thành công",
-  "connectionStatusFailure": "Kết nối Supabase thất bại: {error}",
-  "@connectionStatusFailure": {
-    "description": "Shown when the Supabase connectivity check fails",
+  "tabSpending": "Chi tiêu",
+  "@tabSpending": {
+    "description": "Bottom navigation tab label for the Spending screen"
+  },
+  "tabEnvelopes": "Khoản",
+  "@tabEnvelopes": {
+    "description": "Bottom navigation tab label for the Envelopes screen"
+  },
+  "tabAccount": "Cá nhân",
+  "@tabAccount": {
+    "description": "Bottom navigation tab label for the Account screen"
+  },
+  "signInTitle": "Đăng nhập",
+  "@signInTitle": {
+    "description": "Title of the sign-in screen"
+  },
+  "signInEmailLabel": "Email",
+  "@signInEmailLabel": {
+    "description": "Label for the email input field on the sign-in screen"
+  },
+  "signInPasswordLabel": "Mật khẩu",
+  "@signInPasswordLabel": {
+    "description": "Label for the password input field on the sign-in screen"
+  },
+  "signInSubmit": "Đăng nhập",
+  "@signInSubmit": {
+    "description": "Submit button label on the sign-in screen"
+  },
+  "signInError": "Đăng nhập thất bại: {error}",
+  "@signInError": {
+    "description": "Shown when sign-in fails",
     "placeholders": {
       "error": {
         "type": "String"
       }
     }
+  },
+  "overviewTitle": "Tổng quan",
+  "@overviewTitle": {
+    "description": "Title of the Overview screen"
+  },
+  "overviewEmptyState": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.",
+  "@overviewEmptyState": {
+    "description": "Shown on Overview when the user has no envelopes yet"
+  },
+  "overviewPlanAction": "Lập kế hoạch",
+  "@overviewPlanAction": {
+    "description": "Button/action on Overview that opens the income allocation (Plan) flow"
+  },
+  "planTitle": "Lập kế hoạch",
+  "@planTitle": {
+    "description": "Title of the Plan (income allocation) screen"
+  },
+  "planIncomeLabel": "Số tiền thu nhập",
+  "@planIncomeLabel": {
+    "description": "Label for the income amount input field on the Plan screen"
+  },
+  "planPreviewHeading": "Xem trước phân bổ",
+  "@planPreviewHeading": {
+    "description": "Heading above the per-envelope allocation preview list"
+  },
+  "planOverAllocationWarning": "Tổng phân bổ vượt quá thu nhập {excess} ₫. Vui lòng điều chỉnh trước khi xác nhận.",
+  "@planOverAllocationWarning": {
+    "description": "Shown when combined fixed+percentage allocations exceed the income entered (FR-011a)",
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      }
+    }
+  },
+  "planMissingReceiverWarning": "Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.",
+  "@planMissingReceiverWarning": {
+    "description": "Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)"
+  },
+  "planNegativeBalanceWarning": "Một hoặc nhiều khoản sẽ vẫn bị âm sau khi phân bổ.",
+  "@planNegativeBalanceWarning": {
+    "description": "Shown when any envelope's resulting balance would still be negative after this allocation (FR-011)"
+  },
+  "planConfirmAction": "Xác nhận",
+  "@planConfirmAction": {
+    "description": "Button to confirm and apply the allocation event"
+  },
+  "planErrorPrefix": "Không thể xác nhận kế hoạch: {error}",
+  "@planErrorPrefix": {
+    "description": "Shown when confirming the allocation event fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "spendingTitle": "Chi tiêu",
+  "@spendingTitle": {
+    "description": "Title of the Spending screen"
+  },
+  "spendingEmptyState": "Chưa có khoản chi nào.",
+  "@spendingEmptyState": {
+    "description": "Shown on Spending when no expenses exist yet"
+  },
+  "spendingAddAction": "Thêm khoản chi",
+  "@spendingAddAction": {
+    "description": "Action to open the expense entry form"
+  },
+  "spendingNoEnvelopesWarning": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.",
+  "@spendingNoEnvelopesWarning": {
+    "description": "Shown instead of the add-expense action when the user has zero envelopes (FR-030)"
+  },
+  "spendingDeleteConfirmTitle": "Xóa khoản chi?",
+  "@spendingDeleteConfirmTitle": {
+    "description": "Title of the confirmation dialog before deleting an expense entry"
+  },
+  "spendingDeleteConfirmAction": "Xóa",
+  "@spendingDeleteConfirmAction": {
+    "description": "Confirm button in the delete-expense dialog"
+  },
+  "cancelAction": "Hủy",
+  "@cancelAction": {
+    "description": "Generic cancel button label"
+  },
+  "expenseFormTitleCreate": "Ghi khoản chi",
+  "@expenseFormTitleCreate": {
+    "description": "Title of the expense form screen when creating a new entry"
+  },
+  "expenseFormTitleEdit": "Sửa khoản chi",
+  "@expenseFormTitleEdit": {
+    "description": "Title of the expense form screen when editing an existing entry"
+  },
+  "expenseFormAmountLabel": "Số tiền",
+  "@expenseFormAmountLabel": {
+    "description": "Label for the amount input field on the expense form"
+  },
+  "expenseFormEnvelopeLabel": "Khoản",
+  "@expenseFormEnvelopeLabel": {
+    "description": "Label for the envelope selector on the expense form"
+  },
+  "expenseFormNoteLabel": "Ghi chú (không bắt buộc)",
+  "@expenseFormNoteLabel": {
+    "description": "Label for the optional note field on the expense form"
+  },
+  "expenseFormSaveAction": "Lưu",
+  "@expenseFormSaveAction": {
+    "description": "Save button on the expense form"
+  },
+  "expenseFormErrorPrefix": "Không thể lưu khoản chi: {error}",
+  "@expenseFormErrorPrefix": {
+    "description": "Shown when saving the expense fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coveringPromptTitle": "Chọn khoản để bù",
+  "@coveringPromptTitle": {
+    "description": "Title of the covering-envelope prompt shown on overspend"
+  },
+  "coveringPromptMessage": "Khoản chi này vượt quá số dư {shortfall} ₫. Chọn một khoản khác để bù phần thiếu.",
+  "@coveringPromptMessage": {
+    "description": "Body text of the covering-envelope prompt, showing the shortfall",
+    "placeholders": {
+      "shortfall": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopesTitle": "Khoản",
+  "@envelopesTitle": {
+    "description": "Title of the Envelopes CRUD screen"
+  },
+  "envelopesEmptyState": "Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.",
+  "@envelopesEmptyState": {
+    "description": "Shown on the Envelopes screen when no envelopes exist yet"
+  },
+  "envelopesAddAction": "Thêm khoản",
+  "@envelopesAddAction": {
+    "description": "Action to open the envelope creation form"
+  },
+  "envelopesReceiverBadge": "Nhận phần dư",
+  "@envelopesReceiverBadge": {
+    "description": "Badge shown on the envelope currently flagged as the rounding-remainder receiver"
+  },
+  "envelopeFormTitleCreate": "Tạo khoản",
+  "@envelopeFormTitleCreate": {
+    "description": "Title of the envelope form screen when creating a new envelope"
+  },
+  "envelopeFormTitleEdit": "Sửa khoản",
+  "@envelopeFormTitleEdit": {
+    "description": "Title of the envelope form screen when editing an existing envelope"
+  },
+  "envelopeFormNameLabel": "Tên khoản",
+  "@envelopeFormNameLabel": {
+    "description": "Label for the envelope name input field"
+  },
+  "envelopeFormMethodLabel": "Cách phân bổ",
+  "@envelopeFormMethodLabel": {
+    "description": "Label for the allocation method selector (percentage or fixed)"
+  },
+  "envelopeFormMethodPercentage": "Theo phần trăm",
+  "@envelopeFormMethodPercentage": {
+    "description": "Option label for percentage-based allocation"
+  },
+  "envelopeFormMethodFixed": "Số tiền cố định",
+  "@envelopeFormMethodFixed": {
+    "description": "Option label for fixed-amount allocation"
+  },
+  "envelopeFormValueLabelPercentage": "Phần trăm (%)",
+  "@envelopeFormValueLabelPercentage": {
+    "description": "Label for the allocation value field when method is percentage"
+  },
+  "envelopeFormValueLabelFixed": "Số tiền cố định",
+  "@envelopeFormValueLabelFixed": {
+    "description": "Label for the allocation value field when method is fixed"
+  },
+  "envelopeFormReceiverToggle": "Nhận phần dư khi làm tròn",
+  "@envelopeFormReceiverToggle": {
+    "description": "Toggle label for flagging this envelope as the rounding-remainder receiver"
+  },
+  "envelopeFormSaveAction": "Lưu",
+  "@envelopeFormSaveAction": {
+    "description": "Save button on the envelope form"
+  },
+  "envelopeFormErrorPrefix": "Không thể lưu khoản: {error}",
+  "@envelopeFormErrorPrefix": {
+    "description": "Shown when saving the envelope fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteConfirmTitle": "Xóa khoản \"{name}\"?",
+  "@envelopeDeleteConfirmTitle": {
+    "description": "Title of the delete-envelope confirmation dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteNonZeroWarning": "Khoản này vẫn còn số dư {balance} ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.",
+  "@envelopeDeleteNonZeroWarning": {
+    "description": "Warning shown when deleting an envelope with a non-zero balance (FR-027)",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteConfirmAction": "Xóa",
+  "@envelopeDeleteConfirmAction": {
+    "description": "Confirm button in the delete-envelope dialog"
+  },
+  "envelopeReassignReceiverTitle": "Chọn khoản nhận phần dư mới",
+  "@envelopeReassignReceiverTitle": {
+    "description": "Title of the dialog requiring a new rounding-remainder receiver before deleting the current one (FR-028)"
+  },
+  "accountTitle": "Cá nhân",
+  "@accountTitle": {
+    "description": "Title of the Account screen"
+  },
+  "accountAvatarUrlLabel": "Đường dẫn ảnh đại diện",
+  "@accountAvatarUrlLabel": {
+    "description": "Label for the avatar URL input field"
+  },
+  "accountAvatarSaveAction": "Cập nhật ảnh đại diện",
+  "@accountAvatarSaveAction": {
+    "description": "Button to save the avatar URL"
+  },
+  "accountAvatarSavedMessage": "Đã cập nhật ảnh đại diện.",
+  "@accountAvatarSavedMessage": {
+    "description": "Confirmation shown after the avatar is saved"
+  },
+  "accountAvatarErrorPrefix": "Không thể cập nhật ảnh đại diện: {error}",
+  "@accountAvatarErrorPrefix": {
+    "description": "Shown when saving the avatar fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNewPasswordLabel": "Mật khẩu mới",
+  "@accountNewPasswordLabel": {
+    "description": "Label for the new password input field"
+  },
+  "accountPasswordSaveAction": "Đổi mật khẩu",
+  "@accountPasswordSaveAction": {
+    "description": "Button to change the password"
+  },
+  "accountPasswordSavedMessage": "Đã đổi mật khẩu.",
+  "@accountPasswordSavedMessage": {
+    "description": "Confirmation shown after the password is changed"
+  },
+  "accountPasswordErrorPrefix": "Không thể đổi mật khẩu: {error}",
+  "@accountPasswordErrorPrefix": {
+    "description": "Shown when changing the password fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSignOutAction": "Đăng xuất",
+  "@accountSignOutAction": {
+    "description": "Button to sign out of the account"
   }
 }

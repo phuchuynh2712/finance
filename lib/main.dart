@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/l10n/app_localizations.dart';
 import 'core/network/supabase_client_provider.dart';
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/connection_test/presentation/connection_test_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,13 +15,14 @@ Future<void> main() async {
   runApp(const ProviderScope(child: FinanceApp()));
 }
 
-class FinanceApp extends StatelessWidget {
+class FinanceApp extends ConsumerWidget {
   const FinanceApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'Finance',
+      routerConfig: ref.watch(appRouterProvider),
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -33,7 +34,6 @@ class FinanceApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const ConnectionTestScreen(),
     );
   }
 }

@@ -31,3 +31,6 @@ build/
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Test coverage output
+coverage/
