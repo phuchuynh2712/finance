@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/account/presentation/account_screen.dart';
+import 'package:finance/features/account/presentation/google_sign_in_feature_flag.dart';
 
 class _FakeAccountAuthActions implements AccountAuthActions {
   String? updatedAvatarUrl;
@@ -13,6 +15,8 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   bool signedOut = false;
   Object? throwOnUpdateAvatar;
   Object? throwOnChangePassword;
+  Object? throwOnLinkGoogleAccount;
+  String? _linkedGoogleEmail;
 
   @override
   Future<void> updateAvatar(String avatarUrl) async {
@@ -30,6 +34,15 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   Future<void> signOut() async {
     signedOut = true;
   }
+
+  @override
+  Future<void> linkGoogleAccount() async {
+    if (throwOnLinkGoogleAccount != null) throw throwOnLinkGoogleAccount!;
+    _linkedGoogleEmail = 'linked@example.com';
+  }
+
+  @override
+  String? get linkedGoogleEmail => _linkedGoogleEmail;
 }
 
 Widget _harness(_FakeAccountAuthActions fake) {
@@ -90,4 +103,58 @@ void main() {
 
     expect(fake.signedOut, isTrue);
   });
+
+  testWidgets(
+    'linking a Google account shows the linked email (FR-016, FR-018)',
+    skip: !kGoogleSignInEnabled,
+    (tester) async {
+      final fake = _FakeAccountAuthActions();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Đã liên kết: linked@example.com'), findsOneWidget);
+      expect(
+        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'identity_already_exists shows a clear error with no state change (FR-017)',
+    skip: !kGoogleSignInEnabled,
+    (tester) async {
+      final fake = _FakeAccountAuthActions()
+        ..throwOnLinkGoogleAccount = AuthApiException(
+          'Identity is already linked to another user',
+          code: 'identity_already_exists',
+        );
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(fake.linkedGoogleEmail, isNull);
+      expect(
+        find.textContaining('Không thể liên kết tài khoản Google'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
+        findsOneWidget,
+      );
+    },
+  );
 }

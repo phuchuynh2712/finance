@@ -18,9 +18,23 @@ void main() {
       );
     });
 
+    test('signed out, on sign-up → no redirect', () {
+      expect(
+        computeAuthRedirect(isSignedIn: false, matchedLocation: '/sign-up'),
+        isNull,
+      );
+    });
+
     test('signed in, on sign-in → redirects to overview', () {
       expect(
         computeAuthRedirect(isSignedIn: true, matchedLocation: '/sign-in'),
+        '/overview',
+      );
+    });
+
+    test('signed in, on sign-up → redirects to overview', () {
+      expect(
+        computeAuthRedirect(isSignedIn: true, matchedLocation: '/sign-up'),
         '/overview',
       );
     });

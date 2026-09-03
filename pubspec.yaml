@@ -66,6 +66,9 @@ dependencies:
   # Secure storage for tokens/secrets
   flutter_secure_storage: ^9.2.2
 
+  # Native Google Sign-In (registration & login feature)
+  google_sign_in: ^7.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
