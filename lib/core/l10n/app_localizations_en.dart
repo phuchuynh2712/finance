@@ -41,6 +41,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get signInEmailNotConfirmedError =>
+      'This email hasn\'t been confirmed yet. Please check your inbox and click the confirmation link before signing in.';
+
+  @override
+  String get signInResendConfirmationAction => 'Resend confirmation email';
+
+  @override
+  String get signInResendConfirmationSuccess => 'Confirmation email resent.';
+
+  @override
+  String signInResendConfirmationError(String error) {
+    return 'Could not resend the confirmation email: $error';
+  }
+
+  @override
   String get overviewTitle => 'Overview';
 
   @override
@@ -231,4 +246,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSignOutAction => 'Sign out';
+
+  @override
+  String get signUpTitle => 'Sign Up';
+
+  @override
+  String get signUpEmailLabel => 'Email';
+
+  @override
+  String get signUpPasswordLabel => 'Password';
+
+  @override
+  String get signUpConfirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get signUpNameLabel => 'Name';
+
+  @override
+  String get signUpPhoneLabel => 'Phone Number';
+
+  @override
+  String get signUpEmailInvalidError => 'Enter a valid email address.';
+
+  @override
+  String get signUpPasswordTooShortError =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get signUpConfirmPasswordMismatchError => 'Passwords do not match.';
+
+  @override
+  String get signUpSubmit => 'Sign Up';
+
+  @override
+  String signUpError(String error) {
+    return 'Registration failed: $error';
+  }
+
+  @override
+  String get signUpDuplicateEmailError =>
+      'This email is already registered. Sign in with your password, or use \"Sign in with Google\" below if you registered via Google.';
+
+  @override
+  String signUpCheckEmailMessage(String email) {
+    return 'Please check $email and click the confirmation link to finish registering before you can sign in.';
+  }
+
+  @override
+  String get signUpResendConfirmationAction => 'Resend confirmation email';
+
+  @override
+  String get signUpResendConfirmationSuccess => 'Confirmation email resent.';
+
+  @override
+  String signUpResendConfirmationError(String error) {
+    return 'Could not resend the confirmation email: $error';
+  }
+
+  @override
+  String get signUpNavigateToSignIn => 'Already have an account? Sign in';
+
+  @override
+  String get signInNavigateToSignUp => 'Don\'t have an account? Sign up';
+
+  @override
+  String get signInWithGoogleAction => 'Sign in with Google';
+
+  @override
+  String signInWithGoogleError(String error) {
+    return 'Google sign-in failed: $error';
+  }
+
+  @override
+  String get accountLinkGoogleTitle => 'Link Google Account';
+
+  @override
+  String get accountLinkGoogleAction => 'Link Google account';
+
+  @override
+  String accountLinkedGoogleEmail(String email) {
+    return 'Linked: $email';
+  }
+
+  @override
+  String accountLinkGoogleErrorPrefix(String error) {
+    return 'Could not link the Google account: $error';
+  }
+
+  @override
+  String get accountLinkGoogleAlreadyExistsError =>
+      'This Google account is already linked to a different account.';
 }

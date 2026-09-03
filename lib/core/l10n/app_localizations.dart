@@ -158,6 +158,30 @@ abstract class AppLocalizations {
   /// **'Đăng nhập thất bại: {error}'**
   String signInError(String error);
 
+  /// Shown instead of the generic sign-in error when Supabase returns email_not_confirmed (FR-022)
+  ///
+  /// In vi, this message translates to:
+  /// **'Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.'**
+  String get signInEmailNotConfirmedError;
+
+  /// Action shown alongside the email_not_confirmed error to resend the confirmation email (FR-023)
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi lại email xác nhận'**
+  String get signInResendConfirmationAction;
+
+  /// Shown after resendConfirmationEmail succeeds (FR-023)
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã gửi lại email xác nhận.'**
+  String get signInResendConfirmationSuccess;
+
+  /// Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể gửi lại email xác nhận: {error}'**
+  String signInResendConfirmationError(String error);
+
   /// Title of the Overview screen
   ///
   /// In vi, this message translates to:
@@ -493,6 +517,156 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đăng xuất'**
   String get accountSignOutAction;
+
+  /// Title of the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký'**
+  String get signUpTitle;
+
+  /// Label for the email input field on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Email'**
+  String get signUpEmailLabel;
+
+  /// Label for the password input field on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu'**
+  String get signUpPasswordLabel;
+
+  /// Label for the confirm-password input field on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận mật khẩu'**
+  String get signUpConfirmPasswordLabel;
+
+  /// Label for the optional display-name input field on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên'**
+  String get signUpNameLabel;
+
+  /// Label for the optional phone-number input field on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Số điện thoại'**
+  String get signUpPhoneLabel;
+
+  /// Inline error shown when the entered email fails format validation
+  ///
+  /// In vi, this message translates to:
+  /// **'Email không hợp lệ.'**
+  String get signUpEmailInvalidError;
+
+  /// Inline error shown when the entered password is shorter than the minimum length
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu phải có ít nhất 6 ký tự.'**
+  String get signUpPasswordTooShortError;
+
+  /// Inline error shown when the confirm-password field doesn't match the password field
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu xác nhận không khớp.'**
+  String get signUpConfirmPasswordMismatchError;
+
+  /// Submit button label on the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký'**
+  String get signUpSubmit;
+
+  /// Generic (retryable) error shown when registration fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký thất bại: {error}'**
+  String signUpError(String error);
+
+  /// Shown when the entered email is already registered, either with a password (FR-003) or as a Google-only account (FR-012) — the client cannot reliably distinguish the two cases (contracts/auth_repository_interface.md), so the message covers both
+  ///
+  /// In vi, this message translates to:
+  /// **'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.'**
+  String get signUpDuplicateEmailError;
+
+  /// Shown after successful registration when the account requires email confirmation before it can sign in (FR-015, FR-021)
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng kiểm tra hộp thư {email} và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.'**
+  String signUpCheckEmailMessage(String email);
+
+  /// Button on the check-your-email screen to resend the confirmation email (FR-023)
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi lại email xác nhận'**
+  String get signUpResendConfirmationAction;
+
+  /// Shown after resendConfirmationEmail succeeds (FR-023)
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã gửi lại email xác nhận.'**
+  String get signUpResendConfirmationSuccess;
+
+  /// Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể gửi lại email xác nhận: {error}'**
+  String signUpResendConfirmationError(String error);
+
+  /// Link on the registration screen navigating back to the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã có tài khoản? Đăng nhập'**
+  String get signUpNavigateToSignIn;
+
+  /// Link on the sign-in screen navigating to the registration screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có tài khoản? Đăng ký'**
+  String get signInNavigateToSignUp;
+
+  /// Label for the native Google sign-in button, shown on both the sign-in and registration screens
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập bằng Google'**
+  String get signInWithGoogleAction;
+
+  /// Shown when the native Google sign-in flow fails for a reason other than the user cancelling the account chooser
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập bằng Google thất bại: {error}'**
+  String signInWithGoogleError(String error);
+
+  /// Heading for the Google-account-linking section on the Profile/Account screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết tài khoản Google'**
+  String get accountLinkGoogleTitle;
+
+  /// Button to start linking a Google account from the Profile/Account screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết tài khoản Google'**
+  String get accountLinkGoogleAction;
+
+  /// Shown on the Profile/Account screen when a Google account is already linked
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã liên kết: {email}'**
+  String accountLinkedGoogleEmail(String email);
+
+  /// Shown when linking a Google account fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể liên kết tài khoản Google: {error}'**
+  String accountLinkGoogleErrorPrefix(String error);
+
+  /// Shown when the Google identity being linked already belongs to a different account (FR-017)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tài khoản Google này đã được liên kết với một tài khoản khác.'**
+  String get accountLinkGoogleAlreadyExistsError;
 }
 
 class _AppLocalizationsDelegate

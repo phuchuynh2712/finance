@@ -6,6 +6,7 @@ import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
+import '../../features/account/presentation/sign_up_screen.dart';
 import '../../features/envelopes/presentation/envelopes_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
 import '../../features/expenses/presentation/spending_screen.dart';
@@ -35,7 +36,8 @@ String? computeAuthRedirect({
   required bool isSignedIn,
   required String matchedLocation,
 }) {
-  final isSigningIn = matchedLocation == '/sign-in';
+  final isSigningIn =
+      matchedLocation == '/sign-in' || matchedLocation == '/sign-up';
 
   if (!isSignedIn && !isSigningIn) return '/sign-in';
   if (isSignedIn && isSigningIn) return '/overview';
@@ -57,6 +59,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: '/sign-up',
+        builder: (context, state) => const SignUpScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

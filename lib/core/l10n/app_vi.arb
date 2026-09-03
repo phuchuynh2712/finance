@@ -45,6 +45,27 @@
       }
     }
   },
+  "signInEmailNotConfirmedError": "Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.",
+  "@signInEmailNotConfirmedError": {
+    "description": "Shown instead of the generic sign-in error when Supabase returns email_not_confirmed (FR-022)"
+  },
+  "signInResendConfirmationAction": "Gửi lại email xác nhận",
+  "@signInResendConfirmationAction": {
+    "description": "Action shown alongside the email_not_confirmed error to resend the confirmation email (FR-023)"
+  },
+  "signInResendConfirmationSuccess": "Đã gửi lại email xác nhận.",
+  "@signInResendConfirmationSuccess": {
+    "description": "Shown after resendConfirmationEmail succeeds (FR-023)"
+  },
+  "signInResendConfirmationError": "Không thể gửi lại email xác nhận: {error}",
+  "@signInResendConfirmationError": {
+    "description": "Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "overviewTitle": "Tổng quan",
   "@overviewTitle": {
     "description": "Title of the Overview screen"
@@ -313,5 +334,135 @@
   "accountSignOutAction": "Đăng xuất",
   "@accountSignOutAction": {
     "description": "Button to sign out of the account"
+  },
+  "signUpTitle": "Đăng ký",
+  "@signUpTitle": {
+    "description": "Title of the registration screen"
+  },
+  "signUpEmailLabel": "Email",
+  "@signUpEmailLabel": {
+    "description": "Label for the email input field on the registration screen"
+  },
+  "signUpPasswordLabel": "Mật khẩu",
+  "@signUpPasswordLabel": {
+    "description": "Label for the password input field on the registration screen"
+  },
+  "signUpConfirmPasswordLabel": "Xác nhận mật khẩu",
+  "@signUpConfirmPasswordLabel": {
+    "description": "Label for the confirm-password input field on the registration screen"
+  },
+  "signUpNameLabel": "Tên",
+  "@signUpNameLabel": {
+    "description": "Label for the optional display-name input field on the registration screen"
+  },
+  "signUpPhoneLabel": "Số điện thoại",
+  "@signUpPhoneLabel": {
+    "description": "Label for the optional phone-number input field on the registration screen"
+  },
+  "signUpEmailInvalidError": "Email không hợp lệ.",
+  "@signUpEmailInvalidError": {
+    "description": "Inline error shown when the entered email fails format validation"
+  },
+  "signUpPasswordTooShortError": "Mật khẩu phải có ít nhất 6 ký tự.",
+  "@signUpPasswordTooShortError": {
+    "description": "Inline error shown when the entered password is shorter than the minimum length"
+  },
+  "signUpConfirmPasswordMismatchError": "Mật khẩu xác nhận không khớp.",
+  "@signUpConfirmPasswordMismatchError": {
+    "description": "Inline error shown when the confirm-password field doesn't match the password field"
+  },
+  "signUpSubmit": "Đăng ký",
+  "@signUpSubmit": {
+    "description": "Submit button label on the registration screen"
+  },
+  "signUpError": "Đăng ký thất bại: {error}",
+  "@signUpError": {
+    "description": "Generic (retryable) error shown when registration fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "signUpDuplicateEmailError": "Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.",
+  "@signUpDuplicateEmailError": {
+    "description": "Shown when the entered email is already registered, either with a password (FR-003) or as a Google-only account (FR-012) — the client cannot reliably distinguish the two cases (contracts/auth_repository_interface.md), so the message covers both"
+  },
+  "signUpCheckEmailMessage": "Vui lòng kiểm tra hộp thư {email} và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.",
+  "@signUpCheckEmailMessage": {
+    "description": "Shown after successful registration when the account requires email confirmation before it can sign in (FR-015, FR-021)",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "signUpResendConfirmationAction": "Gửi lại email xác nhận",
+  "@signUpResendConfirmationAction": {
+    "description": "Button on the check-your-email screen to resend the confirmation email (FR-023)"
+  },
+  "signUpResendConfirmationSuccess": "Đã gửi lại email xác nhận.",
+  "@signUpResendConfirmationSuccess": {
+    "description": "Shown after resendConfirmationEmail succeeds (FR-023)"
+  },
+  "signUpResendConfirmationError": "Không thể gửi lại email xác nhận: {error}",
+  "@signUpResendConfirmationError": {
+    "description": "Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "signUpNavigateToSignIn": "Đã có tài khoản? Đăng nhập",
+  "@signUpNavigateToSignIn": {
+    "description": "Link on the registration screen navigating back to the sign-in screen"
+  },
+  "signInNavigateToSignUp": "Chưa có tài khoản? Đăng ký",
+  "@signInNavigateToSignUp": {
+    "description": "Link on the sign-in screen navigating to the registration screen"
+  },
+  "signInWithGoogleAction": "Đăng nhập bằng Google",
+  "@signInWithGoogleAction": {
+    "description": "Label for the native Google sign-in button, shown on both the sign-in and registration screens"
+  },
+  "signInWithGoogleError": "Đăng nhập bằng Google thất bại: {error}",
+  "@signInWithGoogleError": {
+    "description": "Shown when the native Google sign-in flow fails for a reason other than the user cancelling the account chooser",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountLinkGoogleTitle": "Liên kết tài khoản Google",
+  "@accountLinkGoogleTitle": {
+    "description": "Heading for the Google-account-linking section on the Profile/Account screen"
+  },
+  "accountLinkGoogleAction": "Liên kết tài khoản Google",
+  "@accountLinkGoogleAction": {
+    "description": "Button to start linking a Google account from the Profile/Account screen"
+  },
+  "accountLinkedGoogleEmail": "Đã liên kết: {email}",
+  "@accountLinkedGoogleEmail": {
+    "description": "Shown on the Profile/Account screen when a Google account is already linked",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountLinkGoogleErrorPrefix": "Không thể liên kết tài khoản Google: {error}",
+  "@accountLinkGoogleErrorPrefix": {
+    "description": "Shown when linking a Google account fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountLinkGoogleAlreadyExistsError": "Tài khoản Google này đã được liên kết với một tài khoản khác.",
+  "@accountLinkGoogleAlreadyExistsError": {
+    "description": "Shown when the Google identity being linked already belongs to a different account (FR-017)"
   }
 }

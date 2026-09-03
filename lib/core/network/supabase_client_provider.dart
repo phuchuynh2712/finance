@@ -2,6 +2,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../storage/secure_local_storage.dart';
+
 /// Initializes the Supabase SDK using credentials from `.env`.
 ///
 /// MUST be awaited in `main()` before `runApp`. Throws if the required
@@ -18,7 +20,13 @@ Future<void> initSupabase() async {
     throw StateError('SUPABASE_PUBLISHABLE_KEY is missing from .env');
   }
 
-  await Supabase.initialize(url: url, publishableKey: publishableKey);
+  await Supabase.initialize(
+    url: url,
+    publishableKey: publishableKey,
+    authOptions: const FlutterAuthClientOptions(
+      localStorage: SecureLocalStorage(),
+    ),
+  );
 }
 
 /// Shared Supabase client, injected via Riverpod per the constitution's

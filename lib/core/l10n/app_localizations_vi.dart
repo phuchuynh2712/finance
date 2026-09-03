@@ -41,6 +41,21 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get signInEmailNotConfirmedError =>
+      'Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.';
+
+  @override
+  String get signInResendConfirmationAction => 'Gửi lại email xác nhận';
+
+  @override
+  String get signInResendConfirmationSuccess => 'Đã gửi lại email xác nhận.';
+
+  @override
+  String signInResendConfirmationError(String error) {
+    return 'Không thể gửi lại email xác nhận: $error';
+  }
+
+  @override
   String get overviewTitle => 'Tổng quan';
 
   @override
@@ -230,4 +245,94 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get accountSignOutAction => 'Đăng xuất';
+
+  @override
+  String get signUpTitle => 'Đăng ký';
+
+  @override
+  String get signUpEmailLabel => 'Email';
+
+  @override
+  String get signUpPasswordLabel => 'Mật khẩu';
+
+  @override
+  String get signUpConfirmPasswordLabel => 'Xác nhận mật khẩu';
+
+  @override
+  String get signUpNameLabel => 'Tên';
+
+  @override
+  String get signUpPhoneLabel => 'Số điện thoại';
+
+  @override
+  String get signUpEmailInvalidError => 'Email không hợp lệ.';
+
+  @override
+  String get signUpPasswordTooShortError => 'Mật khẩu phải có ít nhất 6 ký tự.';
+
+  @override
+  String get signUpConfirmPasswordMismatchError =>
+      'Mật khẩu xác nhận không khớp.';
+
+  @override
+  String get signUpSubmit => 'Đăng ký';
+
+  @override
+  String signUpError(String error) {
+    return 'Đăng ký thất bại: $error';
+  }
+
+  @override
+  String get signUpDuplicateEmailError =>
+      'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.';
+
+  @override
+  String signUpCheckEmailMessage(String email) {
+    return 'Vui lòng kiểm tra hộp thư $email và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.';
+  }
+
+  @override
+  String get signUpResendConfirmationAction => 'Gửi lại email xác nhận';
+
+  @override
+  String get signUpResendConfirmationSuccess => 'Đã gửi lại email xác nhận.';
+
+  @override
+  String signUpResendConfirmationError(String error) {
+    return 'Không thể gửi lại email xác nhận: $error';
+  }
+
+  @override
+  String get signUpNavigateToSignIn => 'Đã có tài khoản? Đăng nhập';
+
+  @override
+  String get signInNavigateToSignUp => 'Chưa có tài khoản? Đăng ký';
+
+  @override
+  String get signInWithGoogleAction => 'Đăng nhập bằng Google';
+
+  @override
+  String signInWithGoogleError(String error) {
+    return 'Đăng nhập bằng Google thất bại: $error';
+  }
+
+  @override
+  String get accountLinkGoogleTitle => 'Liên kết tài khoản Google';
+
+  @override
+  String get accountLinkGoogleAction => 'Liên kết tài khoản Google';
+
+  @override
+  String accountLinkedGoogleEmail(String email) {
+    return 'Đã liên kết: $email';
+  }
+
+  @override
+  String accountLinkGoogleErrorPrefix(String error) {
+    return 'Không thể liên kết tài khoản Google: $error';
+  }
+
+  @override
+  String get accountLinkGoogleAlreadyExistsError =>
+      'Tài khoản Google này đã được liên kết với một tài khoản khác.';
 }

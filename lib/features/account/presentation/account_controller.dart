@@ -11,6 +11,8 @@ class AccountState {
     this.passwordErrorMessage,
     this.avatarSaved = false,
     this.passwordSaved = false,
+    this.isLinkingGoogle = false,
+    this.linkGoogleErrorMessage,
   });
 
   final bool isSubmittingAvatar;
@@ -19,6 +21,8 @@ class AccountState {
   final String? passwordErrorMessage;
   final bool avatarSaved;
   final bool passwordSaved;
+  final bool isLinkingGoogle;
+  final String? linkGoogleErrorMessage;
 
   AccountState copyWith({
     bool? isSubmittingAvatar,
@@ -27,8 +31,11 @@ class AccountState {
     String? passwordErrorMessage,
     bool? avatarSaved,
     bool? passwordSaved,
+    bool? isLinkingGoogle,
+    String? linkGoogleErrorMessage,
     bool clearAvatarError = false,
     bool clearPasswordError = false,
+    bool clearLinkGoogleError = false,
   }) {
     return AccountState(
       isSubmittingAvatar: isSubmittingAvatar ?? this.isSubmittingAvatar,
@@ -41,6 +48,10 @@ class AccountState {
           : (passwordErrorMessage ?? this.passwordErrorMessage),
       avatarSaved: avatarSaved ?? this.avatarSaved,
       passwordSaved: passwordSaved ?? this.passwordSaved,
+      isLinkingGoogle: isLinkingGoogle ?? this.isLinkingGoogle,
+      linkGoogleErrorMessage: clearLinkGoogleError
+          ? null
+          : (linkGoogleErrorMessage ?? this.linkGoogleErrorMessage),
     );
   }
 }
@@ -80,6 +91,26 @@ class AccountController extends StateNotifier<AccountState> {
   }
 
   Future<void> signOut() => _repository.signOut();
+
+  /// Links a Google account to the currently signed-in user (FR-016),
+  /// for a Google account whose email differs from this account's email.
+  /// `identity_already_exists` (FR-017) surfaces as an inline error with no
+  /// state change to either account.
+  Future<void> linkGoogleAccount() async {
+    state = state.copyWith(isLinkingGoogle: true, clearLinkGoogleError: true);
+    try {
+      await _repository.linkGoogleAccount();
+      state = state.copyWith(isLinkingGoogle: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLinkingGoogle: false,
+        linkGoogleErrorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// The linked Google account's email, or null if none linked (FR-018).
+  String? get linkedGoogleEmail => _repository.linkedGoogleEmail;
 }
 
 /// Narrower than [authRepositoryProvider] on purpose: overriding this in
