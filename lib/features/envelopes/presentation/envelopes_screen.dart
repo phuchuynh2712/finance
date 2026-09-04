@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/formatting/currency_formatter.dart';
 import '../../../core/l10n/app_localizations.dart';
@@ -162,7 +163,7 @@ class EnvelopesScreen extends ConsumerWidget {
                   children: [
                     Text(currency.format(envelope.balance)),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const Icon(LucideIcons.trash2),
                       onPressed: () =>
                           _handleDelete(context, ref, envelope, envelopes),
                     ),
@@ -177,7 +178,7 @@ class EnvelopesScreen extends ConsumerWidget {
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const EnvelopeFormScreen()),
         ),
-        icon: const Icon(Icons.add),
+        icon: const Icon(LucideIcons.plus),
         label: Text(l10n.envelopesAddAction),
       ),
     );

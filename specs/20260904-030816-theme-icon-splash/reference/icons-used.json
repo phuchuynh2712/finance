@@ -1,0 +1,27 @@
+{
+  "iconLibrary": {
+    "name": "Lucide",
+    "style": "line icons, 2px stroke, round caps/joins",
+    "webSource": "https://lucide.dev (CDN used in mockup: https://unpkg.com/lucide@latest/dist/umd/lucide.min.js)",
+    "flutter": {
+      "recommendedPackage": "lucide_icons (pub.dev)",
+      "installCommand": "flutter pub add lucide_icons",
+      "usageNote": "Each icon below maps 1:1 to a LucideIcons.<camelCase> constant, e.g. data-lucide=\"arrow-left-right\" -> LucideIcons.arrowLeftRight",
+      "alternativePackage": "lucide_icons_flutter — same icon set, different API surface; either works, pick one and stay consistent"
+    },
+    "sizing": { "defaultPx": 24, "inButtonsInputsPx": 20, "minimumPx": 16, "strokeWidth": 2 },
+    "colorRule": "icon color follows text color, or the tinted accent (e.g. blue-600) on a soft-tint chip background"
+  },
+  "iconsUsedFixed": [
+    "alert-triangle", "arrow-down-circle", "arrow-left-right", "arrow-up-circle", "bell", "camera",
+    "check", "check-circle-2", "chevron-down", "chevron-left", "chevron-right", "circle-help",
+    "corner-down-right", "eye", "fingerprint", "grip-vertical", "history", "info", "layout-dashboard",
+    "log-out", "pencil", "pencil-line", "pie-chart", "plus", "scan-line", "search", "shield-check",
+    "sliders-horizontal", "sun-moon", "trash-2", "user-plus", "user-round"
+  ],
+  "iconsUsedPerCategory": [
+    "banknote", "book-open", "briefcase", "car", "heart", "home", "piggy-bank", "popcorn",
+    "shield-check", "shopping-bag", "user", "utensils", "zap"
+  ],
+  "note": "iconsUsedPerCategory are the per-item icons a user picks when creating a custom group/category (e.g. 'zap' for utilities) — expose a small icon picker with at least this set, ideally the full Lucide set."
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
@@ -124,23 +125,19 @@ class _AppShell extends StatelessWidget {
         ),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard),
+            icon: const Icon(LucideIcons.layoutDashboard),
             label: l10n.tabOverview,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long),
+            icon: const Icon(LucideIcons.receipt),
             label: l10n.tabSpending,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.mail_outline),
-            selectedIcon: const Icon(Icons.mail),
+            icon: const Icon(LucideIcons.mail),
             label: l10n.tabEnvelopes,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
+            icon: const Icon(LucideIcons.user),
             label: l10n.tabAccount,
           ),
         ],
