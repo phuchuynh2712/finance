@@ -11,8 +11,7 @@ class AccountState {
     this.passwordErrorMessage,
     this.avatarSaved = false,
     this.passwordSaved = false,
-    this.isLinkingGoogle = false,
-    this.linkGoogleErrorMessage,
+    this.isBiometricEnabled = false,
   });
 
   final bool isSubmittingAvatar;
@@ -21,8 +20,7 @@ class AccountState {
   final String? passwordErrorMessage;
   final bool avatarSaved;
   final bool passwordSaved;
-  final bool isLinkingGoogle;
-  final String? linkGoogleErrorMessage;
+  final bool isBiometricEnabled;
 
   AccountState copyWith({
     bool? isSubmittingAvatar,
@@ -31,11 +29,9 @@ class AccountState {
     String? passwordErrorMessage,
     bool? avatarSaved,
     bool? passwordSaved,
-    bool? isLinkingGoogle,
-    String? linkGoogleErrorMessage,
+    bool? isBiometricEnabled,
     bool clearAvatarError = false,
     bool clearPasswordError = false,
-    bool clearLinkGoogleError = false,
   }) {
     return AccountState(
       isSubmittingAvatar: isSubmittingAvatar ?? this.isSubmittingAvatar,
@@ -48,18 +44,22 @@ class AccountState {
           : (passwordErrorMessage ?? this.passwordErrorMessage),
       avatarSaved: avatarSaved ?? this.avatarSaved,
       passwordSaved: passwordSaved ?? this.passwordSaved,
-      isLinkingGoogle: isLinkingGoogle ?? this.isLinkingGoogle,
-      linkGoogleErrorMessage: clearLinkGoogleError
-          ? null
-          : (linkGoogleErrorMessage ?? this.linkGoogleErrorMessage),
+      isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
     );
   }
 }
 
 class AccountController extends StateNotifier<AccountState> {
-  AccountController(this._repository) : super(const AccountState());
+  AccountController(this._repository) : super(const AccountState()) {
+    _loadBiometricState();
+  }
 
   final AccountAuthActions _repository;
+
+  Future<void> _loadBiometricState() async {
+    final enabled = await _repository.isBiometricLoginEnabled();
+    state = state.copyWith(isBiometricEnabled: enabled);
+  }
 
   Future<void> updateAvatar(String avatarUrl) async {
     state = state.copyWith(isSubmittingAvatar: true, clearAvatarError: true);
@@ -80,6 +80,8 @@ class AccountController extends StateNotifier<AccountState> {
       clearPasswordError: true,
     );
     try {
+      // FR-016b: signs out every OTHER device/session; this device is
+      // unaffected (research.md §2).
       await _repository.changePassword(newPassword);
       state = state.copyWith(isSubmittingPassword: false, passwordSaved: true);
     } catch (e) {
@@ -90,27 +92,17 @@ class AccountController extends StateNotifier<AccountState> {
     }
   }
 
+  /// FR-014a: signing out clears the biometric preference for this
+  /// account/device (handled inside [AccountAuthActions.signOut] itself),
+  /// so a future sign-in is a fresh enrollment opportunity.
   Future<void> signOut() => _repository.signOut();
 
-  /// Links a Google account to the currently signed-in user (FR-016),
-  /// for a Google account whose email differs from this account's email.
-  /// `identity_already_exists` (FR-017) surfaces as an inline error with no
-  /// state change to either account.
-  Future<void> linkGoogleAccount() async {
-    state = state.copyWith(isLinkingGoogle: true, clearLinkGoogleError: true);
-    try {
-      await _repository.linkGoogleAccount();
-      state = state.copyWith(isLinkingGoogle: false);
-    } catch (e) {
-      state = state.copyWith(
-        isLinkingGoogle: false,
-        linkGoogleErrorMessage: e.toString(),
-      );
-    }
+  /// FR-010: manual on/off toggle, independent of the FR-009 first-sign-in
+  /// prompt.
+  Future<void> setBiometricEnabled(bool enabled) async {
+    await _repository.setBiometricLoginEnabled(enabled);
+    state = state.copyWith(isBiometricEnabled: enabled);
   }
-
-  /// The linked Google account's email, or null if none linked (FR-018).
-  String? get linkedGoogleEmail => _repository.linkedGoogleEmail;
 }
 
 /// Narrower than [authRepositoryProvider] on purpose: overriding this in

@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
         android:label="finance"
         android:name="${applicationName}"
@@ -24,6 +25,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Password-reset deep link (FR-015/FR-016) — Supabase's
+                 resetPasswordForEmail redirectTo opens this scheme, handled
+                 internally by supabase_flutter's deep-link detection. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.finance.finance" android:host="reset-callback"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

@@ -7,16 +7,14 @@ import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/account/presentation/account_screen.dart';
-import 'package:finance/features/account/presentation/google_sign_in_feature_flag.dart';
 
 class _FakeAccountAuthActions implements AccountAuthActions {
   String? updatedAvatarUrl;
   String? changedPassword;
-  bool signedOut = false;
+  SignOutScope? signOutScope;
   Object? throwOnUpdateAvatar;
   Object? throwOnChangePassword;
-  Object? throwOnLinkGoogleAccount;
-  String? _linkedGoogleEmail;
+  bool biometricEnabled = false;
 
   @override
   Future<void> updateAvatar(String avatarUrl) async {
@@ -31,18 +29,17 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   }
 
   @override
-  Future<void> signOut() async {
-    signedOut = true;
+  Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {
+    signOutScope = scope;
   }
 
   @override
-  Future<void> linkGoogleAccount() async {
-    if (throwOnLinkGoogleAccount != null) throw throwOnLinkGoogleAccount!;
-    _linkedGoogleEmail = 'linked@example.com';
-  }
+  Future<bool> isBiometricLoginEnabled() async => biometricEnabled;
 
   @override
-  String? get linkedGoogleEmail => _linkedGoogleEmail;
+  Future<void> setBiometricLoginEnabled(bool enabled) async {
+    biometricEnabled = enabled;
+  }
 }
 
 Widget _harness(_FakeAccountAuthActions fake) {
@@ -89,11 +86,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fake.changedPassword, 'newSecurePass123');
-      expect(find.text('Đã đổi mật khẩu.'), findsOneWidget);
+      expect(find.textContaining('Đã đổi mật khẩu'), findsOneWidget);
     },
   );
 
-  testWidgets('tapping sign out calls signOut', (tester) async {
+  testWidgets('tapping sign out calls signOut with the local scope', (
+    tester,
+  ) async {
     final fake = _FakeAccountAuthActions();
     await tester.pumpWidget(_harness(fake));
     await tester.pumpAndSettle();
@@ -101,60 +100,39 @@ void main() {
     await tester.tap(find.text('Đăng xuất'));
     await tester.pumpAndSettle();
 
-    expect(fake.signedOut, isTrue);
+    expect(fake.signOutScope, SignOutScope.local);
+  });
+
+  testWidgets('no Google-linking section is present anywhere on the screen', (
+    tester,
+  ) async {
+    final fake = _FakeAccountAuthActions();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Google'), findsNothing);
   });
 
   testWidgets(
-    'linking a Google account shows the linked email (FR-016, FR-018)',
-    skip: !kGoogleSignInEnabled,
+    'the biometric toggle reflects and updates the stored preference (FR-010)',
     (tester) async {
       final fake = _FakeAccountAuthActions();
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
-      expect(
-        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
-        findsOneWidget,
+      final toggleBefore = tester.widget<SwitchListTile>(
+        find.byType(SwitchListTile),
       );
-      await tester.tap(
-        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
-      );
+      expect(toggleBefore.value, isFalse);
+
+      await tester.tap(find.byType(SwitchListTile));
       await tester.pumpAndSettle();
 
-      expect(find.text('Đã liên kết: linked@example.com'), findsOneWidget);
-      expect(
-        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
-        findsNothing,
+      expect(fake.biometricEnabled, isTrue);
+      final toggleAfter = tester.widget<SwitchListTile>(
+        find.byType(SwitchListTile),
       );
-    },
-  );
-
-  testWidgets(
-    'identity_already_exists shows a clear error with no state change (FR-017)',
-    skip: !kGoogleSignInEnabled,
-    (tester) async {
-      final fake = _FakeAccountAuthActions()
-        ..throwOnLinkGoogleAccount = AuthApiException(
-          'Identity is already linked to another user',
-          code: 'identity_already_exists',
-        );
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
-
-      await tester.tap(
-        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
-      );
-      await tester.pumpAndSettle();
-
-      expect(fake.linkedGoogleEmail, isNull);
-      expect(
-        find.textContaining('Không thể liên kết tài khoản Google'),
-        findsOneWidget,
-      );
-      expect(
-        find.widgetWithText(OutlinedButton, 'Liên kết tài khoản Google'),
-        findsOneWidget,
-      );
+      expect(toggleAfter.value, isTrue);
     },
   );
 }

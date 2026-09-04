@@ -42,3 +42,11 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Required for the Theme.AppCompat.* activity theme (styles.xml) that
+    // local_auth_android's BiometricPrompt needs — MainActivity extends
+    // FlutterFragmentActivity, and BiometricPrompt throws IllegalStateException
+    // without an AppCompat-derived theme on Android 8 and below.
+    implementation("androidx.appcompat:appcompat:1.7.0")
+}

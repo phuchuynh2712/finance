@@ -12,6 +12,7 @@ class AppTheme {
 
   static final light = ThemeData(
     useMaterial3: true,
+    fontFamily: 'Lexend',
     colorScheme: const ColorScheme.light(
       primary: AppColors.lightPrimary,
       onPrimary: AppColors.lightOnPrimary,
@@ -25,6 +26,7 @@ class AppTheme {
 
   static final dark = ThemeData(
     useMaterial3: true,
+    fontFamily: 'Lexend',
     colorScheme: const ColorScheme.dark(
       primary: AppColors.darkPrimary,
       onPrimary: AppColors.darkOnPrimary,
