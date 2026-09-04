@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
@@ -118,7 +119,7 @@ void main() {
       await tester.pumpWidget(_harness(repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(LucideIcons.trash2));
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsOneWidget);
@@ -141,7 +142,7 @@ void main() {
       await tester.pumpWidget(_harness(repo));
       await tester.pumpAndSettle();
 
-      final deleteButtons = find.byIcon(Icons.delete_outline);
+      final deleteButtons = find.byIcon(LucideIcons.trash2);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 

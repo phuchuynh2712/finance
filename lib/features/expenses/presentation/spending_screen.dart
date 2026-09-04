@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/formatting/currency_formatter.dart';
 import '../../../core/l10n/app_localizations.dart';
@@ -79,7 +80,7 @@ class SpendingScreen extends ConsumerWidget {
                   ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(LucideIcons.trash2),
                   onPressed: () => _confirmDelete(context, ref, expense),
                 ),
               );
@@ -94,7 +95,7 @@ class SpendingScreen extends ConsumerWidget {
                   builder: (context) => const ExpenseFormScreen(),
                 ),
               ),
-              icon: const Icon(Icons.add),
+              icon: const Icon(LucideIcons.plus),
               label: Text(l10n.spendingAddAction),
             )
           : null,

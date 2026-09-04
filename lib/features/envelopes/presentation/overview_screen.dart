@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/formatting/currency_formatter.dart';
 import '../../../core/l10n/app_localizations.dart';
@@ -46,7 +47,7 @@ class OverviewScreen extends ConsumerWidget {
                 // (FR-020, SC-005) — not color alone, so the signal reads
                 // for users who can't distinguish the color difference.
                 leading: isNegative
-                    ? Icon(Icons.warning_amber_rounded, color: errorColor)
+                    ? Icon(LucideIcons.alertTriangle, color: errorColor)
                     : null,
                 trailing: Text(
                   currency.format(envelope.balance),
@@ -66,7 +67,7 @@ class OverviewScreen extends ConsumerWidget {
         onPressed: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (context) => const PlanScreen())),
-        icon: const Icon(Icons.calculate_outlined),
+        icon: const Icon(LucideIcons.calculator),
         label: Text(l10n.overviewPlanAction),
       ),
     );

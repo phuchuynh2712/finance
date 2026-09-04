@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/features/envelopes/domain/envelope.dart';
@@ -45,7 +46,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.warning_amber_rounded), findsNWidgets(2));
+      expect(find.byIcon(LucideIcons.alertTriangle), findsNWidgets(2));
 
       final groceriesTile = tester.widget<ListTile>(
         find.ancestor(
@@ -70,6 +71,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+    expect(find.byIcon(LucideIcons.alertTriangle), findsNothing);
   });
 }
