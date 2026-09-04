@@ -6,6 +6,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../../features/account/presentation/account_screen.dart';
+import '../../features/account/presentation/forgot_password_screen.dart';
+import '../../features/account/presentation/reset_password_screen.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
 import '../../features/account/presentation/sign_up_screen.dart';
 import '../../features/envelopes/presentation/envelopes_screen.dart';
@@ -25,6 +27,11 @@ final _routerRefreshListenableProvider = Provider<_RouterRefreshListenable>((
 ) {
   final listenable = _RouterRefreshListenable();
   ref.listen(authStateChangesProvider, (previous, next) => listenable.ping());
+  // isLocked/isPasswordRecovery can change independently of an auth-state
+  // event (e.g. a biometric unlock — FR-011 makes no network call), so the
+  // router must also re-evaluate its redirect when either changes.
+  ref.listen(appLockProvider, (previous, next) => listenable.ping());
+  ref.listen(isPasswordRecoveryProvider, (previous, next) => listenable.ping());
   ref.onDispose(listenable.dispose);
   return listenable;
 });
@@ -33,15 +40,33 @@ final _routerRefreshListenableProvider = Provider<_RouterRefreshListenable>((
 /// closure so it's unit-testable without constructing a real [GoRouterState].
 ///
 /// Returns the path to redirect to, or `null` to allow the navigation as-is.
+///
+/// [isLocked] and [isPasswordRecovery] default to `false`, so every prior
+/// call site/test case is reproduced unchanged (FR-020/FR-021, FR-016).
 String? computeAuthRedirect({
   required bool isSignedIn,
+  bool isLocked = false,
+  bool isPasswordRecovery = false,
   required String matchedLocation,
 }) {
+  // Checked first, before the ordinary signed-in branches: the password
+  // recovery deep link establishes a real (if recovery-scoped) session,
+  // which would otherwise make isSignedIn true and redirect straight to
+  // /overview, bypassing "Set New Password" entirely.
+  if (isPasswordRecovery && matchedLocation != '/reset-password') {
+    return '/reset-password';
+  }
+
   final isSigningIn =
-      matchedLocation == '/sign-in' || matchedLocation == '/sign-up';
+      matchedLocation == '/sign-in' ||
+      matchedLocation == '/sign-up' ||
+      matchedLocation == '/forgot-password';
 
   if (!isSignedIn && !isSigningIn) return '/sign-in';
-  if (isSignedIn && isSigningIn) return '/overview';
+  // Signed in but the re-entry gate hasn't been unlocked yet (FR-020/FR-021)
+  // — show the Login screen as a lock screen, reusing the same route.
+  if (isSignedIn && isLocked && !isSigningIn) return '/sign-in';
+  if (isSignedIn && !isLocked && isSigningIn) return '/overview';
   return null;
 }
 
@@ -54,6 +79,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: ref.watch(_routerRefreshListenableProvider),
     redirect: (context, state) => computeAuthRedirect(
       isSignedIn: ref.read(isSignedInProvider),
+      isLocked: ref.read(appLockProvider),
+      isPasswordRecovery: ref.read(isPasswordRecoveryProvider),
       matchedLocation: state.matchedLocation,
     ),
     routes: [
@@ -64,6 +91,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sign-up',
         builder: (context, state) => const SignUpScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

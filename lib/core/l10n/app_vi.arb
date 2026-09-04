@@ -20,17 +20,37 @@
   "@tabAccount": {
     "description": "Bottom navigation tab label for the Account screen"
   },
+  "signInAppName": "Khai Tâm",
+  "@signInAppName": {
+    "description": "Brand name shown in the Login screen's logo block (FR-003)"
+  },
+  "signInAppSubtitle": "Quản lý thu chi thông minh",
+  "@signInAppSubtitle": {
+    "description": "Subtitle shown under the brand name on the Login screen (FR-003)"
+  },
   "signInTitle": "Đăng nhập",
   "@signInTitle": {
-    "description": "Title of the sign-in screen"
+    "description": "Title of the sign-in screen (app bar / page title, not shown on the redesigned screen body itself)"
   },
-  "signInEmailLabel": "Email",
-  "@signInEmailLabel": {
-    "description": "Label for the email input field on the sign-in screen"
+  "signInIdentifierLabel": "Số điện thoại hoặc email",
+  "@signInIdentifierLabel": {
+    "description": "Label for the phone-or-email identifier field (FR-003). Only email is ever a valid credential (FR-005) — a phone number typed here fails sign-in with the same message as any other invalid credential."
   },
   "signInPasswordLabel": "Mật khẩu",
   "@signInPasswordLabel": {
     "description": "Label for the password input field on the sign-in screen"
+  },
+  "signInShowPasswordSemantic": "Hiện mật khẩu",
+  "@signInShowPasswordSemantic": {
+    "description": "Accessibility label for the icon button that reveals the password"
+  },
+  "signInHidePasswordSemantic": "Ẩn mật khẩu",
+  "@signInHidePasswordSemantic": {
+    "description": "Accessibility label for the icon button that hides the password"
+  },
+  "signInForgotPasswordAction": "Quên mật khẩu?",
+  "@signInForgotPasswordAction": {
+    "description": "Link on the sign-in screen navigating to the forgot-password flow (FR-015)"
   },
   "signInSubmit": "Đăng nhập",
   "@signInSubmit": {
@@ -38,33 +58,20 @@
   },
   "signInError": "Đăng nhập thất bại: {error}",
   "@signInError": {
-    "description": "Shown when sign-in fails",
+    "description": "Shown when sign-in fails, for any reason (wrong password, unregistered/non-email identifier per FR-005, network error)",
     "placeholders": {
       "error": {
         "type": "String"
       }
     }
   },
-  "signInEmailNotConfirmedError": "Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.",
-  "@signInEmailNotConfirmedError": {
-    "description": "Shown instead of the generic sign-in error when Supabase returns email_not_confirmed (FR-022)"
+  "signInOrDivider": "hoặc",
+  "@signInOrDivider": {
+    "description": "Divider text between the password sign-in button and the biometric sign-in button (FR-003)"
   },
-  "signInResendConfirmationAction": "Gửi lại email xác nhận",
-  "@signInResendConfirmationAction": {
-    "description": "Action shown alongside the email_not_confirmed error to resend the confirmation email (FR-023)"
-  },
-  "signInResendConfirmationSuccess": "Đã gửi lại email xác nhận.",
-  "@signInResendConfirmationSuccess": {
-    "description": "Shown after resendConfirmationEmail succeeds (FR-023)"
-  },
-  "signInResendConfirmationError": "Không thể gửi lại email xác nhận: {error}",
-  "@signInResendConfirmationError": {
-    "description": "Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+  "signInWithBiometricAction": "Đăng nhập bằng vân tay",
+  "@signInWithBiometricAction": {
+    "description": "Button to sign in via device biometric (fingerprint/Face ID), shown only per FR-008's visibility rules"
   },
   "overviewTitle": "Tổng quan",
   "@overviewTitle": {
@@ -318,9 +325,9 @@
   "@accountPasswordSaveAction": {
     "description": "Button to change the password"
   },
-  "accountPasswordSavedMessage": "Đã đổi mật khẩu.",
+  "accountPasswordSavedMessage": "Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.",
   "@accountPasswordSavedMessage": {
-    "description": "Confirmation shown after the password is changed"
+    "description": "Confirmation shown after the password is changed (FR-016b: other devices/sessions are signed out, this one is not)"
   },
   "accountPasswordErrorPrefix": "Không thể đổi mật khẩu: {error}",
   "@accountPasswordErrorPrefix": {
@@ -331,33 +338,41 @@
       }
     }
   },
+  "accountBiometricToggleLabel": "Đăng nhập bằng vân tay",
+  "@accountBiometricToggleLabel": {
+    "description": "Label for the Account screen's biometric login on/off toggle (FR-010)"
+  },
   "accountSignOutAction": "Đăng xuất",
   "@accountSignOutAction": {
     "description": "Button to sign out of the account"
   },
-  "signUpTitle": "Đăng ký",
+  "signUpTitle": "Tạo tài khoản",
   "@signUpTitle": {
-    "description": "Title of the registration screen"
+    "description": "Header title of the Sign Up screen (FR-004)"
+  },
+  "signUpBackSemantic": "Quay lại",
+  "@signUpBackSemantic": {
+    "description": "Accessibility label for the Sign Up screen's back action"
   },
   "signUpEmailLabel": "Email",
   "@signUpEmailLabel": {
-    "description": "Label for the email input field on the registration screen"
+    "description": "Label for the required email input field on the Sign Up screen (FR-006 — required despite the design mockup's visual optional-style label, see spec.md Assumptions)"
   },
   "signUpPasswordLabel": "Mật khẩu",
   "@signUpPasswordLabel": {
-    "description": "Label for the password input field on the registration screen"
+    "description": "Label for the password input field on the Sign Up screen"
   },
   "signUpConfirmPasswordLabel": "Xác nhận mật khẩu",
   "@signUpConfirmPasswordLabel": {
-    "description": "Label for the confirm-password input field on the registration screen"
+    "description": "Label for the confirm-password input field on the Sign Up screen"
   },
-  "signUpNameLabel": "Tên",
+  "signUpNameLabel": "Họ và tên",
   "@signUpNameLabel": {
-    "description": "Label for the optional display-name input field on the registration screen"
+    "description": "Label for the full-name input field on the Sign Up screen (FR-004)"
   },
   "signUpPhoneLabel": "Số điện thoại",
   "@signUpPhoneLabel": {
-    "description": "Label for the optional phone-number input field on the registration screen"
+    "description": "Label for the phone-number input field on the Sign Up screen — profile data only, never a login credential (FR-005)"
   },
   "signUpEmailInvalidError": "Email không hợp lệ.",
   "@signUpEmailInvalidError": {
@@ -371,9 +386,25 @@
   "@signUpConfirmPasswordMismatchError": {
     "description": "Inline error shown when the confirm-password field doesn't match the password field"
   },
+  "signUpTermsPrefix": "Tôi đồng ý với ",
+  "@signUpTermsPrefix": {
+    "description": "Text immediately before the Terms of Service link in the Sign Up checkbox label (FR-007)"
+  },
+  "signUpTermsOfServiceLink": "Điều khoản dịch vụ",
+  "@signUpTermsOfServiceLink": {
+    "description": "Terms of Service link text in the Sign Up checkbox label — styled text only, no real destination in this feature (spec.md Assumptions)"
+  },
+  "signUpTermsMiddle": " và ",
+  "@signUpTermsMiddle": {
+    "description": "Text between the Terms of Service and Privacy Policy links in the Sign Up checkbox label"
+  },
+  "signUpPrivacyPolicyLink": "Chính sách bảo mật",
+  "@signUpPrivacyPolicyLink": {
+    "description": "Privacy Policy link text in the Sign Up checkbox label — styled text only, no real destination in this feature (spec.md Assumptions)"
+  },
   "signUpSubmit": "Đăng ký",
   "@signUpSubmit": {
-    "description": "Submit button label on the registration screen"
+    "description": "Submit button label on the Sign Up screen"
   },
   "signUpError": "Đăng ký thất bại: {error}",
   "@signUpError": {
@@ -384,85 +415,89 @@
       }
     }
   },
-  "signUpDuplicateEmailError": "Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.",
+  "signUpDuplicateEmailError": "Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.",
   "@signUpDuplicateEmailError": {
-    "description": "Shown when the entered email is already registered, either with a password (FR-003) or as a Google-only account (FR-012) — the client cannot reliably distinguish the two cases (contracts/auth_repository_interface.md), so the message covers both"
-  },
-  "signUpCheckEmailMessage": "Vui lòng kiểm tra hộp thư {email} và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.",
-  "@signUpCheckEmailMessage": {
-    "description": "Shown after successful registration when the account requires email confirmation before it can sign in (FR-015, FR-021)",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
-  "signUpResendConfirmationAction": "Gửi lại email xác nhận",
-  "@signUpResendConfirmationAction": {
-    "description": "Button on the check-your-email screen to resend the confirmation email (FR-023)"
-  },
-  "signUpResendConfirmationSuccess": "Đã gửi lại email xác nhận.",
-  "@signUpResendConfirmationSuccess": {
-    "description": "Shown after resendConfirmationEmail succeeds (FR-023)"
-  },
-  "signUpResendConfirmationError": "Không thể gửi lại email xác nhận: {error}",
-  "@signUpResendConfirmationError": {
-    "description": "Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Shown when the entered email is already registered (FR-003)"
   },
   "signUpNavigateToSignIn": "Đã có tài khoản? Đăng nhập",
   "@signUpNavigateToSignIn": {
-    "description": "Link on the registration screen navigating back to the sign-in screen"
+    "description": "Link on the Sign Up screen navigating back to the sign-in screen"
   },
-  "signInNavigateToSignUp": "Chưa có tài khoản? Đăng ký",
+  "signInNavigateToSignUp": "Chưa có tài khoản? Đăng ký ngay",
   "@signInNavigateToSignUp": {
-    "description": "Link on the sign-in screen navigating to the registration screen"
+    "description": "Link on the sign-in screen navigating to the Sign Up screen (FR-003)"
   },
-  "signInWithGoogleAction": "Đăng nhập bằng Google",
-  "@signInWithGoogleAction": {
-    "description": "Label for the native Google sign-in button, shown on both the sign-in and registration screens"
+  "biometricEnablePromptTitle": "Bật đăng nhập vân tay?",
+  "@biometricEnablePromptTitle": {
+    "description": "Title of the one-time prompt offering to enable biometric login, shown after first Sign Up/Sign In on a device (FR-009)"
   },
-  "signInWithGoogleError": "Đăng nhập bằng Google thất bại: {error}",
-  "@signInWithGoogleError": {
-    "description": "Shown when the native Google sign-in flow fails for a reason other than the user cancelling the account chooser",
+  "biometricEnablePromptMessage": "Lần sau bạn có thể vào ứng dụng nhanh hơn chỉ bằng vân tay, không cần gõ mật khẩu.",
+  "@biometricEnablePromptMessage": {
+    "description": "Body text of the enable-biometric prompt"
+  },
+  "biometricEnablePromptAcceptAction": "Bật",
+  "@biometricEnablePromptAcceptAction": {
+    "description": "Accept button on the enable-biometric prompt"
+  },
+  "biometricEnablePromptDeclineAction": "Để sau",
+  "@biometricEnablePromptDeclineAction": {
+    "description": "Decline button on the enable-biometric prompt"
+  },
+  "forgotPasswordTitle": "Quên mật khẩu",
+  "@forgotPasswordTitle": {
+    "description": "Title of the Forgot Password screen (FR-015)"
+  },
+  "forgotPasswordInstructions": "Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.",
+  "@forgotPasswordInstructions": {
+    "description": "Instructional text on the Forgot Password screen"
+  },
+  "forgotPasswordEmailLabel": "Email",
+  "@forgotPasswordEmailLabel": {
+    "description": "Label for the email input field on the Forgot Password screen"
+  },
+  "forgotPasswordSubmitAction": "Gửi liên kết đặt lại",
+  "@forgotPasswordSubmitAction": {
+    "description": "Submit button on the Forgot Password screen"
+  },
+  "forgotPasswordConfirmationMessage": "Nếu email này đã đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu trong ít phút.",
+  "@forgotPasswordConfirmationMessage": {
+    "description": "Generic confirmation shown after submitting the Forgot Password form, identical regardless of whether the email is registered (FR-015, account-enumeration protection)"
+  },
+  "forgotPasswordBackToSignIn": "Quay lại đăng nhập",
+  "@forgotPasswordBackToSignIn": {
+    "description": "Link on the Forgot Password screen navigating back to the sign-in screen"
+  },
+  "resetPasswordTitle": "Đặt mật khẩu mới",
+  "@resetPasswordTitle": {
+    "description": "Title of the Set New Password screen, reached via the password-recovery deep link (FR-016)"
+  },
+  "resetPasswordNewPasswordLabel": "Mật khẩu mới",
+  "@resetPasswordNewPasswordLabel": {
+    "description": "Label for the new-password input field on the Set New Password screen"
+  },
+  "resetPasswordConfirmPasswordLabel": "Xác nhận mật khẩu mới",
+  "@resetPasswordConfirmPasswordLabel": {
+    "description": "Label for the confirm-new-password input field on the Set New Password screen"
+  },
+  "resetPasswordSubmitAction": "Đặt lại mật khẩu",
+  "@resetPasswordSubmitAction": {
+    "description": "Submit button on the Set New Password screen"
+  },
+  "resetPasswordSuccessMessage": "Đã đặt lại mật khẩu. Vui lòng đăng nhập lại bằng mật khẩu mới.",
+  "@resetPasswordSuccessMessage": {
+    "description": "Shown after confirmPasswordReset succeeds (FR-016), before the router's signed-out redirect takes the user to Login"
+  },
+  "resetPasswordMismatchError": "Mật khẩu xác nhận không khớp.",
+  "@resetPasswordMismatchError": {
+    "description": "Inline error shown when the confirm-password field doesn't match the new password field"
+  },
+  "resetPasswordError": "Không thể đặt lại mật khẩu: {error}",
+  "@resetPasswordError": {
+    "description": "Shown when confirming the password reset fails",
     "placeholders": {
       "error": {
         "type": "String"
       }
     }
-  },
-  "accountLinkGoogleTitle": "Liên kết tài khoản Google",
-  "@accountLinkGoogleTitle": {
-    "description": "Heading for the Google-account-linking section on the Profile/Account screen"
-  },
-  "accountLinkGoogleAction": "Liên kết tài khoản Google",
-  "@accountLinkGoogleAction": {
-    "description": "Button to start linking a Google account from the Profile/Account screen"
-  },
-  "accountLinkedGoogleEmail": "Đã liên kết: {email}",
-  "@accountLinkedGoogleEmail": {
-    "description": "Shown on the Profile/Account screen when a Google account is already linked",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
-  "accountLinkGoogleErrorPrefix": "Không thể liên kết tài khoản Google: {error}",
-  "@accountLinkGoogleErrorPrefix": {
-    "description": "Shown when linking a Google account fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "accountLinkGoogleAlreadyExistsError": "Tài khoản Google này đã được liên kết với một tài khoản khác.",
-  "@accountLinkGoogleAlreadyExistsError": {
-    "description": "Shown when the Google identity being linked already belongs to a different account (FR-017)"
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import 'account_controller.dart';
-import 'google_sign_in_feature_flag.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
@@ -82,39 +81,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 : () => controller.changePassword(_passwordController.text),
             child: Text(l10n.accountPasswordSaveAction),
           ),
-          if (kGoogleSignInEnabled) ...[
-            const Divider(height: 48),
-            Text(
-              l10n.accountLinkGoogleTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            if (controller.linkedGoogleEmail case final linkedEmail?)
-              Text(
-                l10n.accountLinkedGoogleEmail(linkedEmail),
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
-              )
-            else ...[
-              if (state.linkGoogleErrorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    l10n.accountLinkGoogleErrorPrefix(
-                      state.linkGoogleErrorMessage!,
-                    ),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ),
-              OutlinedButton(
-                onPressed: state.isLinkingGoogle
-                    ? null
-                    : controller.linkGoogleAccount,
-                child: Text(l10n.accountLinkGoogleAction),
-              ),
-            ],
-          ],
+          const Divider(height: 48),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.accountBiometricToggleLabel),
+            value: state.isBiometricEnabled,
+            onChanged: (enabled) => controller.setBiometricEnabled(enabled),
+          ),
           const Divider(height: 48),
           OutlinedButton(
             onPressed: controller.signOut,

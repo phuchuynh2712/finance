@@ -1,0 +1,54 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    {
+      "lucideName": "eye",
+      "flutterConstant": "LucideIcons.eye",
+      "usedIn": ["Đăng nhập — trường Mật khẩu", "Đăng ký — trường Mật khẩu"],
+      "sizePx": 18,
+      "sizePxSignup": 17,
+      "strokeWidth": 2,
+      "colorLight": "var(--fg-3) #8A8073",
+      "colorDark": "#8A8073",
+      "note": "Toggle hiện/ẩn mật khẩu — cần onTap đổi giữa eye / eye-off"
+    },
+    {
+      "lucideName": "fingerprint",
+      "flutterConstant": "LucideIcons.fingerprint",
+      "usedIn": ["Đăng nhập — nút 'Đăng nhập bằng vân tay'"],
+      "sizePx": 18,
+      "strokeWidth": 2,
+      "colorLight": "var(--fg-2) #4A443B",
+      "colorDark": "#B0A696"
+    },
+    {
+      "lucideName": "chevron-left",
+      "flutterConstant": "LucideIcons.chevronLeft",
+      "usedIn": ["Đăng ký — nút quay lại trong header"],
+      "sizePx": 22,
+      "strokeWidth": 2,
+      "colorLight": "var(--fg-2) #4A443B",
+      "colorDark": "#B0A696",
+      "tapTargetPx": 44
+    },
+    {
+      "lucideName": "user-plus",
+      "flutterConstant": "LucideIcons.userPlus",
+      "usedIn": ["Đăng ký — icon badge trong header"],
+      "sizePx": 17,
+      "strokeWidth": 2,
+      "colorLight": "var(--blue-600) on var(--blue-50) chip",
+      "colorDark": "#6AADFF on rgba(59,141,248,.16) chip"
+    },
+    {
+      "lucideName": "check",
+      "flutterConstant": "LucideIcons.check",
+      "usedIn": ["Đăng ký — checkbox điều khoản dịch vụ (đã tick)"],
+      "sizePx": 12,
+      "strokeWidth": 2,
+      "colorLight": "#FFFFFF on var(--blue-500) fill",
+      "colorDark": "#FFFFFF on #3B8DF8 fill"
+    }
+  ]
+}

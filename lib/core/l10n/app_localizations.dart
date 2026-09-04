@@ -128,17 +128,29 @@ abstract class AppLocalizations {
   /// **'Cá nhân'**
   String get tabAccount;
 
-  /// Title of the sign-in screen
+  /// Brand name shown in the Login screen's logo block (FR-003)
+  ///
+  /// In vi, this message translates to:
+  /// **'Khai Tâm'**
+  String get signInAppName;
+
+  /// Subtitle shown under the brand name on the Login screen (FR-003)
+  ///
+  /// In vi, this message translates to:
+  /// **'Quản lý thu chi thông minh'**
+  String get signInAppSubtitle;
+
+  /// Title of the sign-in screen (app bar / page title, not shown on the redesigned screen body itself)
   ///
   /// In vi, this message translates to:
   /// **'Đăng nhập'**
   String get signInTitle;
 
-  /// Label for the email input field on the sign-in screen
+  /// Label for the phone-or-email identifier field (FR-003). Only email is ever a valid credential (FR-005) — a phone number typed here fails sign-in with the same message as any other invalid credential.
   ///
   /// In vi, this message translates to:
-  /// **'Email'**
-  String get signInEmailLabel;
+  /// **'Số điện thoại hoặc email'**
+  String get signInIdentifierLabel;
 
   /// Label for the password input field on the sign-in screen
   ///
@@ -146,41 +158,47 @@ abstract class AppLocalizations {
   /// **'Mật khẩu'**
   String get signInPasswordLabel;
 
+  /// Accessibility label for the icon button that reveals the password
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiện mật khẩu'**
+  String get signInShowPasswordSemantic;
+
+  /// Accessibility label for the icon button that hides the password
+  ///
+  /// In vi, this message translates to:
+  /// **'Ẩn mật khẩu'**
+  String get signInHidePasswordSemantic;
+
+  /// Link on the sign-in screen navigating to the forgot-password flow (FR-015)
+  ///
+  /// In vi, this message translates to:
+  /// **'Quên mật khẩu?'**
+  String get signInForgotPasswordAction;
+
   /// Submit button label on the sign-in screen
   ///
   /// In vi, this message translates to:
   /// **'Đăng nhập'**
   String get signInSubmit;
 
-  /// Shown when sign-in fails
+  /// Shown when sign-in fails, for any reason (wrong password, unregistered/non-email identifier per FR-005, network error)
   ///
   /// In vi, this message translates to:
   /// **'Đăng nhập thất bại: {error}'**
   String signInError(String error);
 
-  /// Shown instead of the generic sign-in error when Supabase returns email_not_confirmed (FR-022)
+  /// Divider text between the password sign-in button and the biometric sign-in button (FR-003)
   ///
   /// In vi, this message translates to:
-  /// **'Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.'**
-  String get signInEmailNotConfirmedError;
+  /// **'hoặc'**
+  String get signInOrDivider;
 
-  /// Action shown alongside the email_not_confirmed error to resend the confirmation email (FR-023)
+  /// Button to sign in via device biometric (fingerprint/Face ID), shown only per FR-008's visibility rules
   ///
   /// In vi, this message translates to:
-  /// **'Gửi lại email xác nhận'**
-  String get signInResendConfirmationAction;
-
-  /// Shown after resendConfirmationEmail succeeds (FR-023)
-  ///
-  /// In vi, this message translates to:
-  /// **'Đã gửi lại email xác nhận.'**
-  String get signInResendConfirmationSuccess;
-
-  /// Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể gửi lại email xác nhận: {error}'**
-  String signInResendConfirmationError(String error);
+  /// **'Đăng nhập bằng vân tay'**
+  String get signInWithBiometricAction;
 
   /// Title of the Overview screen
   ///
@@ -500,10 +518,10 @@ abstract class AppLocalizations {
   /// **'Đổi mật khẩu'**
   String get accountPasswordSaveAction;
 
-  /// Confirmation shown after the password is changed
+  /// Confirmation shown after the password is changed (FR-016b: other devices/sessions are signed out, this one is not)
   ///
   /// In vi, this message translates to:
-  /// **'Đã đổi mật khẩu.'**
+  /// **'Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.'**
   String get accountPasswordSavedMessage;
 
   /// Shown when changing the password fails
@@ -512,43 +530,55 @@ abstract class AppLocalizations {
   /// **'Không thể đổi mật khẩu: {error}'**
   String accountPasswordErrorPrefix(String error);
 
+  /// Label for the Account screen's biometric login on/off toggle (FR-010)
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập bằng vân tay'**
+  String get accountBiometricToggleLabel;
+
   /// Button to sign out of the account
   ///
   /// In vi, this message translates to:
   /// **'Đăng xuất'**
   String get accountSignOutAction;
 
-  /// Title of the registration screen
+  /// Header title of the Sign Up screen (FR-004)
   ///
   /// In vi, this message translates to:
-  /// **'Đăng ký'**
+  /// **'Tạo tài khoản'**
   String get signUpTitle;
 
-  /// Label for the email input field on the registration screen
+  /// Accessibility label for the Sign Up screen's back action
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại'**
+  String get signUpBackSemantic;
+
+  /// Label for the required email input field on the Sign Up screen (FR-006 — required despite the design mockup's visual optional-style label, see spec.md Assumptions)
   ///
   /// In vi, this message translates to:
   /// **'Email'**
   String get signUpEmailLabel;
 
-  /// Label for the password input field on the registration screen
+  /// Label for the password input field on the Sign Up screen
   ///
   /// In vi, this message translates to:
   /// **'Mật khẩu'**
   String get signUpPasswordLabel;
 
-  /// Label for the confirm-password input field on the registration screen
+  /// Label for the confirm-password input field on the Sign Up screen
   ///
   /// In vi, this message translates to:
   /// **'Xác nhận mật khẩu'**
   String get signUpConfirmPasswordLabel;
 
-  /// Label for the optional display-name input field on the registration screen
+  /// Label for the full-name input field on the Sign Up screen (FR-004)
   ///
   /// In vi, this message translates to:
-  /// **'Tên'**
+  /// **'Họ và tên'**
   String get signUpNameLabel;
 
-  /// Label for the optional phone-number input field on the registration screen
+  /// Label for the phone-number input field on the Sign Up screen — profile data only, never a login credential (FR-005)
   ///
   /// In vi, this message translates to:
   /// **'Số điện thoại'**
@@ -572,7 +602,31 @@ abstract class AppLocalizations {
   /// **'Mật khẩu xác nhận không khớp.'**
   String get signUpConfirmPasswordMismatchError;
 
-  /// Submit button label on the registration screen
+  /// Text immediately before the Terms of Service link in the Sign Up checkbox label (FR-007)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tôi đồng ý với '**
+  String get signUpTermsPrefix;
+
+  /// Terms of Service link text in the Sign Up checkbox label — styled text only, no real destination in this feature (spec.md Assumptions)
+  ///
+  /// In vi, this message translates to:
+  /// **'Điều khoản dịch vụ'**
+  String get signUpTermsOfServiceLink;
+
+  /// Text between the Terms of Service and Privacy Policy links in the Sign Up checkbox label
+  ///
+  /// In vi, this message translates to:
+  /// **' và '**
+  String get signUpTermsMiddle;
+
+  /// Privacy Policy link text in the Sign Up checkbox label — styled text only, no real destination in this feature (spec.md Assumptions)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chính sách bảo mật'**
+  String get signUpPrivacyPolicyLink;
+
+  /// Submit button label on the Sign Up screen
   ///
   /// In vi, this message translates to:
   /// **'Đăng ký'**
@@ -584,89 +638,125 @@ abstract class AppLocalizations {
   /// **'Đăng ký thất bại: {error}'**
   String signUpError(String error);
 
-  /// Shown when the entered email is already registered, either with a password (FR-003) or as a Google-only account (FR-012) — the client cannot reliably distinguish the two cases (contracts/auth_repository_interface.md), so the message covers both
+  /// Shown when the entered email is already registered (FR-003)
   ///
   /// In vi, this message translates to:
-  /// **'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.'**
+  /// **'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.'**
   String get signUpDuplicateEmailError;
 
-  /// Shown after successful registration when the account requires email confirmation before it can sign in (FR-015, FR-021)
-  ///
-  /// In vi, this message translates to:
-  /// **'Vui lòng kiểm tra hộp thư {email} và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.'**
-  String signUpCheckEmailMessage(String email);
-
-  /// Button on the check-your-email screen to resend the confirmation email (FR-023)
-  ///
-  /// In vi, this message translates to:
-  /// **'Gửi lại email xác nhận'**
-  String get signUpResendConfirmationAction;
-
-  /// Shown after resendConfirmationEmail succeeds (FR-023)
-  ///
-  /// In vi, this message translates to:
-  /// **'Đã gửi lại email xác nhận.'**
-  String get signUpResendConfirmationSuccess;
-
-  /// Shown after resendConfirmationEmail fails (FR-023), same retryable-error pattern as FR-011
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể gửi lại email xác nhận: {error}'**
-  String signUpResendConfirmationError(String error);
-
-  /// Link on the registration screen navigating back to the sign-in screen
+  /// Link on the Sign Up screen navigating back to the sign-in screen
   ///
   /// In vi, this message translates to:
   /// **'Đã có tài khoản? Đăng nhập'**
   String get signUpNavigateToSignIn;
 
-  /// Link on the sign-in screen navigating to the registration screen
+  /// Link on the sign-in screen navigating to the Sign Up screen (FR-003)
   ///
   /// In vi, this message translates to:
-  /// **'Chưa có tài khoản? Đăng ký'**
+  /// **'Chưa có tài khoản? Đăng ký ngay'**
   String get signInNavigateToSignUp;
 
-  /// Label for the native Google sign-in button, shown on both the sign-in and registration screens
+  /// Title of the one-time prompt offering to enable biometric login, shown after first Sign Up/Sign In on a device (FR-009)
   ///
   /// In vi, this message translates to:
-  /// **'Đăng nhập bằng Google'**
-  String get signInWithGoogleAction;
+  /// **'Bật đăng nhập vân tay?'**
+  String get biometricEnablePromptTitle;
 
-  /// Shown when the native Google sign-in flow fails for a reason other than the user cancelling the account chooser
+  /// Body text of the enable-biometric prompt
   ///
   /// In vi, this message translates to:
-  /// **'Đăng nhập bằng Google thất bại: {error}'**
-  String signInWithGoogleError(String error);
+  /// **'Lần sau bạn có thể vào ứng dụng nhanh hơn chỉ bằng vân tay, không cần gõ mật khẩu.'**
+  String get biometricEnablePromptMessage;
 
-  /// Heading for the Google-account-linking section on the Profile/Account screen
+  /// Accept button on the enable-biometric prompt
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết tài khoản Google'**
-  String get accountLinkGoogleTitle;
+  /// **'Bật'**
+  String get biometricEnablePromptAcceptAction;
 
-  /// Button to start linking a Google account from the Profile/Account screen
+  /// Decline button on the enable-biometric prompt
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết tài khoản Google'**
-  String get accountLinkGoogleAction;
+  /// **'Để sau'**
+  String get biometricEnablePromptDeclineAction;
 
-  /// Shown on the Profile/Account screen when a Google account is already linked
+  /// Title of the Forgot Password screen (FR-015)
   ///
   /// In vi, this message translates to:
-  /// **'Đã liên kết: {email}'**
-  String accountLinkedGoogleEmail(String email);
+  /// **'Quên mật khẩu'**
+  String get forgotPasswordTitle;
 
-  /// Shown when linking a Google account fails
+  /// Instructional text on the Forgot Password screen
   ///
   /// In vi, this message translates to:
-  /// **'Không thể liên kết tài khoản Google: {error}'**
-  String accountLinkGoogleErrorPrefix(String error);
+  /// **'Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.'**
+  String get forgotPasswordInstructions;
 
-  /// Shown when the Google identity being linked already belongs to a different account (FR-017)
+  /// Label for the email input field on the Forgot Password screen
   ///
   /// In vi, this message translates to:
-  /// **'Tài khoản Google này đã được liên kết với một tài khoản khác.'**
-  String get accountLinkGoogleAlreadyExistsError;
+  /// **'Email'**
+  String get forgotPasswordEmailLabel;
+
+  /// Submit button on the Forgot Password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi liên kết đặt lại'**
+  String get forgotPasswordSubmitAction;
+
+  /// Generic confirmation shown after submitting the Forgot Password form, identical regardless of whether the email is registered (FR-015, account-enumeration protection)
+  ///
+  /// In vi, this message translates to:
+  /// **'Nếu email này đã đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu trong ít phút.'**
+  String get forgotPasswordConfirmationMessage;
+
+  /// Link on the Forgot Password screen navigating back to the sign-in screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại đăng nhập'**
+  String get forgotPasswordBackToSignIn;
+
+  /// Title of the Set New Password screen, reached via the password-recovery deep link (FR-016)
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt mật khẩu mới'**
+  String get resetPasswordTitle;
+
+  /// Label for the new-password input field on the Set New Password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới'**
+  String get resetPasswordNewPasswordLabel;
+
+  /// Label for the confirm-new-password input field on the Set New Password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận mật khẩu mới'**
+  String get resetPasswordConfirmPasswordLabel;
+
+  /// Submit button on the Set New Password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt lại mật khẩu'**
+  String get resetPasswordSubmitAction;
+
+  /// Shown after confirmPasswordReset succeeds (FR-016), before the router's signed-out redirect takes the user to Login
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đặt lại mật khẩu. Vui lòng đăng nhập lại bằng mật khẩu mới.'**
+  String get resetPasswordSuccessMessage;
+
+  /// Inline error shown when the confirm-password field doesn't match the new password field
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu xác nhận không khớp.'**
+  String get resetPasswordMismatchError;
+
+  /// Shown when confirming the password reset fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể đặt lại mật khẩu: {error}'**
+  String resetPasswordError(String error);
 }
 
 class _AppLocalizationsDelegate

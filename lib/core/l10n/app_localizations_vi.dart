@@ -24,13 +24,28 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabAccount => 'Cá nhân';
 
   @override
+  String get signInAppName => 'Khai Tâm';
+
+  @override
+  String get signInAppSubtitle => 'Quản lý thu chi thông minh';
+
+  @override
   String get signInTitle => 'Đăng nhập';
 
   @override
-  String get signInEmailLabel => 'Email';
+  String get signInIdentifierLabel => 'Số điện thoại hoặc email';
 
   @override
   String get signInPasswordLabel => 'Mật khẩu';
+
+  @override
+  String get signInShowPasswordSemantic => 'Hiện mật khẩu';
+
+  @override
+  String get signInHidePasswordSemantic => 'Ẩn mật khẩu';
+
+  @override
+  String get signInForgotPasswordAction => 'Quên mật khẩu?';
 
   @override
   String get signInSubmit => 'Đăng nhập';
@@ -41,19 +56,10 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get signInEmailNotConfirmedError =>
-      'Email này chưa được xác nhận. Vui lòng kiểm tra hộp thư và bấm vào liên kết xác nhận trước khi đăng nhập.';
+  String get signInOrDivider => 'hoặc';
 
   @override
-  String get signInResendConfirmationAction => 'Gửi lại email xác nhận';
-
-  @override
-  String get signInResendConfirmationSuccess => 'Đã gửi lại email xác nhận.';
-
-  @override
-  String signInResendConfirmationError(String error) {
-    return 'Không thể gửi lại email xác nhận: $error';
-  }
+  String get signInWithBiometricAction => 'Đăng nhập bằng vân tay';
 
   @override
   String get overviewTitle => 'Tổng quan';
@@ -236,7 +242,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get accountPasswordSaveAction => 'Đổi mật khẩu';
 
   @override
-  String get accountPasswordSavedMessage => 'Đã đổi mật khẩu.';
+  String get accountPasswordSavedMessage =>
+      'Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.';
 
   @override
   String accountPasswordErrorPrefix(String error) {
@@ -244,10 +251,16 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get accountBiometricToggleLabel => 'Đăng nhập bằng vân tay';
+
+  @override
   String get accountSignOutAction => 'Đăng xuất';
 
   @override
-  String get signUpTitle => 'Đăng ký';
+  String get signUpTitle => 'Tạo tài khoản';
+
+  @override
+  String get signUpBackSemantic => 'Quay lại';
 
   @override
   String get signUpEmailLabel => 'Email';
@@ -259,7 +272,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get signUpConfirmPasswordLabel => 'Xác nhận mật khẩu';
 
   @override
-  String get signUpNameLabel => 'Tên';
+  String get signUpNameLabel => 'Họ và tên';
 
   @override
   String get signUpPhoneLabel => 'Số điện thoại';
@@ -275,6 +288,18 @@ class AppLocalizationsVi extends AppLocalizations {
       'Mật khẩu xác nhận không khớp.';
 
   @override
+  String get signUpTermsPrefix => 'Tôi đồng ý với ';
+
+  @override
+  String get signUpTermsOfServiceLink => 'Điều khoản dịch vụ';
+
+  @override
+  String get signUpTermsMiddle => ' và ';
+
+  @override
+  String get signUpPrivacyPolicyLink => 'Chính sách bảo mật';
+
+  @override
   String get signUpSubmit => 'Đăng ký';
 
   @override
@@ -284,55 +309,68 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get signUpDuplicateEmailError =>
-      'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu, hoặc dùng nút \"Đăng nhập bằng Google\" bên dưới nếu bạn đã đăng ký qua Google.';
-
-  @override
-  String signUpCheckEmailMessage(String email) {
-    return 'Vui lòng kiểm tra hộp thư $email và bấm vào liên kết xác nhận để hoàn tất đăng ký trước khi đăng nhập.';
-  }
-
-  @override
-  String get signUpResendConfirmationAction => 'Gửi lại email xác nhận';
-
-  @override
-  String get signUpResendConfirmationSuccess => 'Đã gửi lại email xác nhận.';
-
-  @override
-  String signUpResendConfirmationError(String error) {
-    return 'Không thể gửi lại email xác nhận: $error';
-  }
+      'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.';
 
   @override
   String get signUpNavigateToSignIn => 'Đã có tài khoản? Đăng nhập';
 
   @override
-  String get signInNavigateToSignUp => 'Chưa có tài khoản? Đăng ký';
+  String get signInNavigateToSignUp => 'Chưa có tài khoản? Đăng ký ngay';
 
   @override
-  String get signInWithGoogleAction => 'Đăng nhập bằng Google';
+  String get biometricEnablePromptTitle => 'Bật đăng nhập vân tay?';
 
   @override
-  String signInWithGoogleError(String error) {
-    return 'Đăng nhập bằng Google thất bại: $error';
+  String get biometricEnablePromptMessage =>
+      'Lần sau bạn có thể vào ứng dụng nhanh hơn chỉ bằng vân tay, không cần gõ mật khẩu.';
+
+  @override
+  String get biometricEnablePromptAcceptAction => 'Bật';
+
+  @override
+  String get biometricEnablePromptDeclineAction => 'Để sau';
+
+  @override
+  String get forgotPasswordTitle => 'Quên mật khẩu';
+
+  @override
+  String get forgotPasswordInstructions =>
+      'Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.';
+
+  @override
+  String get forgotPasswordEmailLabel => 'Email';
+
+  @override
+  String get forgotPasswordSubmitAction => 'Gửi liên kết đặt lại';
+
+  @override
+  String get forgotPasswordConfirmationMessage =>
+      'Nếu email này đã đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu trong ít phút.';
+
+  @override
+  String get forgotPasswordBackToSignIn => 'Quay lại đăng nhập';
+
+  @override
+  String get resetPasswordTitle => 'Đặt mật khẩu mới';
+
+  @override
+  String get resetPasswordNewPasswordLabel => 'Mật khẩu mới';
+
+  @override
+  String get resetPasswordConfirmPasswordLabel => 'Xác nhận mật khẩu mới';
+
+  @override
+  String get resetPasswordSubmitAction => 'Đặt lại mật khẩu';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Đã đặt lại mật khẩu. Vui lòng đăng nhập lại bằng mật khẩu mới.';
+
+  @override
+  String get resetPasswordMismatchError => 'Mật khẩu xác nhận không khớp.';
+
+  @override
+  String resetPasswordError(String error) {
+    return 'Không thể đặt lại mật khẩu: $error';
   }
-
-  @override
-  String get accountLinkGoogleTitle => 'Liên kết tài khoản Google';
-
-  @override
-  String get accountLinkGoogleAction => 'Liên kết tài khoản Google';
-
-  @override
-  String accountLinkedGoogleEmail(String email) {
-    return 'Đã liên kết: $email';
-  }
-
-  @override
-  String accountLinkGoogleErrorPrefix(String error) {
-    return 'Không thể liên kết tài khoản Google: $error';
-  }
-
-  @override
-  String get accountLinkGoogleAlreadyExistsError =>
-      'Tài khoản Google này đã được liên kết với một tài khoản khác.';
 }

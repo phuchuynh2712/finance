@@ -24,13 +24,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabAccount => 'Account';
 
   @override
+  String get signInAppName => 'Khai Tam';
+
+  @override
+  String get signInAppSubtitle => 'Smart income & expense management';
+
+  @override
   String get signInTitle => 'Sign In';
 
   @override
-  String get signInEmailLabel => 'Email';
+  String get signInIdentifierLabel => 'Phone number or email';
 
   @override
   String get signInPasswordLabel => 'Password';
+
+  @override
+  String get signInShowPasswordSemantic => 'Show password';
+
+  @override
+  String get signInHidePasswordSemantic => 'Hide password';
+
+  @override
+  String get signInForgotPasswordAction => 'Forgot password?';
 
   @override
   String get signInSubmit => 'Sign In';
@@ -41,19 +56,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get signInEmailNotConfirmedError =>
-      'This email hasn\'t been confirmed yet. Please check your inbox and click the confirmation link before signing in.';
+  String get signInOrDivider => 'or';
 
   @override
-  String get signInResendConfirmationAction => 'Resend confirmation email';
-
-  @override
-  String get signInResendConfirmationSuccess => 'Confirmation email resent.';
-
-  @override
-  String signInResendConfirmationError(String error) {
-    return 'Could not resend the confirmation email: $error';
-  }
+  String get signInWithBiometricAction => 'Log in with fingerprint';
 
   @override
   String get overviewTitle => 'Overview';
@@ -237,7 +243,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountPasswordSaveAction => 'Change password';
 
   @override
-  String get accountPasswordSavedMessage => 'Password changed.';
+  String get accountPasswordSavedMessage =>
+      'Password changed. Other signed-in devices have been signed out.';
 
   @override
   String accountPasswordErrorPrefix(String error) {
@@ -245,10 +252,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get accountBiometricToggleLabel => 'Log in with fingerprint';
+
+  @override
   String get accountSignOutAction => 'Sign out';
 
   @override
-  String get signUpTitle => 'Sign Up';
+  String get signUpTitle => 'Create Account';
+
+  @override
+  String get signUpBackSemantic => 'Back';
 
   @override
   String get signUpEmailLabel => 'Email';
@@ -260,7 +273,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUpConfirmPasswordLabel => 'Confirm Password';
 
   @override
-  String get signUpNameLabel => 'Name';
+  String get signUpNameLabel => 'Full Name';
 
   @override
   String get signUpPhoneLabel => 'Phone Number';
@@ -276,6 +289,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUpConfirmPasswordMismatchError => 'Passwords do not match.';
 
   @override
+  String get signUpTermsPrefix => 'I agree to the ';
+
+  @override
+  String get signUpTermsOfServiceLink => 'Terms of Service';
+
+  @override
+  String get signUpTermsMiddle => ' and ';
+
+  @override
+  String get signUpPrivacyPolicyLink => 'Privacy Policy';
+
+  @override
   String get signUpSubmit => 'Sign Up';
 
   @override
@@ -285,55 +310,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signUpDuplicateEmailError =>
-      'This email is already registered. Sign in with your password, or use \"Sign in with Google\" below if you registered via Google.';
-
-  @override
-  String signUpCheckEmailMessage(String email) {
-    return 'Please check $email and click the confirmation link to finish registering before you can sign in.';
-  }
-
-  @override
-  String get signUpResendConfirmationAction => 'Resend confirmation email';
-
-  @override
-  String get signUpResendConfirmationSuccess => 'Confirmation email resent.';
-
-  @override
-  String signUpResendConfirmationError(String error) {
-    return 'Could not resend the confirmation email: $error';
-  }
+      'This email is already registered. Sign in with your password.';
 
   @override
   String get signUpNavigateToSignIn => 'Already have an account? Sign in';
 
   @override
-  String get signInNavigateToSignUp => 'Don\'t have an account? Sign up';
+  String get signInNavigateToSignUp => 'Don\'t have an account? Sign up now';
 
   @override
-  String get signInWithGoogleAction => 'Sign in with Google';
+  String get biometricEnablePromptTitle => 'Enable fingerprint login?';
 
   @override
-  String signInWithGoogleError(String error) {
-    return 'Google sign-in failed: $error';
+  String get biometricEnablePromptMessage =>
+      'Next time you can get in faster with just your fingerprint — no password needed.';
+
+  @override
+  String get biometricEnablePromptAcceptAction => 'Enable';
+
+  @override
+  String get biometricEnablePromptDeclineAction => 'Later';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot Password';
+
+  @override
+  String get forgotPasswordInstructions =>
+      'Enter your registered email and we\'ll send you a password reset link.';
+
+  @override
+  String get forgotPasswordEmailLabel => 'Email';
+
+  @override
+  String get forgotPasswordSubmitAction => 'Send reset link';
+
+  @override
+  String get forgotPasswordConfirmationMessage =>
+      'If this email is registered, you\'ll receive a password reset link shortly.';
+
+  @override
+  String get forgotPasswordBackToSignIn => 'Back to sign in';
+
+  @override
+  String get resetPasswordTitle => 'Set New Password';
+
+  @override
+  String get resetPasswordNewPasswordLabel => 'New password';
+
+  @override
+  String get resetPasswordConfirmPasswordLabel => 'Confirm new password';
+
+  @override
+  String get resetPasswordSubmitAction => 'Reset password';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Password reset. Please sign in again with your new password.';
+
+  @override
+  String get resetPasswordMismatchError => 'Passwords do not match.';
+
+  @override
+  String resetPasswordError(String error) {
+    return 'Could not reset the password: $error';
   }
-
-  @override
-  String get accountLinkGoogleTitle => 'Link Google Account';
-
-  @override
-  String get accountLinkGoogleAction => 'Link Google account';
-
-  @override
-  String accountLinkedGoogleEmail(String email) {
-    return 'Linked: $email';
-  }
-
-  @override
-  String accountLinkGoogleErrorPrefix(String error) {
-    return 'Could not link the Google account: $error';
-  }
-
-  @override
-  String get accountLinkGoogleAlreadyExistsError =>
-      'This Google account is already linked to a different account.';
 }

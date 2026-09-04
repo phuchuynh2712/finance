@@ -58,5 +58,83 @@ void main() {
         );
       },
     );
+
+    // FR-020/FR-021: the re-entry lock gate.
+    test('signed in, locked, on a normal tab → redirects to sign-in', () {
+      expect(
+        computeAuthRedirect(
+          isSignedIn: true,
+          isLocked: true,
+          matchedLocation: '/overview',
+        ),
+        '/sign-in',
+      );
+    });
+
+    test('signed in, locked, already on sign-in → no redirect', () {
+      expect(
+        computeAuthRedirect(
+          isSignedIn: true,
+          isLocked: true,
+          matchedLocation: '/sign-in',
+        ),
+        isNull,
+      );
+    });
+
+    test(
+      'signed in, unlocked (explicit isLocked: false), on sign-in → redirects to overview',
+      () {
+        expect(
+          computeAuthRedirect(
+            isSignedIn: true,
+            isLocked: false,
+            matchedLocation: '/sign-in',
+          ),
+          '/overview',
+        );
+      },
+    );
+
+    // FR-016: the password-recovery deep link takes priority over everything.
+    test(
+      'password recovery, not signed in, on a normal tab → redirects to reset-password',
+      () {
+        expect(
+          computeAuthRedirect(
+            isSignedIn: false,
+            isPasswordRecovery: true,
+            matchedLocation: '/overview',
+          ),
+          '/reset-password',
+        );
+      },
+    );
+
+    test(
+      'password recovery, signed in and unlocked → still redirects to reset-password, not overview',
+      () {
+        expect(
+          computeAuthRedirect(
+            isSignedIn: true,
+            isLocked: false,
+            isPasswordRecovery: true,
+            matchedLocation: '/overview',
+          ),
+          '/reset-password',
+        );
+      },
+    );
+
+    test('password recovery, already on reset-password → no redirect', () {
+      expect(
+        computeAuthRedirect(
+          isSignedIn: true,
+          isPasswordRecovery: true,
+          matchedLocation: '/reset-password',
+        ),
+        isNull,
+      );
+    });
   });
 }

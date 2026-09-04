@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/auth/biometric_login_repository.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
-import 'package:finance/features/account/presentation/google_sign_in_feature_flag.dart';
+import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/features/account/presentation/sign_up_screen.dart';
 
 class _FakeAuthRepository implements AuthRepository {
@@ -17,14 +18,9 @@ class _FakeAuthRepository implements AuthRepository {
   String? signedUpDisplayName;
   String? signedUpPhoneNumber;
   Object? throwOnSignUp;
-  Object? throwOnSignInWithGoogle;
-  Object? throwOnResendConfirmationEmail;
-  bool signInWithGoogleCalled = false;
-  String? resentConfirmationEmailFor;
-  bool needsEmailConfirmation = true;
 
   @override
-  Future<bool> signUp({
+  Future<void> signUp({
     required String email,
     required String password,
     String? displayName,
@@ -36,32 +32,30 @@ class _FakeAuthRepository implements AuthRepository {
     signedUpPassword = password;
     signedUpDisplayName = displayName;
     signedUpPhoneNumber = phoneNumber;
-    return needsEmailConfirmation;
   }
 
   @override
-  Future<void> resendConfirmationEmail(String email) async {
-    await Future<void>.delayed(Duration.zero);
-    if (throwOnResendConfirmationEmail != null) {
-      throw throwOnResendConfirmationEmail!;
-    }
-    resentConfirmationEmailFor = email;
-  }
-
-  @override
-  Future<void> signInWithGoogle() async {
-    await Future<void>.delayed(Duration.zero);
-    signInWithGoogleCalled = true;
-    if (throwOnSignInWithGoogle != null) throw throwOnSignInWithGoogle!;
-  }
+  Future<bool> shouldShowBiometricEnablePrompt() async => false;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+class _FakeBiometricLoginRepository extends BiometricLoginRepository {
+  _FakeBiometricLoginRepository() : super(LocalAuthentication());
+
+  @override
+  Future<bool> isDeviceCapable() async => false;
+}
+
 Widget _harness(_FakeAuthRepository fake) {
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(fake)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(fake),
+      biometricLoginRepositoryProvider.overrideWithValue(
+        _FakeBiometricLoginRepository(),
+      ),
+    ],
     child: MaterialApp.router(
       routerConfig: GoRouter(
         initialLocation: '/sign-up',
@@ -79,17 +73,18 @@ Widget _harness(_FakeAuthRepository fake) {
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: AppTheme.light,
     ),
   );
 }
 
-/// Field order in [SignUpScreen]: Email, Password, Confirm Password, Name,
-/// Phone Number.
-final _emailField = find.byType(TextField).at(0);
-final _passwordField = find.byType(TextField).at(1);
-final _confirmPasswordField = find.byType(TextField).at(2);
-final _nameField = find.byType(TextField).at(3);
-final _phoneField = find.byType(TextField).at(4);
+/// Field order in the rebuilt [SignUpScreen] (reference/login-signup-spec.md
+/// §2): Full name, Phone, Email, Password, Confirm Password.
+final _nameField = find.byType(TextField).at(0);
+final _phoneField = find.byType(TextField).at(1);
+final _emailField = find.byType(TextField).at(2);
+final _passwordField = find.byType(TextField).at(3);
+final _confirmPasswordField = find.byType(TextField).at(4);
 
 Future<void> _fillValidForm(
   WidgetTester tester, {
@@ -98,12 +93,18 @@ Future<void> _fillValidForm(
   String? confirmPassword,
   String name = '',
   String phone = '',
+  bool acceptTerms = true,
 }) async {
+  if (name.isNotEmpty) await tester.enterText(_nameField, name);
+  if (phone.isNotEmpty) await tester.enterText(_phoneField, phone);
   await tester.enterText(_emailField, email);
   await tester.enterText(_passwordField, password);
   await tester.enterText(_confirmPasswordField, confirmPassword ?? password);
-  if (name.isNotEmpty) await tester.enterText(_nameField, name);
-  if (phone.isNotEmpty) await tester.enterText(_phoneField, phone);
+  if (acceptTerms) {
+    await tester.ensureVisible(find.textContaining('Tôi đồng ý với'));
+    await tester.tap(find.textContaining('Tôi đồng ý với'));
+    await tester.pump();
+  }
 }
 
 void main() {
@@ -115,6 +116,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester);
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.pumpAndSettle();
 
@@ -123,99 +125,87 @@ void main() {
   });
 
   testWidgets(
-    'successful registration needing confirmation shows the check-your-email '
-    'message instead of navigating away (FR-015, FR-021)',
+    'the primary button is disabled until the Terms checkbox is checked (FR-007)',
     (tester) async {
-      final fake = _FakeAuthRepository()..needsEmailConfirmation = true;
+      final fake = _FakeAuthRepository();
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
-      await _fillValidForm(tester);
-      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+      await _fillValidForm(tester, acceptTerms: false);
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.onPressed, isNull);
+
+      await tester.ensureVisible(find.textContaining('Tôi đồng ý với'));
+      await tester.tap(find.textContaining('Tôi đồng ý với'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('user@example.com'), findsOneWidget);
-      expect(find.text('Gửi lại email xác nhận'), findsOneWidget);
+      final buttonAfter = tester.widget<FilledButton>(
+        find.byType(FilledButton),
+      );
+      expect(buttonAfter.onPressed, isNotNull);
     },
   );
 
   testWidgets(
-    'successful registration with an immediate session shows the form '
-    'submitted without a check-your-email message',
+    'a successful registration signs in immediately, no confirmation step of any kind (FR-019)',
     (tester) async {
-      final fake = _FakeAuthRepository()..needsEmailConfirmation = false;
+      final fake = _FakeAuthRepository();
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
       await _fillValidForm(tester);
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.pumpAndSettle();
 
       expect(fake.signedUpEmail, 'user@example.com');
+      expect(find.textContaining('kiểm tra hộp thư'), findsNothing);
       expect(find.text('Gửi lại email xác nhận'), findsNothing);
     },
   );
 
-  testWidgets(
-    'tapping resend confirmation email calls resendConfirmationEmail (FR-023)',
-    (tester) async {
-      final fake = _FakeAuthRepository()..needsEmailConfirmation = true;
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
+  testWidgets('leaving name and phone number blank still succeeds', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
 
-      await _fillValidForm(tester);
-      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
-      await tester.pumpAndSettle();
+    await _fillValidForm(tester);
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Gửi lại email xác nhận'));
-      await tester.pumpAndSettle();
+    expect(fake.signedUpEmail, 'user@example.com');
+    expect(fake.signedUpDisplayName, isEmpty);
+    expect(fake.signedUpPhoneNumber, isEmpty);
+  });
 
-      expect(fake.resentConfirmationEmailFor, 'user@example.com');
-      expect(find.text('Đã gửi lại email xác nhận.'), findsOneWidget);
-    },
-  );
+  testWidgets('filling in name and phone number passes them to signUp', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
 
-  testWidgets(
-    'leaving name and phone number blank still succeeds (FR-019)',
-    (tester) async {
-      final fake = _FakeAuthRepository();
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
+    await _fillValidForm(tester, name: 'Nguyen Van A', phone: '0912345678');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.pumpAndSettle();
 
-      await _fillValidForm(tester);
-      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
-      await tester.pumpAndSettle();
-
-      expect(fake.signedUpEmail, 'user@example.com');
-      expect(fake.signedUpDisplayName, isEmpty);
-      expect(fake.signedUpPhoneNumber, isEmpty);
-    },
-  );
+    expect(fake.signedUpDisplayName, 'Nguyen Van A');
+    expect(fake.signedUpPhoneNumber, '0912345678');
+  });
 
   testWidgets(
-    'filling in name and phone number passes them to signUp (FR-001, FR-019)',
-    (tester) async {
-      final fake = _FakeAuthRepository();
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
-
-      await _fillValidForm(tester, name: 'Nguyen Van A', phone: '0912345678');
-      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
-      await tester.pumpAndSettle();
-
-      expect(fake.signedUpDisplayName, 'Nguyen Van A');
-      expect(fake.signedUpPhoneNumber, '0912345678');
-    },
-  );
-
-  testWidgets(
-    'confirm-password mismatch shows an inline error and does not submit (FR-002)',
+    'confirm-password mismatch shows an inline error and does not submit',
     (tester) async {
       final fake = _FakeAuthRepository();
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
       await _fillValidForm(tester, confirmPassword: 'different-password');
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.pumpAndSettle();
 
@@ -224,26 +214,43 @@ void main() {
     },
   );
 
-  testWidgets('duplicate email shows an inline error, no account created', (
-    tester,
-  ) async {
-    final fake = _FakeAuthRepository()
-      ..throwOnSignUp = const AuthApiException(
-        'A user with this email address has already been registered',
-        code: 'email_exists',
-      );
-    await tester.pumpWidget(_harness(fake));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'an empty email is rejected the same as an invalid one, since email is always required (FR-006)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
 
-    await _fillValidForm(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
-    await tester.pumpAndSettle();
+      await _fillValidForm(tester, email: '');
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('Email này đã được đăng ký'),
-      findsOneWidget,
-    );
-  });
+      expect(fake.signedUpEmail, isNull);
+      expect(find.text('Email không hợp lệ.'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'duplicate email shows an inline error, no account created, no Google mention',
+    (tester) async {
+      final fake = _FakeAuthRepository()
+        ..throwOnSignUp = const AuthApiException(
+          'A user with this email address has already been registered',
+          code: 'email_exists',
+        );
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Email này đã được đăng ký'), findsOneWidget);
+      expect(find.textContaining('Google'), findsNothing);
+    },
+  );
 
   testWidgets('weak password shows an inline field error, no submission', (
     tester,
@@ -253,14 +260,12 @@ void main() {
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester, password: '123', confirmPassword: '123');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.pumpAndSettle();
 
     expect(fake.signedUpEmail, isNull);
-    expect(
-      find.text('Mật khẩu phải có ít nhất 6 ký tự.'),
-      findsOneWidget,
-    );
+    expect(find.text('Mật khẩu phải có ít nhất 6 ký tự.'), findsOneWidget);
   });
 
   testWidgets('invalid email shows an inline field error, no submission', (
@@ -271,6 +276,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester, email: 'not-an-email');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.pumpAndSettle();
 
@@ -280,16 +286,15 @@ void main() {
 
   testWidgets(
     'a network/server failure preserves the email, clears the password, '
-    'and a retry with the same email succeeds (US5, FR-011)',
+    'and a retry with the same email succeeds',
     (tester) async {
       final fake = _FakeAuthRepository()
-        ..throwOnSignUp = AuthRetryableFetchException(
-          message: 'Network error',
-        );
+        ..throwOnSignUp = AuthRetryableFetchException(message: 'Network error');
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
       await _fillValidForm(tester);
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.pumpAndSettle();
 
@@ -306,6 +311,7 @@ void main() {
       fake.throwOnSignUp = null;
       await tester.enterText(_passwordField, 'password123');
       await tester.enterText(_confirmPasswordField, 'password123');
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
       await tester.pumpAndSettle();
 
@@ -321,6 +327,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester);
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
     await tester.pump();
 
@@ -330,58 +337,13 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets(
-    'tapping "Sign in with Google" calls signInWithGoogle',
-    (tester) async {
-      final fake = _FakeAuthRepository();
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
+  testWidgets('the screen renders no Google sign-in button anywhere', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Đăng nhập bằng Google'));
-      await tester.pumpAndSettle();
-
-      expect(fake.signInWithGoogleCalled, isTrue);
-    },
-    skip: !kGoogleSignInEnabled,
-  );
-
-  testWidgets(
-    'cancelling the Google account chooser shows no error and no state change',
-    (tester) async {
-      final fake = _FakeAuthRepository()
-        ..throwOnSignInWithGoogle = const GoogleSignInException(
-          code: GoogleSignInExceptionCode.canceled,
-        );
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Đăng nhập bằng Google'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('thất bại'), findsNothing);
-    },
-    skip: !kGoogleSignInEnabled,
-  );
-
-  testWidgets(
-    'a Google sign-in network/server failure shows a retryable error',
-    (tester) async {
-      final fake = _FakeAuthRepository()
-        ..throwOnSignInWithGoogle = const AuthApiException(
-          'Network error',
-          code: 'unexpected_failure',
-        );
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Đăng nhập bằng Google'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.textContaining('Đăng nhập bằng Google thất bại'),
-        findsOneWidget,
-      );
-    },
-    skip: !kGoogleSignInEnabled,
-  );
+    expect(find.textContaining('Google'), findsNothing);
+  });
 }
