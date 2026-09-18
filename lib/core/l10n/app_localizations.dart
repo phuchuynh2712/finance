@@ -110,22 +110,28 @@ abstract class AppLocalizations {
   /// **'Tổng quan'**
   String get tabOverview;
 
-  /// Bottom navigation tab label for the Spending screen
+  /// Bottom navigation tab label for the Spending screen (renamed from "Chi tiêu" to "Thu chi" per FR-020)
   ///
   /// In vi, this message translates to:
-  /// **'Chi tiêu'**
+  /// **'Thu chi'**
   String get tabSpending;
 
-  /// Bottom navigation tab label for the Envelopes screen
+  /// Bottom navigation tab label for the Expense Control screen (FR-020)
   ///
   /// In vi, this message translates to:
-  /// **'Khoản'**
-  String get tabEnvelopes;
+  /// **'Kiểm soát'**
+  String get tabExpenseControl;
 
-  /// Bottom navigation tab label for the Account screen
+  /// Bottom navigation tab label for the History/Report placeholder screen (FR-020)
   ///
   /// In vi, this message translates to:
-  /// **'Cá nhân'**
+  /// **'Lịch sử/Báo cáo'**
+  String get tabHistory;
+
+  /// Bottom navigation tab label for the Account screen (renamed from "Cá nhân" to "Hồ sơ" per FR-020)
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ'**
   String get tabAccount;
 
   /// Brand name shown in the Login screen's logo block (FR-003)
@@ -209,7 +215,7 @@ abstract class AppLocalizations {
   /// Shown on Overview when the user has no envelopes yet
   ///
   /// In vi, this message translates to:
-  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.'**
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước.'**
   String get overviewEmptyState;
 
   /// Button/action on Overview that opens the income allocation (Plan) flow
@@ -245,7 +251,7 @@ abstract class AppLocalizations {
   /// Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)
   ///
   /// In vi, this message translates to:
-  /// **'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.'**
+  /// **'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Kiểm soát.'**
   String get planMissingReceiverWarning;
 
   /// Shown when any envelope's resulting balance would still be negative after this allocation (FR-011)
@@ -287,7 +293,7 @@ abstract class AppLocalizations {
   /// Shown instead of the add-expense action when the user has zero envelopes (FR-030)
   ///
   /// In vi, this message translates to:
-  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.'**
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.'**
   String get spendingNoEnvelopesWarning;
 
   /// Title of the confirmation dialog before deleting an expense entry
@@ -757,6 +763,192 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Không thể đặt lại mật khẩu: {error}'**
   String resetPasswordError(String error);
+
+  /// Header title of the Expense Control screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm soát chi tiêu'**
+  String get expenseControlScreenTitle;
+
+  /// Guidance banner shown at the top of the Expense Control list
+  ///
+  /// In vi, this message translates to:
+  /// **'Bấm tên các khoản để đóng/mở.'**
+  String get expenseControlBannerHint;
+
+  /// FR-023: shown when no items/groups exist yet
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy thêm khoản đầu tiên để bắt đầu kiểm soát chi tiêu.'**
+  String get expenseControlEmptyStateMessage;
+
+  /// Button to create a new top-level expense control item (FR-001)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm khoản mới'**
+  String get expenseControlAddItemAction;
+
+  /// Button to add a child item under a group (FR-002)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm khoản trong {groupName}'**
+  String expenseControlAddChildAction(String groupName);
+
+  /// FR-010: informational (non-blocking) note shown when configuring a fixed-amount item
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản cố định không giới hạn ở đây, nhưng nếu thu nhập thực tế không đủ, khoản này có thể không được phân bổ đầy đủ khi thu nhập thực sự được phân bổ.'**
+  String get expenseControlFixedNote;
+
+  /// Label for the item/group name input field
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên khoản'**
+  String get expenseControlNameLabel;
+
+  /// Label for the optional description field (FR-022)
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú (không bắt buộc)'**
+  String get expenseControlDescriptionLabel;
+
+  /// Label for the formula value input field
+  ///
+  /// In vi, this message translates to:
+  /// **'Giá trị'**
+  String get expenseControlValueLabel;
+
+  /// Allocation mode toggle option: percentage of income
+  ///
+  /// In vi, this message translates to:
+  /// **'Phần trăm'**
+  String get expenseControlModePercentage;
+
+  /// Allocation mode toggle option: fixed amount
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền cố định'**
+  String get expenseControlModeFixed;
+
+  /// Label above the icon picker grid
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn biểu tượng'**
+  String get expenseControlIconPickerLabel;
+
+  /// Semantics label for one selectable icon in the icon picker
+  ///
+  /// In vi, this message translates to:
+  /// **'Biểu tượng {name}'**
+  String expenseControlIconSemanticLabel(String name);
+
+  /// Save/submit button inside the create-item and edit-item dialogs
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get expenseControlDialogSaveAction;
+
+  /// FR-017: shown when the name field is left blank
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập tên khoản.'**
+  String get expenseControlNameRequiredError;
+
+  /// FR-017: shown when the formula value is zero, negative, or blank
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập giá trị lớn hơn 0.'**
+  String get expenseControlValueRequiredError;
+
+  /// FR-007/FR-008/FR-012: shown when a candidate save would violate the percentage budget
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng phần trăm là {total}%, vượt quá giới hạn cho phép. Vui lòng điều chỉnh.'**
+  String expenseControlOverBudgetError(String total);
+
+  /// FR-011: first line of the running allocation summary banner
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã phân bổ {percent}% + {fixedCount} khoản cố định'**
+  String allocationSummaryAllocatedLine(String percent, int fixedCount);
+
+  /// FR-011: second line of the running allocation summary banner
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn {percent}% tự do'**
+  String allocationSummaryFreeLine(String percent);
+
+  /// Semantics label for a group card's drag handle (FR-014)
+  ///
+  /// In vi, this message translates to:
+  /// **'Sắp xếp nhóm {name}'**
+  String expenseControlReorderSemantic(String name);
+
+  /// Semantics label for an item/group row's edit (pencil) button
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa {name}'**
+  String expenseControlEditSemantic(String name);
+
+  /// Semantics label for an item/group row's delete (trash) button
+  ///
+  /// In vi, this message translates to:
+  /// **'Xoá {name}'**
+  String expenseControlDeleteSemantic(String name);
+
+  /// Semantics label for a group's chevron when collapsed (tap to expand)
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở rộng {name}'**
+  String expenseControlExpandSemantic(String name);
+
+  /// Semantics label for a group's chevron when expanded (tap to collapse)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu gọn {name}'**
+  String expenseControlCollapseSemantic(String name);
+
+  /// Title of the edit dialog (name/icon/description only — research.md §9)
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa khoản'**
+  String get expenseControlEditItemTitle;
+
+  /// Title of the group-delete confirmation dialog (FR-016)
+  ///
+  /// In vi, this message translates to:
+  /// **'Xoá nhóm \"{name}\"?'**
+  String expenseControlDeleteGroupTitle(String name);
+
+  /// Cascading-removal warning body text in the group-delete confirmation dialog (FR-016)
+  ///
+  /// In vi, this message translates to:
+  /// **'Các khoản con trong nhóm này cũng sẽ bị xoá.'**
+  String get expenseControlDeleteGroupWarning;
+
+  /// Confirm button in the group-delete confirmation dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Xoá'**
+  String get expenseControlDeleteGroupConfirmAction;
+
+  /// Primary button that commits pending inline formula edits (research.md §9, FR-012)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu công thức'**
+  String get expenseControlSaveFormulaAction;
+
+  /// FR-012: shown when "Lưu công thức" is blocked because the pending plan violates the percentage budget
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu: tổng phần trăm là {total}%, vượt quá giới hạn cho phép.'**
+  String expenseControlSaveFormulaBlockedMessage(String total);
+
+  /// Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tính năng đang được phát triển.'**
+  String get historyPlaceholderMessage;
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,22 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    { "lucideName": "sliders-horizontal", "flutterConstant": "LucideIcons.slidersHorizontal", "usedIn": "Header icon badge", "sizePx": 17, "colorLight": "blue-600 #1A72E0 on blue-50 #EDF4FF chip", "colorDark": "#6AADFF on rgba(59,141,248,.16) chip" },
+    { "lucideName": "info", "flutterConstant": "LucideIcons.info", "usedIn": "Banner hướng dẫn đầu trang", "sizePx": 16, "colorLight": "#1A72E0 (blue-600)", "colorDark": "#6AADFF" },
+    { "lucideName": "grip-vertical", "flutterConstant": "LucideIcons.gripVertical", "usedIn": "Handle kéo-thả sắp xếp nhóm (đầu mỗi card nhóm)", "sizePx": 15, "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073" },
+    { "lucideName": "dynamic (g.icon)", "flutterConstant": "n/a — icon theo từng nhóm, xem icons-used.json chung của app", "usedIn": "Icon 28×28 nhóm lớn (Gia đình, Cá nhân, Tiết kiệm, Sức khoẻ, Dự phòng)", "sizePx": 14, "colorLight": "blue-600 on blue-50 chip", "colorDark": "#6AADFF on rgba(59,141,248,.16) chip" },
+    { "lucideName": "pencil", "flutterConstant": "LucideIcons.pencil", "usedIn": "Nút sửa — cấp nhóm (15px) và cấp khoản con (14px)", "sizePx": "15 (nhóm) / 14 (khoản con)", "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073", "tapTargetPx": 44 },
+    { "lucideName": "trash-2", "flutterConstant": "LucideIcons.trash2", "usedIn": "Nút xoá — cấp nhóm (16px) và cấp khoản con (15px)", "sizePx": "16 (nhóm) / 15 (khoản con)", "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073", "tapTargetPx": 44 },
+    { "lucideName": "chevron-down / chevron-right (g.planChevron)", "flutterConstant": "LucideIcons.chevronDown / LucideIcons.chevronRight", "usedIn": "Chevron mở/đóng nhóm có khoản con", "sizePx": 15, "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073" },
+    { "lucideName": "dynamic (c.icon)", "flutterConstant": "n/a — icon riêng từng khoản con", "usedIn": "Icon 22×22 khoản con", "sizePx": 11, "colorLight": "fg-2 on neutral-100 chip", "colorDark": "#B0A696 on #332F29 chip" },
+    { "lucideName": "plus", "flutterConstant": "LucideIcons.plus", "usedIn": "Nút 'Thêm khoản trong [nhóm]' (13px) và 'Thêm khoản mới' (16px)", "sizePx": "13 / 16", "colorLight": "blue-600 #1A72E0", "colorDark": "#6AADFF" },
+    { "lucideName": "pie-chart", "flutterConstant": "LucideIcons.pieChart", "usedIn": "Banner tổng phân bổ (cuối trang)", "sizePx": 16, "colorLight": "warning #C9971F", "colorDark": "#DFB04A" },
+    { "lucideName": "check", "flutterConstant": "LucideIcons.check", "usedIn": "Nút chính 'Lưu công thức'", "sizePx": 20, "colorLight": "#FFFFFF", "colorDark": "#FFFFFF" }
+  ],
+  "bottomNavIcons": {
+    "note": "Bottom nav dùng chung navTabsControl (sáng) / navTabsControlDark (tối) — 5 tab: Tổng quan, Kiểm soát, Thu chi, Lịch sử/Báo cáo, Hồ sơ. Icon + màu theo tab active/inactive, xem theme-tokens.json cho token màu nav.",
+    "sizePx": 22,
+    "labelSizePx": 10
+  }
+}
