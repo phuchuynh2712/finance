@@ -21,7 +21,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabExpenseControl => 'Kiểm soát';
 
   @override
-  String get tabHistory => 'Lịch sử/Báo cáo';
+  String get tabHistory => 'Báo cáo';
 
   @override
   String get tabAccount => 'Hồ sơ';

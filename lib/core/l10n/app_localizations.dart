@@ -122,10 +122,10 @@ abstract class AppLocalizations {
   /// **'Kiểm soát'**
   String get tabExpenseControl;
 
-  /// Bottom navigation tab label for the History/Report placeholder screen (FR-020)
+  /// Bottom navigation tab label for the History/Report placeholder screen (FR-020, FR-017) — matches the design mockup exactly ("Báo cáo" alone, not "Lịch sử/Báo cáo"), which also happens to fix the label wrapping to two lines
   ///
   /// In vi, this message translates to:
-  /// **'Lịch sử/Báo cáo'**
+  /// **'Báo cáo'**
   String get tabHistory;
 
   /// Bottom navigation tab label for the Account screen (renamed from "Cá nhân" to "Hồ sơ" per FR-020)

@@ -17,12 +17,15 @@ ExpenseControlItem _item(String id, {String? parentId, String name = 'Item'}) {
     iconKey: 'home',
     description: null,
     sortOrder: 0,
-    allocationMethod: parentId == null ? ExpenseAllocationMethod.percentage : null,
+    allocationMethod: parentId == null
+        ? ExpenseAllocationMethod.percentage
+        : null,
     allocationValue: parentId == null ? 20 : null,
   );
 }
 
-Widget _harness(ExpenseControlNode node, {
+Widget _harness(
+  ExpenseControlNode node, {
   void Function(ExpenseControlItem)? onAddChild,
   void Function(ExpenseControlItem)? onDeleteGroup,
   void Function(ExpenseControlItem)? onDeleteLeaf,
@@ -54,57 +57,65 @@ Widget _harness(ExpenseControlNode node, {
 }
 
 void main() {
-  testWidgets('a group with children shows a chevron and, when tapped, toggles expand/collapse independently', (
-    tester,
-  ) async {
-    final node = ExpenseControlNode(
-      item: _item('family', name: 'Family'),
-      children: [_item('groceries', parentId: 'family', name: 'Groceries')],
-    );
-    await tester.pumpWidget(_harness(node));
+  testWidgets(
+    'a group with children shows a chevron and, when tapped, toggles expand/collapse independently',
+    (tester) async {
+      final node = ExpenseControlNode(
+        item: _item('family', name: 'Family'),
+        children: [_item('groceries', parentId: 'family', name: 'Groceries')],
+      );
+      await tester.pumpWidget(_harness(node));
 
-    expect(find.text('Groceries'), findsOneWidget);
+      expect(find.text('Groceries'), findsOneWidget);
 
-    await tester.tap(find.text('Family'));
-    await tester.pumpAndSettle();
-    expect(find.text('Groceries'), findsNothing);
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+      expect(find.text('Groceries'), findsNothing);
 
-    await tester.tap(find.text('Family'));
-    await tester.pumpAndSettle();
-    expect(find.text('Groceries'), findsOneWidget);
-  });
-
-  testWidgets('tapping "Thêm khoản trong [Tên nhóm]" invokes onAddChild with the group item', (
-    tester,
-  ) async {
-    ExpenseControlItem? addedTo;
-    final node = ExpenseControlNode(
-      item: _item('family', name: 'Family'),
-      children: [_item('groceries', parentId: 'family')],
-    );
-    await tester.pumpWidget(_harness(node, onAddChild: (item) => addedTo = item));
-
-    await tester.tap(find.text('Thêm khoản trong Family'));
-    await tester.pump();
-
-    expect(addedTo?.id, 'family');
-  });
-
-  testWidgets('a childless (leaf) node renders its formula row directly, with no chevron', (
-    tester,
-  ) async {
-    final node = ExpenseControlNode(item: _item('rent', name: 'Rent'), children: const []);
-    await tester.pumpWidget(_harness(node));
-
-    expect(find.text('Rent'), findsOneWidget);
-    // The leaf's formula value is a non-interactive static label (FR-001) —
-    // mode conveyed via the label's own %/₫ suffix, not a separate toggle.
-    expect(find.byType(TextField), findsNothing);
-    expect(find.textContaining('20%'), findsOneWidget);
-  });
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+      expect(find.text('Groceries'), findsOneWidget);
+    },
+  );
 
   testWidgets(
-    "a group's sub-label shows the live sum of its children's formulas — not its own (cleared) formula",
+    'tapping "Thêm khoản trong [Tên nhóm]" invokes onAddChild with the group item',
+    (tester) async {
+      ExpenseControlItem? addedTo;
+      final node = ExpenseControlNode(
+        item: _item('family', name: 'Family'),
+        children: [_item('groceries', parentId: 'family')],
+      );
+      await tester.pumpWidget(
+        _harness(node, onAddChild: (item) => addedTo = item),
+      );
+
+      await tester.tap(find.text('Thêm khoản trong Family'));
+      await tester.pump();
+
+      expect(addedTo?.id, 'family');
+    },
+  );
+
+  testWidgets(
+    'a childless (leaf) node renders its formula row directly, with no chevron',
+    (tester) async {
+      final node = ExpenseControlNode(
+        item: _item('rent', name: 'Rent'),
+        children: const [],
+      );
+      await tester.pumpWidget(_harness(node));
+
+      expect(find.text('Rent'), findsOneWidget);
+      // The leaf's formula value is a non-interactive static label (FR-001) —
+      // mode conveyed via the label's own %/₫ suffix, not a separate toggle.
+      expect(find.byType(TextField), findsNothing);
+      expect(find.textContaining('20%'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    "a group's sub-label shows the live sum of its children's formulas — not its own (cleared) formula — only while collapsed (FR-014/FR-015)",
     (tester) async {
       final node = ExpenseControlNode(
         item: _item('family', name: 'Family'),
@@ -120,8 +131,67 @@ void main() {
       );
       await tester.pumpWidget(_harness(node, groupSubtotal: subtotal));
 
+      // A group defaults to expanded (FR-014: the summary duplicates the
+      // children list visible below it, so it's hidden while expanded).
+      expect(find.textContaining('35%'), findsNothing);
+
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+
       expect(find.textContaining('35%'), findsOneWidget);
       expect(find.textContaining('1'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'expanding a collapsed group hides its summary line entirely, leaving only the header row (FR-014, T022 Scenario 2)',
+    (tester) async {
+      final node = ExpenseControlNode(
+        item: _item('family', name: 'Family'),
+        children: [_item('groceries', parentId: 'family', name: 'Groceries')],
+      );
+      const subtotal = ExpenseControlTotals(
+        percentAllocated: 20,
+        fixedItemCount: 0,
+        percentFree: 80,
+      );
+      await tester.pumpWidget(_harness(node, groupSubtotal: subtotal));
+
+      // Collapse first, so the summary is showing.
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('20%'), findsOneWidget);
+
+      // Expand again.
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('20%'), findsNothing);
+      expect(find.text('Groceries'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a long collapsed summary has no overflow/ellipsis configured, so it wraps instead of truncating (FR-015, SC-005, T022 Scenario 1)',
+    (tester) async {
+      final node = ExpenseControlNode(
+        item: _item('family', name: 'Family'),
+        children: [_item('groceries', parentId: 'family', name: 'Groceries')],
+      );
+      // A high fixedItemCount pushes the rendered summary string long
+      // enough that it would previously have needed truncation.
+      const subtotal = ExpenseControlTotals(
+        percentAllocated: 87,
+        fixedItemCount: 12,
+        percentFree: 13,
+      );
+      await tester.pumpWidget(_harness(node, groupSubtotal: subtotal));
+
+      await tester.tap(find.text('Family'));
+      await tester.pumpAndSettle();
+
+      final summaryText = tester.widget<Text>(find.textContaining('87%').last);
+      expect(summaryText.overflow, isNot(TextOverflow.ellipsis));
     },
   );
 
@@ -129,7 +199,10 @@ void main() {
     'a leaf ALSO shows "Thêm khoản trong [Tên nhóm]" — otherwise a leaf could never gain its first child (FR-002)',
     (tester) async {
       ExpenseControlItem? addedTo;
-      final node = ExpenseControlNode(item: _item('rent', name: 'Rent'), children: const []);
+      final node = ExpenseControlNode(
+        item: _item('rent', name: 'Rent'),
+        children: const [],
+      );
       await tester.pumpWidget(
         _harness(node, onAddChild: (item) => addedTo = item),
       );

@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_semantic_colors.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/account/presentation/forgot_password_screen.dart';
 import '../../features/account/presentation/reset_password_screen.dart';
@@ -223,34 +224,44 @@ class _AppShellState extends ConsumerState<_AppShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentIndex = widget.navigationShell.currentIndex;
+    final semantic = Theme.of(context).extension<AppSemanticColors>()!;
 
     return Scaffold(
       body: widget.navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: _handleDestinationSelected,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(LucideIcons.layoutDashboard),
-            label: l10n.tabOverview,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.slidersHorizontal),
-            label: l10n.tabExpenseControl,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.receipt),
-            label: l10n.tabSpending,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.history),
-            label: l10n.tabHistory,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.user),
-            label: l10n.tabAccount,
-          ),
-        ],
+      // FR-018: a thin top border separating the bar from content above,
+      // matching the app's other fixed headers (e.g.
+      // expense_control_screen.dart's own header Container).
+      bottomNavigationBar: DecoratedBox(
+        key: const Key('bottomNavTopBorder'),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: semantic.border1)),
+        ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: _handleDestinationSelected,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(LucideIcons.layoutDashboard),
+              label: l10n.tabOverview,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.slidersHorizontal),
+              label: l10n.tabExpenseControl,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.receipt),
+              label: l10n.tabSpending,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.history),
+              label: l10n.tabHistory,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.user),
+              label: l10n.tabAccount,
+            ),
+          ],
+        ),
       ),
     );
   }

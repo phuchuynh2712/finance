@@ -352,12 +352,7 @@ void main() {
   testWidgets(
     'the prompt fires when switching to each of the four other destinations, not just one (SC-003)',
     (tester) async {
-      for (final label in [
-        'Thu chi',
-        'Lịch sử/Báo cáo',
-        'Hồ sơ',
-        'Tổng quan',
-      ]) {
+      for (final label in ['Thu chi', 'Báo cáo', 'Hồ sơ', 'Tổng quan']) {
         final repository = _FakeExpenseControlRepository([_leaf('a')]);
         final container = _containerFor(repository);
         addTearDown(container.dispose);
