@@ -8,6 +8,13 @@
 
 **Input**: User description: "Khóa ô nhập giá trị công thức (%/₫) inline trong danh sách "Kiểm soát chi tiêu" — không cho gõ trực tiếp tại chỗ nữa. Việc sửa công thức của một khoản (bao gồm cả tên/icon/mô tả) chuyển hẳn vào dialog mở qua nút edit (pencil), dialog đã có sẵn cho tên/icon/mô tả thì nay cho sửa cả công thức luôn. Bấm "Lưu" trong dialog chỉ áp dụng tạm thời vào state hiển thị (cập nhật banner tổng quan, chạy validate vượt ngân sách) — chưa ghi xuống database. Bấm nút lớn "Lưu công thức" ở cuối trang mới thực sự ghi chính thức xuống database, giữ nguyên cơ chế pending-edit hiện có. Thêm mới: nếu đang có pending edit chưa lưu chính thức mà người dùng bấm chuyển sang tab khác (Tổng quan, Thu chi, Lịch sử, Hồ sơ), phải hiện hộp thoại xác nhận hỏi có muốn lưu trước khi rời đi hay không, thay vì âm thầm hủy pending edit như hiện tại. Ngoài ra sửa layout: ô giá trị và toggle %/₫ trong dialog nên chiếm gần hết bề ngang có sẵn, không để khoảng trắng thừa, vì giá trị nhập có thể dài (số tiền cố định lớn)."
 
+## Clarifications
+
+### Session 2026-09-18
+
+- Q: When the edit dialog is opened for a group (an item with children, which has no formula of its own) → A: The dialog continues to show only name/icon/description, exactly as it does today — it never gains formula fields for a group, since a group's value is a live-computed sum of its children rather than its own stored formula.
+- Q: If the formula value entered in the dialog would push the total allocation over budget, what happens when the user presses "Lưu" inside the dialog? → A: The save is blocked — the dialog stays open, shows an inline over-budget error (reusing the same validation/display already used by "Lưu công thức"), and does not stage anything until the value is corrected.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Edit a formula through the dialog instead of inline (Priority: P1)
@@ -24,6 +31,8 @@ A user viewing the "Kiểm soát chi tiêu" (Expense Control) list wants to chan
 2. **Given** an item's edit dialog is closed, **When** the user taps that item's edit (pencil) icon, **Then** a dialog opens pre-filled with the item's current name, icon, description, allocation mode (%/₫), and allocation value, all editable.
 3. **Given** the edit dialog is open for a leaf item, **When** the user changes the allocation mode and/or value and taps "Lưu" (Save) inside the dialog, **Then** the dialog closes and the list's inline value field (still read-only) immediately reflects the new value, the allocation-summary banner updates accordingly, and the "Lưu công thức" (Save Formula) button becomes enabled — but no data has been written to the database yet.
 4. **Given** a formula change is only staged (per Scenario 3) and not yet committed, **When** the user reopens the same item's edit dialog, **Then** it shows the staged (pending) value, not the last-committed database value.
+5. **Given** the edit dialog is open for a leaf item and the entered formula value would push the total allocation over budget, **When** the user taps "Lưu", **Then** the dialog remains open, shows an inline over-budget error identifying the offending total, and does not stage the edit — the user must correct the value before it can be saved.
+6. **Given** the edit dialog is open for a group (an item with children), **Then** it shows only name/icon/description fields, exactly as it does today — no formula/mode/value fields appear, since a group has no formula of its own.
 
 ---
 
@@ -74,10 +83,10 @@ A user has staged formula edits (via dialogs) but has not yet pressed "Lưu côn
 
 - **FR-001**: The system MUST prevent the allocation-value input field shown inline in the Expense Control item list from accepting keyboard focus or text input; tapping it MUST NOT open a keyboard or place a cursor.
 - **FR-002**: The system MUST prevent the inline %/₫ mode toggle shown next to the allocation-value field from being changed by direct interaction with the list; changing the mode MUST only be possible through the edit dialog.
-- **FR-003**: The item edit dialog (opened via the pencil/edit icon) MUST include, in addition to its existing name/icon/description fields, the item's allocation mode (%/₫) and allocation value as editable fields.
-- **FR-004**: Pressing "Lưu" (Save) inside the edit dialog for a leaf item MUST stage the name/icon/description AND the formula changes together as a single pending edit for that item, without writing any of it to the database.
+- **FR-003**: The item edit dialog (opened via the pencil/edit icon) for a **leaf item** MUST include, in addition to its existing name/icon/description fields, the item's allocation mode (%/₫) and allocation value as editable fields. For a **group** (an item with children), the dialog MUST continue to show only name/icon/description, unchanged from today — a group has no formula of its own to edit.
+- **FR-004**: Pressing "Lưu" (Save) inside the edit dialog for a leaf item, when the formula value passes the validation in FR-006, MUST stage the name/icon/description AND the formula changes together as a single pending edit for that item, without writing any of it to the database, and MUST close the dialog.
 - **FR-005**: Staging a formula edit via the dialog (FR-004) MUST immediately update the on-screen allocation-summary banner and the read-only inline value display to reflect the new pending value, exactly as today's inline-typing mechanism does.
-- **FR-006**: The system MUST run the same over-budget validation used by "Lưu công thức" against the dialog's staged formula value before allowing it to be staged, surfacing the same style of error message inline in the dialog if it would push the total over budget — reusing the dialog's existing budget-validation display for this feature.
+- **FR-006**: The system MUST run the same over-budget validation used by "Lưu công thức" against the dialog's formula value *before* allowing "Lưu" to stage it. If the value would push the total allocation over budget, the system MUST block staging entirely: the dialog MUST remain open, surface the same style of inline over-budget error already used by "Lưu công thức", and MUST NOT create or update a pending edit until the value is corrected.
 - **FR-007**: The "Lưu công thức" button MUST remain the only action that writes staged formula edits to the database, and MUST behave exactly as it does today (enabled only when at least one edit is staged, running full over-budget validation across all staged edits, clearing pending state on success).
 - **FR-008**: Re-opening the edit dialog for an item that has a staged (not-yet-committed) formula edit MUST pre-fill the dialog with the staged value, not the last-committed database value.
 - **FR-009**: When at least one formula edit is staged and the user attempts to navigate away from the Expense Control tab via bottom navigation, the system MUST intercept that navigation and present a confirmation choice: save staged edits and proceed, discard staged edits and proceed, or cancel and remain on the Expense Control tab.
@@ -103,7 +112,7 @@ A user has staged formula edits (via dialogs) but has not yet pressed "Lưu côn
 ## Assumptions
 
 - The existing pending-edit data structure (a map of item id → staged formula edit) is reused as-is; this feature only changes *how* entries get added to it (via dialog "Lưu" instead of inline `onChanged`) and adds one new consumer (the navigation-confirmation prompt) that reads/clears it.
-- Group items (which have no formula of their own) are unaffected by this feature beyond no longer showing an inline-editable child row — this feature only concerns leaf items' own formulas.
+- Group items (which have no formula of their own) are unaffected by this feature beyond no longer showing an inline-editable child row — this feature only concerns leaf items' own formulas. A group's own edit dialog is unchanged (name/icon/description only, per Clarifications).
 - The tab-switch confirmation only applies to the five main bottom-navigation destinations already in the app (Tổng quan, Kiểm soát, Thu chi, Lịch sử/Báo cáo, Hồ sơ); it does not apply to other navigation actions (e.g., opening the "Thêm khoản mới" dialog, or the system back button) unless those are later found to bypass the same in-app tab state.
 - This feature does not change the existing "Thêm khoản mới" (create) dialog's behavior — creating a brand-new item still writes directly on save, as it does not yet have a value to stage against; only editing an *existing* item's formula goes through the new staged-then-committed flow described here. (This matches today's dialog already distinguishing create from edit via `isFormulaEditable`.)
 - No new automated-testing framework or approach is introduced; this feature is verified with the same `flutter test` unit/widget-test conventions already used elsewhere in this codebase.

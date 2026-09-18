@@ -32,4 +32,5 @@
 ## Notes
 
 - All decisions in this spec (lock inline input, dialog-based formula editing, staged-then-committed persistence via "Lưu công thức", tab-switch confirmation) were explicitly confirmed with the user across multiple clarifying questions before this spec was written — no [NEEDS CLARIFICATION] markers were needed.
+- 2026-09-18 `/speckit-clarify` session: 2 additional questions resolved 2 gaps found during ambiguity review (dialog behavior for a group vs. a leaf item; whether over-budget validation blocks or merely warns on dialog "Lưu"). Both answers are now reflected in the Clarifications section, the relevant Acceptance Scenarios (US1 #5-#6), and FR-003/FR-004/FR-006. All 16 checklist items remained passing after the update — no regressions.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.
