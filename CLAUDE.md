@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260904-144604-expense-control/plan.md
+specs/20260918-100444-lock-formula-dialog-edit/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention
