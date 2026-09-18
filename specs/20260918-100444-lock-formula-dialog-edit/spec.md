@@ -18,6 +18,7 @@
 - Q: Since the %/₫ mode toggle is no longer interactive, should its visual presentation in the list still match the original design mockup's pill-toggle look? → A: No — because the control is now purely informational (not interactive), its exact visual treatment in the list is left to implementation judgment rather than mandated to match the original mockup control; the edit dialog remains the one place where the interactive pill-toggle control still applies.
 - Q: A group header's allocation-summary line currently gets truncated with "..." when too long — should it be removed entirely, kept but wrapped to multiple lines, or something else? → A: Show it only while the group is collapsed (hide it entirely while expanded, since the same information is already visible per-child there), and while shown, always display it in full by wrapping to multiple lines rather than truncating.
 - Q: What Vietnamese labels should the three navigation-confirmation prompt buttons (FR-009) use? → A: "Lưu" (Save) / "Không lưu" (Don't Save) / "Hủy" (Cancel).
+- Q: The dialog's mode selector currently uses a full-text `DropdownButton` ("Phần trăm" / "Số tiền cố định"), unlike the list's compact %/₫ pill-toggle — should the dialog switch to the same compact pill-toggle, or keep the dropdown and just widen the value field beside it? → A: Switch the dialog to the same compact %/₫ pill-toggle already used in the list, for one consistent mode-selection control across the whole screen.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -58,7 +59,7 @@ A user has staged one or more formula edits via the dialog (User Story 1) and wa
 
 ### User Story 3 - Warn before losing unsaved staged edits by switching tabs (Priority: P2)
 
-A user has staged formula edits (via dialogs) but has not yet pressed "Lưu công thức". If they tap a different bottom-navigation tab (Tổng quan, Thu chi, Lịch sử, Hồ sơ), the app must not silently discard their staged changes. Instead, it must ask them to confirm whether to save first, discard, or cancel the navigation.
+A user has staged formula edits (via dialogs) but has not yet pressed "Lưu công thức". If they tap a different bottom-navigation tab (Tổng quan, Thu chi, Lịch sử, Hồ sơ), the app must not silently discard their staged changes. Instead, it must present a confirmation prompt with "Lưu" / "Không lưu" / "Hủy" choices.
 
 **Why this priority**: This is a data-loss guard that only matters once User Stories 1 and 2 exist (there must be a staging mechanism for it to protect). It's explicitly requested as a follow-up safety net once the dialog-based staging flow existed, so it depends on but does not block the first two stories.
 
@@ -113,7 +114,7 @@ A group header today always shows a one-line summary ("Đã phân bổ X% + N kh
 - **FR-010**: Choosing "Lưu" in the navigation-confirmation prompt (FR-009) MUST apply the identical persistence and validation behavior as pressing "Lưu công thức" (FR-007); if that validation fails, the prompt MUST surface the error, keep the staged edits intact, and MUST NOT navigate away.
 - **FR-011**: Choosing "Không lưu" in the navigation-confirmation prompt (FR-009) MUST clear all staged formula edits without persisting them, then complete the navigation.
 - **FR-012**: When zero formula edits are staged, navigating away from the Expense Control tab MUST proceed immediately with no confirmation prompt, matching current behavior.
-- **FR-013**: The edit dialog's layout for the allocation value field and the %/₫ mode toggle MUST use the available horizontal width efficiently (no more than a small fixed gap between them), rather than leaving significant unused blank space, so that longer fixed-amount values remain fully visible while being entered.
+- **FR-013**: The edit dialog's mode selector MUST be the same compact %/₫ pill-toggle control already used in the list (not the dialog's current full-text dropdown), and the dialog's layout for the allocation value field and this pill-toggle MUST use the available horizontal width efficiently (no more than a small fixed gap between them), rather than leaving significant unused blank space, so that longer fixed-amount values remain fully visible while being entered.
 - **FR-014**: A group header's allocation-summary line MUST be shown only while that group is collapsed, and MUST be hidden entirely while that group is expanded.
 - **FR-015**: While shown (per FR-014), the group allocation-summary line MUST display its full text, wrapping across as many lines as needed — it MUST NOT be truncated or ellipsized.
 
