@@ -160,7 +160,10 @@ class ExpenseControlPlanService {
 
   /// FR-002: a row that is itself a child (non-null `parentId`) MUST NOT be
   /// used as another row's `parentId` — nesting is capped at one level.
-  bool isNestingAllowed(List<ExpenseControlItem> items, String candidateParentId) {
+  bool isNestingAllowed(
+    List<ExpenseControlItem> items,
+    String candidateParentId,
+  ) {
     for (final item in items) {
       if (item.id == candidateParentId) return item.parentId == null;
     }

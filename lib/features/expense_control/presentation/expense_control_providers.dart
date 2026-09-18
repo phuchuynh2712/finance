@@ -36,26 +36,25 @@ final pendingItemEditsProvider =
 
 /// Tree (top-level items + children) reflecting persisted data with any
 /// pending item edits overlaid live (FR-005/FR-011).
-final expenseControlTreeProvider = Provider<AsyncValue<List<ExpenseControlNode>>>((
-  ref,
-) {
-  final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
-  final pending = ref.watch(pendingItemEditsProvider);
-  final service = ref.watch(expenseControlPlanServiceProvider);
-  return itemsAsync.whenData(
-    (items) => service.buildTree(items, pendingEdits: pending),
-  );
-});
+final expenseControlTreeProvider =
+    Provider<AsyncValue<List<ExpenseControlNode>>>((ref) {
+      final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
+      final pending = ref.watch(pendingItemEditsProvider);
+      final service = ref.watch(expenseControlPlanServiceProvider);
+      return itemsAsync.whenData(
+        (items) => service.buildTree(items, pendingEdits: pending),
+      );
+    });
 
 /// Running allocation summary reflecting persisted data with any pending
 /// item edits overlaid live (FR-011).
-final expenseControlTotalsProvider = Provider<AsyncValue<ExpenseControlTotals>>((
-  ref,
-) {
-  final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
-  final pending = ref.watch(pendingItemEditsProvider);
-  final service = ref.watch(expenseControlPlanServiceProvider);
-  return itemsAsync.whenData(
-    (items) => service.computeTotals(items, pendingEdits: pending),
-  );
-});
+final expenseControlTotalsProvider = Provider<AsyncValue<ExpenseControlTotals>>(
+  (ref) {
+    final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
+    final pending = ref.watch(pendingItemEditsProvider);
+    final service = ref.watch(expenseControlPlanServiceProvider);
+    return itemsAsync.whenData(
+      (items) => service.computeTotals(items, pendingEdits: pending),
+    );
+  },
+);

@@ -181,15 +181,16 @@ void main() {
   testWidgets(
     'save is blocked at 105% total with the offending total flagged',
     (tester) async {
-      final repository = _FakeExpenseControlRepository([
-        _leaf('a', value: 60),
-      ]);
+      final repository = _FakeExpenseControlRepository([_leaf('a', value: 60)]);
       await tester.pumpWidget(_harness(repository));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Thêm khoản mới').first);
       await tester.pumpAndSettle();
-      await tester.enterText(find.widgetWithText(TextField, 'Tên khoản'), 'Extra');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Tên khoản'),
+        'Extra',
+      );
       await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '45');
       await tester.pump();
 
@@ -215,7 +216,10 @@ void main() {
 
       await tester.tap(find.text('Thêm khoản mới').first, warnIfMissed: false);
       await tester.pumpAndSettle();
-      await tester.enterText(find.widgetWithText(TextField, 'Tên khoản'), 'Extra');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Tên khoản'),
+        'Extra',
+      );
       await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '30');
       await tester.pump();
 
@@ -242,20 +246,19 @@ void main() {
     expect(saveButton.onPressed, isNull);
   });
 
-  testWidgets(
-    'deleting a leaf removes it immediately (US3 Scenario 4)',
-    (tester) async {
-      final repository = _FakeExpenseControlRepository([_leaf('a')]);
-      await tester.pumpWidget(_harness(repository));
-      await tester.pumpAndSettle();
+  testWidgets('deleting a leaf removes it immediately (US3 Scenario 4)', (
+    tester,
+  ) async {
+    final repository = _FakeExpenseControlRepository([_leaf('a')]);
+    await tester.pumpWidget(_harness(repository));
+    await tester.pumpAndSettle();
 
-      expect(find.text('a'), findsOneWidget);
-      await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.trash2).first);
-      await tester.pump();
+    expect(find.text('a'), findsOneWidget);
+    await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.trash2).first);
+    await tester.pump();
 
-      expect(repository._items, isEmpty);
-    },
-  );
+    expect(repository._items, isEmpty);
+  });
 
   testWidgets(
     'editing a leaf via the pencil dialog stages the change — it is not persisted until "Lưu công thức" (research.md Decision 3)',
@@ -264,9 +267,14 @@ void main() {
       await tester.pumpWidget(_harness(repository));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+      await tester.tap(
+        find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+      );
       await tester.pumpAndSettle();
-      await tester.enterText(find.widgetWithText(TextField, 'Tên khoản'), 'Renamed');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Tên khoản'),
+        'Renamed',
+      );
       await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
       await tester.pumpAndSettle();
 
@@ -311,7 +319,9 @@ void main() {
       await tester.pumpWidget(_harness(repository));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.trash2).first);
+      await tester.tap(
+        find.widgetWithIcon(IconButton, LucideIcons.trash2).first,
+      );
       await tester.pumpAndSettle();
 
       // Confirmation dialog is showing; deletion hasn't happened yet.
@@ -429,7 +439,9 @@ void main() {
         await tester.pumpWidget(_harness(repository));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.tap(
+          find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+        );
         await tester.pumpAndSettle();
 
         expect(find.widgetWithText(TextField, 'Giá trị'), findsOneWidget);
@@ -473,7 +485,9 @@ void main() {
         await tester.pumpWidget(_harness(repository));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.tap(
+          find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+        );
         await tester.pumpAndSettle();
 
         expect(find.widgetWithText(TextField, 'Giá trị'), findsNothing);
@@ -496,7 +510,9 @@ void main() {
         };
         await tester.pumpAndSettle();
 
-        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.tap(
+          find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+        );
         await tester.pumpAndSettle();
 
         expect(
@@ -521,7 +537,9 @@ void main() {
         await tester.pumpWidget(_harnessWithContainer(repository, container));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.tap(
+          find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+        );
         await tester.pumpAndSettle();
         await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '50');
         await tester.pump();

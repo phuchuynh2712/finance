@@ -81,7 +81,11 @@ class ExpenseItemRow extends StatelessWidget {
                   label: l10n.expenseControlEditSemantic(item.name),
                   child: IconButton(
                     onPressed: onEdit,
-                    icon: Icon(LucideIcons.pencil, size: 14, color: semantic.fg3),
+                    icon: Icon(
+                      LucideIcons.pencil,
+                      size: 14,
+                      color: semantic.fg3,
+                    ),
                     constraints: const BoxConstraints(
                       minWidth: 48,
                       minHeight: 48,
@@ -94,7 +98,11 @@ class ExpenseItemRow extends StatelessWidget {
                   label: l10n.expenseControlDeleteSemantic(item.name),
                   child: IconButton(
                     onPressed: onDelete,
-                    icon: Icon(LucideIcons.trash2, size: 15, color: semantic.fg3),
+                    icon: Icon(
+                      LucideIcons.trash2,
+                      size: 15,
+                      color: semantic.fg3,
+                    ),
                     constraints: const BoxConstraints(
                       minWidth: 48,
                       minHeight: 48,
@@ -132,8 +140,7 @@ class _FormulaLabel extends StatelessWidget {
     final value = item.allocationValue;
 
     final text = switch ((method, value)) {
-      (ExpenseAllocationMethod.percentage, final v?) =>
-        '${formatPercent(v)}%',
+      (ExpenseAllocationMethod.percentage, final v?) => '${formatPercent(v)}%',
       (ExpenseAllocationMethod.fixed, final v?) => formatFixedAmount(
         context,
         v,

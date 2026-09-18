@@ -103,7 +103,8 @@ class _ScreenContent extends ConsumerWidget {
     final totalsAsync = ref.watch(expenseControlTotalsProvider);
     final pendingEdits = ref.watch(pendingItemEditsProvider);
     final planService = ref.watch(expenseControlPlanServiceProvider);
-    final items = ref.watch(expenseControlItemsStreamProvider).valueOrNull ?? [];
+    final items =
+        ref.watch(expenseControlItemsStreamProvider).valueOrNull ?? [];
 
     final validation = pendingEdits.isEmpty
         ? null
@@ -123,7 +124,11 @@ class _ScreenContent extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(LucideIcons.info, size: 16, color: theme.colorScheme.primary),
+              Icon(
+                LucideIcons.info,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -150,7 +155,8 @@ class _ScreenContent extends ConsumerWidget {
               onEditItem: (item) => _openEditDialog(context, ref, item),
               onDeleteLeaf: (item) =>
                   ref.read(expenseControlRepositoryProvider).delete(item.id),
-              onDeleteGroup: (group) => _confirmDeleteGroup(context, ref, group),
+              onDeleteGroup: (group) =>
+                  _confirmDeleteGroup(context, ref, group),
               onAddChild: (parent) =>
                   _openCreateDialog(context, ref, parentId: parent.id),
               // A group carries no formula of its own (FR-003/FR-004) — its
@@ -171,7 +177,9 @@ class _ScreenContent extends ConsumerWidget {
             final orderedIds = [for (final node in tree) node.item.id];
             final movedId = orderedIds.removeAt(oldIndex);
             orderedIds.insert(adjustedNewIndex, movedId);
-            ref.read(expenseControlRepositoryProvider).reorderTopLevel(orderedIds);
+            ref
+                .read(expenseControlRepositoryProvider)
+                .reorderTopLevel(orderedIds);
           },
         ),
         Padding(
@@ -267,16 +275,16 @@ void _openCreateDialog(
   showDialog<void>(
     context: context,
     builder: (_) => _ItemFormDialog(
-      params: (
-        existingItem: null,
-        parentId: parentId,
-        isFormulaEditable: true,
-      ),
+      params: (existingItem: null, parentId: parentId, isFormulaEditable: true),
     ),
   );
 }
 
-void _openEditDialog(BuildContext context, WidgetRef ref, ExpenseControlItem item) {
+void _openEditDialog(
+  BuildContext context,
+  WidgetRef ref,
+  ExpenseControlItem item,
+) {
   showDialog<void>(
     context: context,
     builder: (_) => _ItemFormDialog(
@@ -383,7 +391,9 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              decoration: InputDecoration(labelText: l10n.expenseControlNameLabel),
+              decoration: InputDecoration(
+                labelText: l10n.expenseControlNameLabel,
+              ),
               controller: _nameController,
               onChanged: controller.setName,
             ),
@@ -395,7 +405,10 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
             const SizedBox(height: 12),
             Text(l10n.expenseControlIconPickerLabel),
             const SizedBox(height: 6),
-            IconPicker(selectedKey: state.iconKey, onSelected: controller.setIconKey),
+            IconPicker(
+              selectedKey: state.iconKey,
+              onSelected: controller.setIconKey,
+            ),
             const SizedBox(height: 12),
             TextField(
               decoration: InputDecoration(
@@ -451,7 +464,9 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
                         controller.budgetValidation!.violatingTotal ?? 0,
                       ),
                     ),
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
             ],

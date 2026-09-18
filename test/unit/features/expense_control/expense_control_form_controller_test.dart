@@ -74,14 +74,17 @@ void main() {
     staged = {};
   });
 
-  test('blank name is rejected — canSave is false and save() is a no-op', () async {
-    final controller = buildController();
-    controller.setValue(10);
-    expect(controller.isNameValid, isFalse);
-    expect(controller.canSave, isFalse);
-    await controller.save();
-    expect(repository.created, isEmpty);
-  });
+  test(
+    'blank name is rejected — canSave is false and save() is a no-op',
+    () async {
+      final controller = buildController();
+      controller.setValue(10);
+      expect(controller.isNameValid, isFalse);
+      expect(controller.canSave, isFalse);
+      await controller.save();
+      expect(repository.created, isEmpty);
+    },
+  );
 
   test('zero/blank value is rejected for a leaf', () async {
     final controller = buildController();

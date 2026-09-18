@@ -87,7 +87,10 @@ void main() {
           value: 25,
         ),
       };
-      final validation = planService.validateBudget(items, pendingEdits: pending);
+      final validation = planService.validateBudget(
+        items,
+        pendingEdits: pending,
+      );
       expect(validation.isValid, isTrue);
       await repository.saveFormulas(pending);
 

@@ -4,7 +4,8 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/tables/expense_control_items_table.dart' as tables;
+import '../../../core/database/tables/expense_control_items_table.dart'
+    as tables;
 import '../../../core/sync/sync_outbox_table.dart';
 import '../domain/expense_control_item.dart';
 import '../domain/expense_control_repository.dart';
@@ -79,9 +80,8 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
 
   @override
   Stream<List<ExpenseControlItem>> watchAll() {
-    return (_db.select(_db.expenseControlItems)..where(
-          (row) => row.userId.equals(_userId) & row.deletedAt.isNull(),
-        ))
+    return (_db.select(_db.expenseControlItems)
+          ..where((row) => row.userId.equals(_userId) & row.deletedAt.isNull()))
         .watch()
         .map((rows) => rows.map(_toDomain).toList());
   }
@@ -99,8 +99,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
   Future<int> _childCount(String parentId) async {
     final rows =
         await (_db.select(_db.expenseControlItems)..where(
-              (row) =>
-                  row.parentId.equals(parentId) & row.deletedAt.isNull(),
+              (row) => row.parentId.equals(parentId) & row.deletedAt.isNull(),
             ))
             .get();
     return rows.length;
@@ -115,14 +114,14 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
         final parentRow = await (_db.select(
           _db.expenseControlItems,
         )..where((row) => row.id.equals(parentId))).getSingle();
-        await (_db.update(_db.expenseControlItems)
-              ..where((row) => row.id.equals(parentId)))
-            .write(
-              const ExpenseControlItemsCompanion(
-                allocationMethod: Value(null),
-                allocationValue: Value(null),
-              ),
-            );
+        await (_db.update(
+          _db.expenseControlItems,
+        )..where((row) => row.id.equals(parentId))).write(
+          const ExpenseControlItemsCompanion(
+            allocationMethod: Value(null),
+            allocationValue: Value(null),
+          ),
+        );
         await _appendOutbox(
           parentId,
           SyncOperation.update,
@@ -175,18 +174,14 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
               ))
               .get();
       final now = DateTime.now();
-      await (_db.update(
-        _db.expenseControlItems,
-      )..where((row) => row.id.equals(id))).write(
-        ExpenseControlItemsCompanion(deletedAt: Value(now)),
-      );
+      await (_db.update(_db.expenseControlItems)
+            ..where((row) => row.id.equals(id)))
+          .write(ExpenseControlItemsCompanion(deletedAt: Value(now)));
       await _appendOutbox(id, SyncOperation.delete, {'id': id});
       for (final child in children) {
-        await (_db.update(
-          _db.expenseControlItems,
-        )..where((row) => row.id.equals(child.id))).write(
-          ExpenseControlItemsCompanion(deletedAt: Value(now)),
-        );
+        await (_db.update(_db.expenseControlItems)
+              ..where((row) => row.id.equals(child.id)))
+            .write(ExpenseControlItemsCompanion(deletedAt: Value(now)));
         await _appendOutbox(child.id, SyncOperation.delete, {'id': child.id});
       }
     });

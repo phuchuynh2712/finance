@@ -77,7 +77,8 @@ class ExpenseControlFormState {
 /// [onStageEdit] instead of writing to the repository at all. Only "Lưu
 /// công thức" (or the tab-switch confirmation's "Lưu" choice) later commits
 /// a staged leaf edit.
-class ExpenseControlFormController extends StateNotifier<ExpenseControlFormState> {
+class ExpenseControlFormController
+    extends StateNotifier<ExpenseControlFormState> {
   ExpenseControlFormController({
     required this.repository,
     required this.planService,
