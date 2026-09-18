@@ -257,7 +257,7 @@ void main() {
         expect(find.byType(FloatingActionButton), findsNothing);
         expect(
           find.text(
-            'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.',
+            'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.',
           ),
           findsOneWidget,
         );

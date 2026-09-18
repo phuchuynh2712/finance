@@ -10,9 +10,11 @@ import '../../features/account/presentation/forgot_password_screen.dart';
 import '../../features/account/presentation/reset_password_screen.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
 import '../../features/account/presentation/sign_up_screen.dart';
-import '../../features/envelopes/presentation/envelopes_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
+import '../../features/expense_control/presentation/expense_control_providers.dart';
+import '../../features/expense_control/presentation/expense_control_screen.dart';
 import '../../features/expenses/presentation/spending_screen.dart';
+import '../../features/history/presentation/history_placeholder_screen.dart';
 
 /// A bare [Listenable] that [GoRouter] watches to know when to re-evaluate
 /// its [GoRouterRedirect] — fired manually via [ping] rather than wrapping a
@@ -70,9 +72,11 @@ String? computeAuthRedirect({
   return null;
 }
 
-/// The app's 4-tab shell (Overview, Spending, Envelopes, Account per
-/// FR-023, Overview first/default) with an auth guard (FR-025) redirecting
-/// unauthenticated users to sign-in before any tab is reachable.
+/// The app's 5-tab shell (Tổng quan, Kiểm soát, Thu chi, Lịch sử/Báo cáo,
+/// Hồ sơ per FR-020, Tổng quan first/default) with an auth guard (FR-025)
+/// redirecting unauthenticated users to sign-in before any tab is
+/// reachable. The old "Khoản" (Envelopes) tab is retired — Kiểm soát
+/// replaces it (research.md §12).
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/overview',
@@ -115,6 +119,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/expense-control',
+                builder: (context, state) => const ExpenseControlScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/spending',
                 builder: (context, state) => const SpendingScreen(),
               ),
@@ -123,8 +135,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/envelopes',
-                builder: (context, state) => const EnvelopesScreen(),
+                path: '/history',
+                builder: (context, state) => const HistoryPlaceholderScreen(),
               ),
             ],
           ),
@@ -142,21 +154,48 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class _AppShell extends StatelessWidget {
+/// Index of the Kiểm soát branch within [appRouterProvider]'s
+/// `StatefulShellRoute` — used by [_AppShellState] to discard pending
+/// formula edits when the user navigates away (research.md §9).
+const _expenseControlBranchIndex = 1;
+
+class _AppShell extends ConsumerStatefulWidget {
   const _AppShell({required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
+  ConsumerState<_AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<_AppShell> {
+  int? _previousIndex;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final currentIndex = widget.navigationShell.currentIndex;
+
+    // Edge Case: navigating away from Kiểm soát without tapping "Lưu công
+    // thức" discards pending inline formula edits. `IndexedStack` keeps the
+    // screen mounted across tab switches, so a plain `autoDispose` provider
+    // would never fire here on its own — this explicit index-change check
+    // is the primary discard mechanism (research.md §9).
+    if (_previousIndex == _expenseControlBranchIndex &&
+        currentIndex != _expenseControlBranchIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.invalidate(pendingFormulaEditsProvider);
+      });
+    }
+    _previousIndex = currentIndex;
+
     return Scaffold(
-      body: navigationShell,
+      body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
+        selectedIndex: currentIndex,
+        onDestinationSelected: (index) => widget.navigationShell.goBranch(
           index,
-          initialLocation: index == navigationShell.currentIndex,
+          initialLocation: index == currentIndex,
         ),
         destinations: [
           NavigationDestination(
@@ -164,12 +203,16 @@ class _AppShell extends StatelessWidget {
             label: l10n.tabOverview,
           ),
           NavigationDestination(
+            icon: const Icon(LucideIcons.slidersHorizontal),
+            label: l10n.tabExpenseControl,
+          ),
+          NavigationDestination(
             icon: const Icon(LucideIcons.receipt),
             label: l10n.tabSpending,
           ),
           NavigationDestination(
-            icon: const Icon(LucideIcons.mail),
-            label: l10n.tabEnvelopes,
+            icon: const Icon(LucideIcons.history),
+            label: l10n.tabHistory,
           ),
           NavigationDestination(
             icon: const Icon(LucideIcons.user),

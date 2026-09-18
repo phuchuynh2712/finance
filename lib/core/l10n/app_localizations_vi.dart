@@ -15,13 +15,16 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabOverview => 'Tổng quan';
 
   @override
-  String get tabSpending => 'Chi tiêu';
+  String get tabSpending => 'Thu chi';
 
   @override
-  String get tabEnvelopes => 'Khoản';
+  String get tabExpenseControl => 'Kiểm soát';
 
   @override
-  String get tabAccount => 'Cá nhân';
+  String get tabHistory => 'Lịch sử/Báo cáo';
+
+  @override
+  String get tabAccount => 'Hồ sơ';
 
   @override
   String get signInAppName => 'Khai Tâm';
@@ -66,7 +69,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overviewEmptyState =>
-      'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.';
+      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước.';
 
   @override
   String get overviewPlanAction => 'Lập kế hoạch';
@@ -87,7 +90,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get planMissingReceiverWarning =>
-      'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.';
+      'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Kiểm soát.';
 
   @override
   String get planNegativeBalanceWarning =>
@@ -112,7 +115,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get spendingNoEnvelopesWarning =>
-      'Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.';
+      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.';
 
   @override
   String get spendingDeleteConfirmTitle => 'Xóa khoản chi?';
@@ -373,4 +376,125 @@ class AppLocalizationsVi extends AppLocalizations {
   String resetPasswordError(String error) {
     return 'Không thể đặt lại mật khẩu: $error';
   }
+
+  @override
+  String get expenseControlScreenTitle => 'Kiểm soát chi tiêu';
+
+  @override
+  String get expenseControlBannerHint => 'Bấm tên các khoản để đóng/mở.';
+
+  @override
+  String get expenseControlEmptyStateMessage =>
+      'Chưa có khoản nào. Hãy thêm khoản đầu tiên để bắt đầu kiểm soát chi tiêu.';
+
+  @override
+  String get expenseControlAddItemAction => 'Thêm khoản mới';
+
+  @override
+  String expenseControlAddChildAction(String groupName) {
+    return 'Thêm khoản trong $groupName';
+  }
+
+  @override
+  String get expenseControlFixedNote =>
+      'Khoản cố định không giới hạn ở đây, nhưng nếu thu nhập thực tế không đủ, khoản này có thể không được phân bổ đầy đủ khi thu nhập thực sự được phân bổ.';
+
+  @override
+  String get expenseControlNameLabel => 'Tên khoản';
+
+  @override
+  String get expenseControlDescriptionLabel => 'Ghi chú (không bắt buộc)';
+
+  @override
+  String get expenseControlValueLabel => 'Giá trị';
+
+  @override
+  String get expenseControlModePercentage => 'Phần trăm';
+
+  @override
+  String get expenseControlModeFixed => 'Số tiền cố định';
+
+  @override
+  String get expenseControlIconPickerLabel => 'Chọn biểu tượng';
+
+  @override
+  String expenseControlIconSemanticLabel(String name) {
+    return 'Biểu tượng $name';
+  }
+
+  @override
+  String get expenseControlDialogSaveAction => 'Lưu';
+
+  @override
+  String get expenseControlNameRequiredError => 'Vui lòng nhập tên khoản.';
+
+  @override
+  String get expenseControlValueRequiredError =>
+      'Vui lòng nhập giá trị lớn hơn 0.';
+
+  @override
+  String expenseControlOverBudgetError(String total) {
+    return 'Tổng phần trăm là $total%, vượt quá giới hạn cho phép. Vui lòng điều chỉnh.';
+  }
+
+  @override
+  String allocationSummaryAllocatedLine(String percent, int fixedCount) {
+    return 'Đã phân bổ $percent% + $fixedCount khoản cố định';
+  }
+
+  @override
+  String allocationSummaryFreeLine(String percent) {
+    return 'Còn $percent% tự do';
+  }
+
+  @override
+  String expenseControlReorderSemantic(String name) {
+    return 'Sắp xếp nhóm $name';
+  }
+
+  @override
+  String expenseControlEditSemantic(String name) {
+    return 'Sửa $name';
+  }
+
+  @override
+  String expenseControlDeleteSemantic(String name) {
+    return 'Xoá $name';
+  }
+
+  @override
+  String expenseControlExpandSemantic(String name) {
+    return 'Mở rộng $name';
+  }
+
+  @override
+  String expenseControlCollapseSemantic(String name) {
+    return 'Thu gọn $name';
+  }
+
+  @override
+  String get expenseControlEditItemTitle => 'Sửa khoản';
+
+  @override
+  String expenseControlDeleteGroupTitle(String name) {
+    return 'Xoá nhóm \"$name\"?';
+  }
+
+  @override
+  String get expenseControlDeleteGroupWarning =>
+      'Các khoản con trong nhóm này cũng sẽ bị xoá.';
+
+  @override
+  String get expenseControlDeleteGroupConfirmAction => 'Xoá';
+
+  @override
+  String get expenseControlSaveFormulaAction => 'Lưu công thức';
+
+  @override
+  String expenseControlSaveFormulaBlockedMessage(String total) {
+    return 'Không thể lưu: tổng phần trăm là $total%, vượt quá giới hạn cho phép.';
+  }
+
+  @override
+  String get historyPlaceholderMessage => 'Tính năng đang được phát triển.';
 }

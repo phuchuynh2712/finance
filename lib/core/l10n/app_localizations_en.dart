@@ -15,13 +15,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabOverview => 'Overview';
 
   @override
-  String get tabSpending => 'Spending';
+  String get tabSpending => 'Income & Expense';
 
   @override
-  String get tabEnvelopes => 'Envelopes';
+  String get tabExpenseControl => 'Control';
 
   @override
-  String get tabAccount => 'Account';
+  String get tabHistory => 'History';
+
+  @override
+  String get tabAccount => 'Profile';
 
   @override
   String get signInAppName => 'Khai Tam';
@@ -66,7 +69,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewEmptyState =>
-      'No envelopes yet. Create one in the Envelopes tab first.';
+      'No envelopes yet. Create one in the Control tab first.';
 
   @override
   String get overviewPlanAction => 'Plan';
@@ -87,7 +90,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planMissingReceiverWarning =>
-      'There is leftover after allocation, but no envelope is set to receive it. Please set one in the Envelopes tab.';
+      'There is leftover after allocation, but no envelope is set to receive it. Please set one in the Control tab.';
 
   @override
   String get planNegativeBalanceWarning =>
@@ -112,7 +115,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spendingNoEnvelopesWarning =>
-      'No envelopes yet. Create one in the Envelopes tab before recording an expense.';
+      'No envelopes yet. Create one in the Control tab before recording an expense.';
 
   @override
   String get spendingDeleteConfirmTitle => 'Delete this expense?';
@@ -374,4 +377,126 @@ class AppLocalizationsEn extends AppLocalizations {
   String resetPasswordError(String error) {
     return 'Could not reset the password: $error';
   }
+
+  @override
+  String get expenseControlScreenTitle => 'Expense Control';
+
+  @override
+  String get expenseControlBannerHint =>
+      'Tap an item\'s name to expand/collapse.';
+
+  @override
+  String get expenseControlEmptyStateMessage =>
+      'No items yet. Add your first one to start controlling your spending.';
+
+  @override
+  String get expenseControlAddItemAction => 'Add new item';
+
+  @override
+  String expenseControlAddChildAction(String groupName) {
+    return 'Add item in $groupName';
+  }
+
+  @override
+  String get expenseControlFixedNote =>
+      'Fixed amounts have no limit here, but if actual income is insufficient, this item may not be fully funded when income is actually allocated.';
+
+  @override
+  String get expenseControlNameLabel => 'Item name';
+
+  @override
+  String get expenseControlDescriptionLabel => 'Description (optional)';
+
+  @override
+  String get expenseControlValueLabel => 'Value';
+
+  @override
+  String get expenseControlModePercentage => 'Percentage';
+
+  @override
+  String get expenseControlModeFixed => 'Fixed amount';
+
+  @override
+  String get expenseControlIconPickerLabel => 'Choose an icon';
+
+  @override
+  String expenseControlIconSemanticLabel(String name) {
+    return '$name icon';
+  }
+
+  @override
+  String get expenseControlDialogSaveAction => 'Save';
+
+  @override
+  String get expenseControlNameRequiredError => 'Please enter an item name.';
+
+  @override
+  String get expenseControlValueRequiredError =>
+      'Please enter a value greater than 0.';
+
+  @override
+  String expenseControlOverBudgetError(String total) {
+    return 'Total is $total%, over the allowed limit. Please adjust.';
+  }
+
+  @override
+  String allocationSummaryAllocatedLine(String percent, int fixedCount) {
+    return '$percent% allocated + $fixedCount fixed item(s)';
+  }
+
+  @override
+  String allocationSummaryFreeLine(String percent) {
+    return '$percent% free';
+  }
+
+  @override
+  String expenseControlReorderSemantic(String name) {
+    return 'Reorder group $name';
+  }
+
+  @override
+  String expenseControlEditSemantic(String name) {
+    return 'Edit $name';
+  }
+
+  @override
+  String expenseControlDeleteSemantic(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String expenseControlExpandSemantic(String name) {
+    return 'Expand $name';
+  }
+
+  @override
+  String expenseControlCollapseSemantic(String name) {
+    return 'Collapse $name';
+  }
+
+  @override
+  String get expenseControlEditItemTitle => 'Edit item';
+
+  @override
+  String expenseControlDeleteGroupTitle(String name) {
+    return 'Delete group \"$name\"?';
+  }
+
+  @override
+  String get expenseControlDeleteGroupWarning =>
+      'Child items in this group will also be removed.';
+
+  @override
+  String get expenseControlDeleteGroupConfirmAction => 'Delete';
+
+  @override
+  String get expenseControlSaveFormulaAction => 'Save formula';
+
+  @override
+  String expenseControlSaveFormulaBlockedMessage(String total) {
+    return 'Can\'t save: total is $total%, over the allowed limit.';
+  }
+
+  @override
+  String get historyPlaceholderMessage => 'Coming soon.';
 }

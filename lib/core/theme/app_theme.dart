@@ -13,6 +13,11 @@ class AppTheme {
   static final light = ThemeData(
     useMaterial3: true,
     fontFamily: 'Lexend',
+    // Unset, ColorScheme.light's ~30 other slots (scaffold background,
+    // surfaceContainer*, etc.) fall back to Flutter's default Material You
+    // purple-gray seed instead of the brand palette — visible as unwanted
+    // gray tinting across the app (research.md's bgApp/bgSunken tokens).
+    scaffoldBackgroundColor: AppColors.lightBgApp,
     colorScheme: const ColorScheme.light(
       primary: AppColors.lightPrimary,
       onPrimary: AppColors.lightOnPrimary,
@@ -20,6 +25,10 @@ class AppTheme {
       onError: AppColors.lightOnDanger,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightOnSurface,
+      // theme-tokens.json's "neutral-100" (kiem-soat-spec.md) — used by
+      // Material widgets themselves (Chip, NavigationBar, etc.) as well as
+      // this app's own secondary-badge backgrounds.
+      surfaceContainerHighest: Color(0xFFF3EFE9),
     ),
     extensions: const [AppSemanticColors.light],
   );
@@ -27,6 +36,7 @@ class AppTheme {
   static final dark = ThemeData(
     useMaterial3: true,
     fontFamily: 'Lexend',
+    scaffoldBackgroundColor: AppColors.darkBgApp,
     colorScheme: const ColorScheme.dark(
       primary: AppColors.darkPrimary,
       onPrimary: AppColors.darkOnPrimary,
@@ -34,6 +44,7 @@ class AppTheme {
       onError: AppColors.darkOnDanger,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkOnSurface,
+      surfaceContainerHighest: Color(0xFF332F29),
     ),
     extensions: const [AppSemanticColors.dark],
   );

@@ -8,17 +8,21 @@
   "@tabOverview": {
     "description": "Bottom navigation tab label for the Overview screen"
   },
-  "tabSpending": "Chi tiêu",
+  "tabSpending": "Thu chi",
   "@tabSpending": {
-    "description": "Bottom navigation tab label for the Spending screen"
+    "description": "Bottom navigation tab label for the Spending screen (renamed from \"Chi tiêu\" to \"Thu chi\" per FR-020)"
   },
-  "tabEnvelopes": "Khoản",
-  "@tabEnvelopes": {
-    "description": "Bottom navigation tab label for the Envelopes screen"
+  "tabExpenseControl": "Kiểm soát",
+  "@tabExpenseControl": {
+    "description": "Bottom navigation tab label for the Expense Control screen (FR-020)"
   },
-  "tabAccount": "Cá nhân",
+  "tabHistory": "Lịch sử/Báo cáo",
+  "@tabHistory": {
+    "description": "Bottom navigation tab label for the History/Report placeholder screen (FR-020)"
+  },
+  "tabAccount": "Hồ sơ",
   "@tabAccount": {
-    "description": "Bottom navigation tab label for the Account screen"
+    "description": "Bottom navigation tab label for the Account screen (renamed from \"Cá nhân\" to \"Hồ sơ\" per FR-020)"
   },
   "signInAppName": "Khai Tâm",
   "@signInAppName": {
@@ -77,7 +81,7 @@
   "@overviewTitle": {
     "description": "Title of the Overview screen"
   },
-  "overviewEmptyState": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước.",
+  "overviewEmptyState": "Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước.",
   "@overviewEmptyState": {
     "description": "Shown on Overview when the user has no envelopes yet"
   },
@@ -106,7 +110,7 @@
       }
     }
   },
-  "planMissingReceiverWarning": "Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Khoản.",
+  "planMissingReceiverWarning": "Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Kiểm soát.",
   "@planMissingReceiverWarning": {
     "description": "Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)"
   },
@@ -139,7 +143,7 @@
   "@spendingAddAction": {
     "description": "Action to open the expense entry form"
   },
-  "spendingNoEnvelopesWarning": "Chưa có khoản nào. Hãy tạo khoản trong tab Khoản trước khi ghi chi tiêu.",
+  "spendingNoEnvelopesWarning": "Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.",
   "@spendingNoEnvelopesWarning": {
     "description": "Shown instead of the add-expense action when the user has zero envelopes (FR-030)"
   },
@@ -499,5 +503,192 @@
         "type": "String"
       }
     }
+  },
+  "expenseControlScreenTitle": "Kiểm soát chi tiêu",
+  "@expenseControlScreenTitle": {
+    "description": "Header title of the Expense Control screen"
+  },
+  "expenseControlBannerHint": "Bấm tên các khoản để đóng/mở.",
+  "@expenseControlBannerHint": {
+    "description": "Guidance banner shown at the top of the Expense Control list"
+  },
+  "expenseControlEmptyStateMessage": "Chưa có khoản nào. Hãy thêm khoản đầu tiên để bắt đầu kiểm soát chi tiêu.",
+  "@expenseControlEmptyStateMessage": {
+    "description": "FR-023: shown when no items/groups exist yet"
+  },
+  "expenseControlAddItemAction": "Thêm khoản mới",
+  "@expenseControlAddItemAction": {
+    "description": "Button to create a new top-level expense control item (FR-001)"
+  },
+  "expenseControlAddChildAction": "Thêm khoản trong {groupName}",
+  "@expenseControlAddChildAction": {
+    "description": "Button to add a child item under a group (FR-002)",
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlFixedNote": "Khoản cố định không giới hạn ở đây, nhưng nếu thu nhập thực tế không đủ, khoản này có thể không được phân bổ đầy đủ khi thu nhập thực sự được phân bổ.",
+  "@expenseControlFixedNote": {
+    "description": "FR-010: informational (non-blocking) note shown when configuring a fixed-amount item"
+  },
+  "expenseControlNameLabel": "Tên khoản",
+  "@expenseControlNameLabel": {
+    "description": "Label for the item/group name input field"
+  },
+  "expenseControlDescriptionLabel": "Ghi chú (không bắt buộc)",
+  "@expenseControlDescriptionLabel": {
+    "description": "Label for the optional description field (FR-022)"
+  },
+  "expenseControlValueLabel": "Giá trị",
+  "@expenseControlValueLabel": {
+    "description": "Label for the formula value input field"
+  },
+  "expenseControlModePercentage": "Phần trăm",
+  "@expenseControlModePercentage": {
+    "description": "Allocation mode toggle option: percentage of income"
+  },
+  "expenseControlModeFixed": "Số tiền cố định",
+  "@expenseControlModeFixed": {
+    "description": "Allocation mode toggle option: fixed amount"
+  },
+  "expenseControlIconPickerLabel": "Chọn biểu tượng",
+  "@expenseControlIconPickerLabel": {
+    "description": "Label above the icon picker grid"
+  },
+  "expenseControlIconSemanticLabel": "Biểu tượng {name}",
+  "@expenseControlIconSemanticLabel": {
+    "description": "Semantics label for one selectable icon in the icon picker",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlDialogSaveAction": "Lưu",
+  "@expenseControlDialogSaveAction": {
+    "description": "Save/submit button inside the create-item and edit-item dialogs"
+  },
+  "expenseControlNameRequiredError": "Vui lòng nhập tên khoản.",
+  "@expenseControlNameRequiredError": {
+    "description": "FR-017: shown when the name field is left blank"
+  },
+  "expenseControlValueRequiredError": "Vui lòng nhập giá trị lớn hơn 0.",
+  "@expenseControlValueRequiredError": {
+    "description": "FR-017: shown when the formula value is zero, negative, or blank"
+  },
+  "expenseControlOverBudgetError": "Tổng phần trăm là {total}%, vượt quá giới hạn cho phép. Vui lòng điều chỉnh.",
+  "@expenseControlOverBudgetError": {
+    "description": "FR-007/FR-008/FR-012: shown when a candidate save would violate the percentage budget",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "allocationSummaryAllocatedLine": "Đã phân bổ {percent}% + {fixedCount} khoản cố định",
+  "@allocationSummaryAllocatedLine": {
+    "description": "FR-011: first line of the running allocation summary banner",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "fixedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "allocationSummaryFreeLine": "Còn {percent}% tự do",
+  "@allocationSummaryFreeLine": {
+    "description": "FR-011: second line of the running allocation summary banner",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlReorderSemantic": "Sắp xếp nhóm {name}",
+  "@expenseControlReorderSemantic": {
+    "description": "Semantics label for a group card's drag handle (FR-014)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlEditSemantic": "Sửa {name}",
+  "@expenseControlEditSemantic": {
+    "description": "Semantics label for an item/group row's edit (pencil) button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlDeleteSemantic": "Xoá {name}",
+  "@expenseControlDeleteSemantic": {
+    "description": "Semantics label for an item/group row's delete (trash) button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlExpandSemantic": "Mở rộng {name}",
+  "@expenseControlExpandSemantic": {
+    "description": "Semantics label for a group's chevron when collapsed (tap to expand)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlCollapseSemantic": "Thu gọn {name}",
+  "@expenseControlCollapseSemantic": {
+    "description": "Semantics label for a group's chevron when expanded (tap to collapse)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlEditItemTitle": "Sửa khoản",
+  "@expenseControlEditItemTitle": {
+    "description": "Title of the edit dialog (name/icon/description only — research.md §9)"
+  },
+  "expenseControlDeleteGroupTitle": "Xoá nhóm \"{name}\"?",
+  "@expenseControlDeleteGroupTitle": {
+    "description": "Title of the group-delete confirmation dialog (FR-016)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseControlDeleteGroupWarning": "Các khoản con trong nhóm này cũng sẽ bị xoá.",
+  "@expenseControlDeleteGroupWarning": {
+    "description": "Cascading-removal warning body text in the group-delete confirmation dialog (FR-016)"
+  },
+  "expenseControlDeleteGroupConfirmAction": "Xoá",
+  "@expenseControlDeleteGroupConfirmAction": {
+    "description": "Confirm button in the group-delete confirmation dialog"
+  },
+  "expenseControlSaveFormulaAction": "Lưu công thức",
+  "@expenseControlSaveFormulaAction": {
+    "description": "Primary button that commits pending inline formula edits (research.md §9, FR-012)"
+  },
+  "expenseControlSaveFormulaBlockedMessage": "Không thể lưu: tổng phần trăm là {total}%, vượt quá giới hạn cho phép.",
+  "@expenseControlSaveFormulaBlockedMessage": {
+    "description": "FR-012: shown when \"Lưu công thức\" is blocked because the pending plan violates the percentage budget",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "historyPlaceholderMessage": "Tính năng đang được phát triển.",
+  "@historyPlaceholderMessage": {
+    "description": "Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)"
   }
 }
