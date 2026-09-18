@@ -45,11 +45,11 @@ void main() {
     await repository.create(_leaf('b', value: 20));
 
     await repository.saveFormulas({
-      'a': const ExpenseFormulaEdit(
+      'a': const PendingItemEdit(
         method: ExpenseAllocationMethod.percentage,
         value: 40,
       ),
-      'b': const ExpenseFormulaEdit(
+      'b': const PendingItemEdit(
         method: ExpenseAllocationMethod.fixed,
         value: 200000,
       ),

@@ -18,27 +18,19 @@ class ExpenseGroupCard extends StatefulWidget {
     super.key,
     required this.node,
     required this.index,
-    required this.onValueChanged,
     required this.onEditItem,
     required this.onDeleteLeaf,
     required this.onDeleteGroup,
     required this.onAddChild,
-    this.pendingEditIds = const {},
     this.groupSubtotal,
   });
 
   final ExpenseControlNode node;
   final int index;
-  final void Function(String itemId, ExpenseFormulaEdit edit) onValueChanged;
   final void Function(ExpenseControlItem item) onEditItem;
   final void Function(ExpenseControlItem item) onDeleteLeaf;
   final void Function(ExpenseControlItem group) onDeleteGroup;
   final void Function(ExpenseControlItem group) onAddChild;
-
-  /// Ids of items with a currently-staged formula edit (research.md §9) —
-  /// threaded down to [ExpenseItemRow] so its text field can tell "still
-  /// pending" apart from "just committed/discarded" and resync accordingly.
-  final Set<String> pendingEditIds;
 
   /// A group carries no formula of its own (FR-003/FR-004); its effective
   /// value is the live sum of its children, computed by the caller and
@@ -190,10 +182,8 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                     padding: const EdgeInsets.only(top: 8, bottom: 8),
                     child: ExpenseItemRow(
                       item: child,
-                      onValueChanged: widget.onValueChanged,
                       onEdit: () => widget.onEditItem(child),
                       onDelete: () => widget.onDeleteLeaf(child),
-                      hasPendingEdit: widget.pendingEditIds.contains(child.id),
                     ),
                   ),
                 ),
@@ -206,12 +196,7 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
               ),
             ),
           ] else if (!isGroup) ...[
-            ExpenseItemRow(
-              item: item,
-              showHeader: false,
-              onValueChanged: widget.onValueChanged,
-              hasPendingEdit: widget.pendingEditIds.contains(item.id),
-            ),
+            ExpenseItemRow(item: item, showHeader: false),
             // FR-002: a leaf becomes a group the moment it gets its first
             // child — this affordance must be available on every leaf, not
             // only after it's already a group (that would make the

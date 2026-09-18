@@ -59,7 +59,7 @@ void main() {
       final totals = service.computeTotals(
         items,
         pendingEdits: {
-          '1': const ExpenseFormulaEdit(
+          '1': const PendingItemEdit(
             method: ExpenseAllocationMethod.percentage,
             value: 50,
           ),
@@ -106,7 +106,7 @@ void main() {
       final result = service.validateBudget(
         items,
         pendingEdits: {
-          '1': const ExpenseFormulaEdit(
+          '1': const PendingItemEdit(
             method: ExpenseAllocationMethod.percentage,
             value: 100,
           ),

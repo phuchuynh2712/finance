@@ -213,24 +213,41 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
   }
 
   @override
-  Future<void> saveFormulas(Map<String, ExpenseFormulaEdit> changes) async {
+  Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {
     await _db.transaction(() async {
       for (final entry in changes.entries) {
         final id = entry.key;
         final edit = entry.value;
+        // Only fields the edit actually set are written — a null field on
+        // PendingItemEdit means "unchanged," so it's left `Value.absent()`
+        // (Companion's default) rather than overwritten with null.
         await (_db.update(
           _db.expenseControlItems,
         )..where((row) => row.id.equals(id))).write(
           ExpenseControlItemsCompanion(
-            allocationMethod: Value(_toTableMethod(edit.method)),
-            allocationValue: Value(edit.value),
+            name: edit.name == null ? const Value.absent() : Value(edit.name!),
+            iconKey: edit.iconKey == null
+                ? const Value.absent()
+                : Value(edit.iconKey!),
+            description: edit.description == null
+                ? const Value.absent()
+                : Value(edit.description),
+            allocationMethod: edit.method == null
+                ? const Value.absent()
+                : Value(_toTableMethod(edit.method)),
+            allocationValue: edit.value == null
+                ? const Value.absent()
+                : Value(edit.value),
             updatedAt: Value(DateTime.now()),
           ),
         );
         await _appendOutbox(id, SyncOperation.update, {
           'id': id,
-          'allocation_method': edit.method.name,
-          'allocation_value': edit.value,
+          if (edit.name != null) 'name': edit.name,
+          if (edit.iconKey != null) 'icon_key': edit.iconKey,
+          if (edit.description != null) 'description': edit.description,
+          if (edit.method != null) 'allocation_method': edit.method!.name,
+          if (edit.value != null) 'allocation_value': edit.value,
         });
       }
     });

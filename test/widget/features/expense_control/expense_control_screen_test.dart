@@ -19,7 +19,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   final List<ExpenseControlItem> _items;
   final _controller = StreamController<List<ExpenseControlItem>>.broadcast();
-  final List<Map<String, ExpenseFormulaEdit>> savedFormulaBatches = [];
+  final List<Map<String, PendingItemEdit>> savedFormulaBatches = [];
   final List<List<String>> reorderCalls = [];
 
   void _emit() => _controller.add(List.of(_items));
@@ -65,12 +65,15 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   }
 
   @override
-  Future<void> saveFormulas(Map<String, ExpenseFormulaEdit> changes) async {
+  Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {
     savedFormulaBatches.add(changes);
     for (final entry in changes.entries) {
       final index = _items.indexWhere((item) => item.id == entry.key);
       if (index != -1) {
         _items[index] = _items[index].copyWith(
+          name: entry.value.name,
+          iconKey: entry.value.iconKey,
+          description: entry.value.description,
           allocationMethod: entry.value.method,
           allocationValue: entry.value.value,
         );
@@ -111,6 +114,34 @@ Widget _harness(_FakeExpenseControlRepository repository) {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: const ExpenseControlScreen(),
     ),
+  );
+}
+
+/// Same harness, but backed by a [ProviderContainer] the test keeps a handle
+/// to — needed to seed/assert `pendingItemEditsProvider` directly rather
+/// than only through UI interaction (T006/T014/T015's staged-edit tests).
+Widget _harnessWithContainer(
+  _FakeExpenseControlRepository repository,
+  ProviderContainer container,
+) {
+  return UncontrolledProviderScope(
+    container: container,
+    child: MaterialApp(
+      theme: AppTheme.light,
+      locale: const Locale('vi'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: const ExpenseControlScreen(),
+    ),
+  );
+}
+
+ProviderContainer _containerFor(_FakeExpenseControlRepository repository) {
+  return ProviderContainer(
+    overrides: [
+      expenseControlRepositoryProvider.overrideWithValue(repository),
+      currentUserIdProvider.overrideWithValue('u1'),
+    ],
   );
 }
 
@@ -227,7 +258,7 @@ void main() {
   );
 
   testWidgets(
-    'editing name/icon/description via the pencil dialog persists immediately (US3 Scenario 1)',
+    'editing a leaf via the pencil dialog stages the change — it is not persisted until "Lưu công thức" (research.md Decision 3)',
     (tester) async {
       final repository = _FakeExpenseControlRepository([_leaf('a')]);
       await tester.pumpWidget(_harness(repository));
@@ -239,9 +270,24 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
       await tester.pumpAndSettle();
 
+      // Nothing written to the repository yet — the rename is only staged.
+      expect(repository._items.single.name, 'a');
+      expect(repository.savedFormulaBatches, isEmpty);
+      // The tree overlays the staged edit, so it's visible immediately.
+      expect(find.text('Renamed'), findsOneWidget);
+
+      await tester.dragUntilVisible(
+        find.text('Lưu công thức'),
+        find.byType(ListView),
+        const Offset(0, -200),
+      );
+      await tester.tap(find.text('Lưu công thức'));
+      await tester.pumpAndSettle();
+
       expect(repository._items.single.name, 'Renamed');
       // The edit dialog never touches the formula.
       expect(repository._items.single.allocationValue, 10);
+      expect(repository.savedFormulaBatches, hasLength(1));
     },
   );
 
@@ -280,25 +326,62 @@ void main() {
   );
 
   testWidgets(
-    'inline-editing a formula updates the banner live, then "Lưu công thức" persists it (research.md §9)',
+    'with zero staged edits, "Lưu công thức" is not shown (FR-007, US2 Scenario 3)',
     (tester) async {
       final repository = _FakeExpenseControlRepository([_leaf('a', value: 20)]);
       await tester.pumpWidget(_harness(repository));
       await tester.pumpAndSettle();
 
-      final valueField = find.byType(TextField).first;
-      await tester.enterText(valueField, '50');
+      expect(find.text('Lưu công thức'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'a staged formula change is reflected live, then "Lưu công thức" persists it (T014, research.md §9)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a', value: 20)]);
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harnessWithContainer(repository, container));
+      await tester.pumpAndSettle();
+
+      container.read(pendingItemEditsProvider.notifier).state = {
+        'a': const PendingItemEdit(value: 50),
+      };
       await tester.pump();
 
-      // Live pending total reflected in the banner before saving.
+      // Live overlay reflected before saving — nothing persisted yet.
       expect(find.textContaining('50%'), findsWidgets);
-      expect(repository._items.single.allocationValue, 20); // not yet persisted
+      expect(repository._items.single.allocationValue, 20);
 
       await tester.tap(find.text('Lưu công thức'));
       await tester.pumpAndSettle();
 
       expect(repository._items.single.allocationValue, 50);
       expect(repository.savedFormulaBatches, hasLength(1));
+      expect(container.read(pendingItemEditsProvider), isEmpty);
+    },
+  );
+
+  testWidgets(
+    'a staged name change commits together with the staged formula (FR-004 "together as a single pending edit", T014)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a', value: 20)]);
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harnessWithContainer(repository, container));
+      await tester.pumpAndSettle();
+
+      container.read(pendingItemEditsProvider.notifier).state = {
+        'a': const PendingItemEdit(name: 'Renamed', value: 50),
+      };
+      await tester.pump();
+
+      await tester.tap(find.text('Lưu công thức'));
+      await tester.pumpAndSettle();
+
+      expect(repository._items.single.name, 'Renamed');
+      expect(repository._items.single.allocationValue, 50);
     },
   );
 
@@ -309,11 +392,14 @@ void main() {
         _leaf('a', value: 20),
         _leaf('b', value: 30),
       ]);
-      await tester.pumpWidget(_harness(repository));
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harnessWithContainer(repository, container));
       await tester.pumpAndSettle();
 
-      final valueFields = find.byType(TextField);
-      await tester.enterText(valueFields.first, '90');
+      container.read(pendingItemEditsProvider.notifier).state = {
+        'a': const PendingItemEdit(value: 90),
+      };
       await tester.pump();
       await tester.dragUntilVisible(
         find.text('Lưu công thức'),
@@ -332,4 +418,120 @@ void main() {
       expect(repository.savedFormulaBatches, isEmpty);
     },
   );
+
+  group('T006: dialog formula-edit behavior', () {
+    testWidgets(
+      "opening a leaf's edit dialog pre-fills its mode/value as editable fields (FR-003 leaf branch)",
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          _leaf('a', method: ExpenseAllocationMethod.percentage, value: 42),
+        ]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.pumpAndSettle();
+
+        expect(find.widgetWithText(TextField, 'Giá trị'), findsOneWidget);
+        expect(
+          tester
+              .widget<TextField>(find.widgetWithText(TextField, 'Giá trị'))
+              .controller
+              ?.text,
+          '42',
+        );
+      },
+    );
+
+    testWidgets(
+      "opening a group's edit dialog shows only name/icon/description, no formula fields (FR-003 group branch, US1 Scenario 6)",
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          ExpenseControlItem(
+            id: 'family',
+            userId: 'u1',
+            parentId: null,
+            name: 'family',
+            iconKey: 'home',
+            description: null,
+            sortOrder: 0,
+            allocationMethod: null,
+            allocationValue: null,
+          ),
+          ExpenseControlItem(
+            id: 'child',
+            userId: 'u1',
+            parentId: 'family',
+            name: 'child',
+            iconKey: 'home',
+            description: null,
+            sortOrder: 0,
+            allocationMethod: ExpenseAllocationMethod.percentage,
+            allocationValue: 5,
+          ),
+        ]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.pumpAndSettle();
+
+        expect(find.widgetWithText(TextField, 'Giá trị'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      "reopening a leaf's dialog before committing shows the previously staged value (FR-008, Scenario 4)",
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          _leaf('a', method: ExpenseAllocationMethod.percentage, value: 20),
+        ]);
+        final container = _containerFor(repository);
+        addTearDown(container.dispose);
+        await tester.pumpWidget(_harnessWithContainer(repository, container));
+        await tester.pumpAndSettle();
+
+        container.read(pendingItemEditsProvider.notifier).state = {
+          'a': const PendingItemEdit(value: 77),
+        };
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.pumpAndSettle();
+
+        expect(
+          tester
+              .widget<TextField>(find.widgetWithText(TextField, 'Giá trị'))
+              .controller
+              ?.text,
+          '77',
+        );
+      },
+    );
+
+    testWidgets(
+      'an over-budget value blocks "Lưu" in the dialog with an inline error and stages nothing (FR-006, Scenario 5)',
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          _leaf('a', method: ExpenseAllocationMethod.percentage, value: 20),
+          _leaf('b', method: ExpenseAllocationMethod.percentage, value: 70),
+        ]);
+        final container = _containerFor(repository);
+        addTearDown(container.dispose);
+        await tester.pumpWidget(_harnessWithContainer(repository, container));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithIcon(IconButton, LucideIcons.pencil).first);
+        await tester.pumpAndSettle();
+        await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '50');
+        await tester.pump();
+
+        final saveButton = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Lưu'),
+        );
+        expect(saveButton.onPressed, isNull);
+        expect(container.read(pendingItemEditsProvider), isEmpty);
+      },
+    );
+  });
 }

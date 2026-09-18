@@ -10,6 +10,7 @@ import '../domain/expense_control_plan_service.dart';
 import 'expense_control_form_controller.dart';
 import 'expense_control_providers.dart';
 import 'formatting.dart';
+import 'widgets/allocation_mode_toggle.dart';
 import 'widgets/allocation_summary_banner.dart';
 import 'widgets/dashed_border.dart';
 import 'widgets/expense_group_card.dart';
@@ -100,7 +101,7 @@ class _ScreenContent extends ConsumerWidget {
     final theme = Theme.of(context);
     final semantic = theme.extension<AppSemanticColors>()!;
     final totalsAsync = ref.watch(expenseControlTotalsProvider);
-    final pendingEdits = ref.watch(pendingFormulaEditsProvider);
+    final pendingEdits = ref.watch(pendingItemEditsProvider);
     final planService = ref.watch(expenseControlPlanServiceProvider);
     final items = ref.watch(expenseControlItemsStreamProvider).valueOrNull ?? [];
 
@@ -146,18 +147,12 @@ class _ScreenContent extends ConsumerWidget {
               key: ValueKey(node.item.id),
               node: node,
               index: index,
-              onValueChanged: (itemId, edit) {
-                ref.read(pendingFormulaEditsProvider.notifier).update(
-                  (state) => {...state, itemId: edit},
-                );
-              },
               onEditItem: (item) => _openEditDialog(context, ref, item),
               onDeleteLeaf: (item) =>
                   ref.read(expenseControlRepositoryProvider).delete(item.id),
               onDeleteGroup: (group) => _confirmDeleteGroup(context, ref, group),
               onAddChild: (parent) =>
                   _openCreateDialog(context, ref, parentId: parent.id),
-              pendingEditIds: pendingEdits.keys.toSet(),
               // A group carries no formula of its own (FR-003/FR-004) — its
               // *effective* value is the sum of its children's formulas,
               // computed live (including any pending inline edits) rather
@@ -245,7 +240,7 @@ class _ScreenContent extends ConsumerWidget {
                       await ref
                           .read(expenseControlRepositoryProvider)
                           .saveFormulas(pendingEdits);
-                      ref.read(pendingFormulaEditsProvider.notifier).state = {};
+                      ref.read(pendingItemEditsProvider.notifier).state = {};
                     }
                   : null,
               icon: const Icon(LucideIcons.check, size: 20),
@@ -288,7 +283,9 @@ void _openEditDialog(BuildContext context, WidgetRef ref, ExpenseControlItem ite
       params: (
         existingItem: item,
         parentId: null,
-        isFormulaEditable: false,
+        // FR-003: only a leaf (non-null allocationMethod) gets formula
+        // fields in its edit dialog — a group has no formula of its own.
+        isFormulaEditable: item.allocationMethod != null,
       ),
     ),
   );
@@ -425,21 +422,9 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  DropdownButton<ExpenseAllocationMethod>(
-                    value: state.method,
-                    items: [
-                      DropdownMenuItem(
-                        value: ExpenseAllocationMethod.percentage,
-                        child: Text(l10n.expenseControlModePercentage),
-                      ),
-                      DropdownMenuItem(
-                        value: ExpenseAllocationMethod.fixed,
-                        child: Text(l10n.expenseControlModeFixed),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) controller.setMethod(value);
-                    },
+                  AllocationModeToggle(
+                    method: state.method,
+                    onChanged: controller.setMethod,
                   ),
                 ],
               ),

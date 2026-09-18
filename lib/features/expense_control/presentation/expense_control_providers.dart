@@ -26,20 +26,21 @@ final expenseControlItemsStreamProvider =
       return ref.watch(expenseControlRepositoryProvider).watchAll();
     });
 
-/// Screen-scoped pending formula edits, staged until "Lưu công thức" commits
-/// them (research.md §9). `autoDispose` for the full-app-kill case; the
-/// *primary* discard mechanism is the explicit `navigationShell.currentIndex`
-/// listener in `_AppShell` (app_router.dart).
-final pendingFormulaEditsProvider =
-    StateProvider.autoDispose<Map<String, ExpenseFormulaEdit>>((ref) => {});
+/// Screen-scoped pending whole-item edits, staged until "Lưu công thức"
+/// commits them (data-model.md — widened from formula-only to cover
+/// name/icon/description too, per this feature). `autoDispose` for the
+/// full-app-kill case; the *primary* discard mechanism is the explicit
+/// `navigationShell.currentIndex` listener in `_AppShell` (app_router.dart).
+final pendingItemEditsProvider =
+    StateProvider.autoDispose<Map<String, PendingItemEdit>>((ref) => {});
 
 /// Tree (top-level items + children) reflecting persisted data with any
-/// pending formula edits overlaid live (FR-011).
+/// pending item edits overlaid live (FR-005/FR-011).
 final expenseControlTreeProvider = Provider<AsyncValue<List<ExpenseControlNode>>>((
   ref,
 ) {
   final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
-  final pending = ref.watch(pendingFormulaEditsProvider);
+  final pending = ref.watch(pendingItemEditsProvider);
   final service = ref.watch(expenseControlPlanServiceProvider);
   return itemsAsync.whenData(
     (items) => service.buildTree(items, pendingEdits: pending),
@@ -47,12 +48,12 @@ final expenseControlTreeProvider = Provider<AsyncValue<List<ExpenseControlNode>>
 });
 
 /// Running allocation summary reflecting persisted data with any pending
-/// formula edits overlaid live (FR-011).
+/// item edits overlaid live (FR-011).
 final expenseControlTotalsProvider = Provider<AsyncValue<ExpenseControlTotals>>((
   ref,
 ) {
   final itemsAsync = ref.watch(expenseControlItemsStreamProvider);
-  final pending = ref.watch(pendingFormulaEditsProvider);
+  final pending = ref.watch(pendingItemEditsProvider);
   final service = ref.watch(expenseControlPlanServiceProvider);
   return itemsAsync.whenData(
     (items) => service.computeTotals(items, pendingEdits: pending),

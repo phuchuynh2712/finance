@@ -41,7 +41,6 @@ Widget _harness(ExpenseControlNode node, {
             key: const ValueKey('card'),
             node: node,
             index: 0,
-            onValueChanged: (_, _) {},
             onEditItem: (_) {},
             onDeleteLeaf: onDeleteLeaf ?? (_) {},
             onDeleteGroup: onDeleteGroup ?? (_) {},
@@ -98,10 +97,10 @@ void main() {
     await tester.pumpWidget(_harness(node));
 
     expect(find.text('Rent'), findsOneWidget);
-    // The leaf's own formula field (value input + %/₫ toggle) is present.
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('%'), findsOneWidget);
-    expect(find.text('₫'), findsOneWidget);
+    // The leaf's formula value is a non-interactive static label (FR-001) —
+    // mode conveyed via the label's own %/₫ suffix, not a separate toggle.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.textContaining('20%'), findsOneWidget);
   });
 
   testWidgets(

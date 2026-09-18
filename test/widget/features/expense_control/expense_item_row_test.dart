@@ -18,60 +18,69 @@ ExpenseControlItem _leaf(double value) => ExpenseControlItem(
   allocationValue: value,
 );
 
-Widget _harness(ExpenseControlItem item, bool hasPendingEdit) {
+Widget _harness(ExpenseControlItem item) {
   return MaterialApp(
     theme: AppTheme.light,
     locale: const Locale('vi'),
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
-    home: Scaffold(
-      body: ExpenseItemRow(
-        item: item,
-        showHeader: false,
-        hasPendingEdit: hasPendingEdit,
-        onValueChanged: (_, _) {},
-      ),
-    ),
+    home: Scaffold(body: ExpenseItemRow(item: item, showHeader: false)),
   );
 }
 
 void main() {
   testWidgets(
-    'when a pending edit is discarded (hasPendingEdit flips false), the field resyncs to the persisted value rather than keeping the discarded typed text',
+    'the allocation value renders as a non-interactive static label, not a TextField (FR-001)',
     (tester) async {
-      // Simulates the discard flow: the widget starts mid-edit (persisted
-      // value 20, user typed 99, hasPendingEdit=true), then research.md
-      // §9's discard trigger clears the pending-edits map, the tree
-      // provider re-emits with the ORIGINAL persisted value, and
-      // hasPendingEdit flips back to false.
-      await tester.pumpWidget(_harness(_leaf(20), true));
-      await tester.enterText(find.byType(TextField), '99');
-      await tester.pump();
-      expect(find.text('99'), findsOneWidget);
+      await tester.pumpWidget(_harness(_leaf(20)));
 
-      // Discard: item reverts to its original persisted value, pending
-      // flag flips off.
-      await tester.pumpWidget(_harness(_leaf(20), false));
-      await tester.pump();
-
-      expect(find.text('99'), findsNothing);
-      expect(find.text('20'), findsOneWidget);
+      // FR-001: no input widget at all — the old TextField-based field is
+      // gone entirely, replaced by a plain label.
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('20%'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'while a pending edit is still active, the field does not fight the user\'s typing on subsequent rebuilds',
+    'tapping the value label produces no reaction — no keyboard, no cursor, no dialog (FR-001, SC-001)',
     (tester) async {
-      await tester.pumpWidget(_harness(_leaf(20), true));
-      await tester.enterText(find.byType(TextField), '35');
-      await tester.pump();
+      await tester.pumpWidget(_harness(_leaf(20)));
 
-      // A rebuild with the SAME hasPendingEdit=true (as would happen from
-      // an unrelated provider change) must not clobber the user's typing.
-      await tester.pumpWidget(_harness(_leaf(35), true));
-      await tester.pump();
+      await tester.tap(find.text('20%'));
+      await tester.pumpAndSettle();
 
-      expect(find.text('35'), findsOneWidget);
+      // Still no TextField (nothing became focusable/editable), no keyboard
+      // requested, and no dialog opened as a side effect of the tap.
+      expect(find.byType(TextField), findsNothing);
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(find.byType(Dialog), findsNothing);
+      // The label itself is unchanged — tapping did not mutate anything.
+      expect(find.text('20%'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a fixed-amount value renders formatted, not the raw percentage-style number',
+    (tester) async {
+      final fixedLeaf = ExpenseControlItem(
+        id: 'b',
+        userId: 'u1',
+        parentId: null,
+        name: 'Học phí các con',
+        iconKey: 'home',
+        description: null,
+        sortOrder: 0,
+        allocationMethod: ExpenseAllocationMethod.fixed,
+        allocationValue: 4000000,
+      );
+      await tester.pumpWidget(_harness(fixedLeaf));
+
+      expect(find.byType(TextField), findsNothing);
+      // Exact currency punctuation is CurrencyFormatter's concern, not this
+      // widget's — assert the raw amount's digits are present and it is not
+      // rendered with a trailing "%".
+      expect(find.textContaining('4.000.000'), findsOneWidget);
+      expect(find.text('4000000%'), findsNothing);
     },
   );
 }

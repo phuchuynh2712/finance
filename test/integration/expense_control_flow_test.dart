@@ -82,7 +82,7 @@ void main() {
 
       // 3. Inline-edit formula -> "Lưu công thức" (per quickstart.md item 7).
       final pending = {
-        groceriesId: const ExpenseFormulaEdit(
+        groceriesId: const PendingItemEdit(
           method: ExpenseAllocationMethod.percentage,
           value: 25,
         ),

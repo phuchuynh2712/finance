@@ -184,7 +184,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
     if (_previousIndex == _expenseControlBranchIndex &&
         currentIndex != _expenseControlBranchIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.invalidate(pendingFormulaEditsProvider);
+        if (mounted) ref.invalidate(pendingItemEditsProvider);
       });
     }
     _previousIndex = currentIndex;
