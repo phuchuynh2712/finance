@@ -690,5 +690,21 @@
   "historyPlaceholderMessage": "Tính năng đang được phát triển.",
   "@historyPlaceholderMessage": {
     "description": "Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)"
+  },
+  "expenseControlDiscardPromptTitle": "Lưu thay đổi?",
+  "@expenseControlDiscardPromptTitle": {
+    "description": "Title of the confirmation prompt shown when switching tabs with unsaved pending edits (FR-009, US3)"
+  },
+  "expenseControlDiscardPromptMessage": "Bạn có thay đổi chưa lưu trong Kiểm soát chi tiêu. Bạn có muốn lưu trước khi rời đi không?",
+  "@expenseControlDiscardPromptMessage": {
+    "description": "Body text of the tab-switch confirmation prompt (FR-009, US3)"
+  },
+  "expenseControlDiscardPromptSaveAction": "Lưu",
+  "@expenseControlDiscardPromptSaveAction": {
+    "description": "Button that saves pending edits then navigates away (FR-010, US3 Scenario 2)"
+  },
+  "expenseControlDiscardPromptDiscardAction": "Không lưu",
+  "@expenseControlDiscardPromptDiscardAction": {
+    "description": "Button that discards pending edits then navigates away (FR-011, US3 Scenario 3)"
   }
 }

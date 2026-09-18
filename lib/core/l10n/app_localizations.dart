@@ -949,6 +949,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tính năng đang được phát triển.'**
   String get historyPlaceholderMessage;
+
+  /// Title of the confirmation prompt shown when switching tabs with unsaved pending edits (FR-009, US3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu thay đổi?'**
+  String get expenseControlDiscardPromptTitle;
+
+  /// Body text of the tab-switch confirmation prompt (FR-009, US3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thay đổi chưa lưu trong Kiểm soát chi tiêu. Bạn có muốn lưu trước khi rời đi không?'**
+  String get expenseControlDiscardPromptMessage;
+
+  /// Button that saves pending edits then navigates away (FR-010, US3 Scenario 2)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get expenseControlDiscardPromptSaveAction;
+
+  /// Button that discards pending edits then navigates away (FR-011, US3 Scenario 3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Không lưu'**
+  String get expenseControlDiscardPromptDiscardAction;
 }
 
 class _AppLocalizationsDelegate

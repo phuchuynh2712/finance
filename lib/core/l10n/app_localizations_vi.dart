@@ -497,4 +497,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get historyPlaceholderMessage => 'Tính năng đang được phát triển.';
+
+  @override
+  String get expenseControlDiscardPromptTitle => 'Lưu thay đổi?';
+
+  @override
+  String get expenseControlDiscardPromptMessage =>
+      'Bạn có thay đổi chưa lưu trong Kiểm soát chi tiêu. Bạn có muốn lưu trước khi rời đi không?';
+
+  @override
+  String get expenseControlDiscardPromptSaveAction => 'Lưu';
+
+  @override
+  String get expenseControlDiscardPromptDiscardAction => 'Không lưu';
 }
