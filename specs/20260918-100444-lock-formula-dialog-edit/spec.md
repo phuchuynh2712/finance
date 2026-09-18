@@ -19,6 +19,7 @@
 - Q: A group header's allocation-summary line currently gets truncated with "..." when too long — should it be removed entirely, kept but wrapped to multiple lines, or something else? → A: Show it only while the group is collapsed (hide it entirely while expanded, since the same information is already visible per-child there), and while shown, always display it in full by wrapping to multiple lines rather than truncating.
 - Q: What Vietnamese labels should the three navigation-confirmation prompt buttons (FR-009) use? → A: "Lưu" (Save) / "Không lưu" (Don't Save) / "Hủy" (Cancel).
 - Q: The dialog's mode selector currently uses a full-text `DropdownButton` ("Phần trăm" / "Số tiền cố định"), unlike the list's compact %/₫ pill-toggle — should the dialog switch to the same compact pill-toggle, or keep the dropdown and just widen the value field beside it? → A: Switch the dialog to the same compact %/₫ pill-toggle already used in the list, for one consistent mode-selection control across the whole screen.
+- Q: A hands-on review found the bottom navigation bar has three visual mismatches versus the design (wrong indicator color, one label wrapping to two lines, missing top border) — should these be fixed in this same feature? → A: Yes, fix all three (selected-tab indicator color, label wrapping, and the missing top border) — added as User Story 5.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -90,6 +91,22 @@ A group header today always shows a one-line summary ("Đã phân bổ X% + N kh
 
 ---
 
+### User Story 5 - Correct the bottom navigation bar's visual details to match the design (Priority: P3)
+
+A hands-on review of the app's bottom navigation bar (the five tabs: Tổng quan, Kiểm soát, Thu chi, Lịch sử/Báo cáo, Hồ sơ) against the design found three visual mismatches: (1) the selected tab's indicator pill renders in Flutter's default teal accent color instead of the app's brand primary color used everywhere else in the app; (2) the "Lịch sử/Báo cáo" label wraps to two lines while the other four labels fit on one line, making that tab's label misaligned with the rest; (3) the bar is missing the thin top border line that visually separates it from the screen content above, which the other fixed headers/footers in the app (e.g., the Expense Control screen's header) already have.
+
+**Why this priority**: This is a standalone visual-polish fix, unrelated to the staged-edit mechanism the other user stories build. It's bundled into this feature because it was found and requested during the same review session, not because it depends on or is depended on by the other stories.
+
+**Independent Test**: Open any screen and observe the bottom navigation bar — the selected tab's indicator must be the app's brand primary color, all five labels must render on a single line without wrapping, and a thin top border line must be visible separating the bar from the content above.
+
+**Acceptance Scenarios**:
+
+1. **Given** the bottom navigation bar is showing, **When** a tab is selected, **Then** its indicator pill uses the app's brand primary color (the same color used by primary buttons and links elsewhere in the app), not the default teal accent.
+2. **Given** the bottom navigation bar is showing, **Then** all five tab labels ("Tổng quan", "Kiểm soát", "Thu chi", "Lịch sử/Báo cáo", "Hồ sơ") render on a single line each, with none wrapping to a second line.
+3. **Given** the bottom navigation bar is showing, **Then** a thin top border line (matching the app's standard border color) is visible along its top edge, separating it from the screen content above.
+
+---
+
 ### Edge Cases
 
 - What happens if the user stages a formula edit, opens the dialog again for the *same* item, and changes it a second time before ever pressing "Lưu công thức"? → The second dialog edit replaces the first staged edit for that item; only the latest staged value per item is kept (matches today's existing pending-edit map behavior, keyed by item id).
@@ -117,6 +134,9 @@ A group header today always shows a one-line summary ("Đã phân bổ X% + N kh
 - **FR-013**: The edit dialog's mode selector MUST be the same compact %/₫ pill-toggle control already used in the list (not the dialog's current full-text dropdown), and the dialog's layout for the allocation value field and this pill-toggle MUST use the available horizontal width efficiently (no more than a small fixed gap between them), rather than leaving significant unused blank space, so that longer fixed-amount values remain fully visible while being entered.
 - **FR-014**: A group header's allocation-summary line MUST be shown only while that group is collapsed, and MUST be hidden entirely while that group is expanded.
 - **FR-015**: While shown (per FR-014), the group allocation-summary line MUST display its full text, wrapping across as many lines as needed — it MUST NOT be truncated or ellipsized.
+- **FR-016**: The bottom navigation bar's selected-tab indicator MUST use the app's brand primary color, not the platform default accent color.
+- **FR-017**: Every bottom navigation bar label MUST render on a single line at the screen's default text scale — no label MUST wrap to a second line.
+- **FR-018**: The bottom navigation bar MUST display a thin top border line, in the app's standard border color, separating it from the screen content above it.
 
 ### Key Entities
 
@@ -132,6 +152,7 @@ A group header today always shows a one-line summary ("Đã phân bổ X% + N kh
 - **SC-003**: Users attempting to switch tabs with unsaved staged formula edits are prompted every time (no missed prompts, no accidental silent data loss) across all four other bottom-navigation destinations.
 - **SC-004**: A fixed-amount value of at least 9 digits (e.g., 999,999,999) remains fully visible without being clipped or scrolled out of view while being entered in the edit dialog's value field.
 - **SC-005**: A collapsed group's allocation-summary text, regardless of its length, is 100% visible with zero truncation (no "..." ever appears in it); the same text is 100% hidden while that group is expanded.
+- **SC-006**: All five bottom navigation bar labels render on exactly one line each, 100% of the time, at the app's default text scale; the selected tab's indicator color visually matches the brand primary color used elsewhere in the app (not the platform default accent); and the bar's top border is visible whenever the bar is shown.
 
 ## Assumptions
 
@@ -140,3 +161,4 @@ A group header today always shows a one-line summary ("Đã phân bổ X% + N kh
 - The tab-switch confirmation only applies to the five main bottom-navigation destinations already in the app (Tổng quan, Kiểm soát, Thu chi, Lịch sử/Báo cáo, Hồ sơ); it does not apply to other navigation actions (e.g., opening the "Thêm khoản mới" dialog, or the system back button) unless those are later found to bypass the same in-app tab state.
 - This feature does not change the existing "Thêm khoản mới" (create) dialog's behavior — creating a brand-new item still writes directly on save, as it does not yet have a value to stage against; only editing an *existing* item's formula goes through the new staged-then-committed flow described here. (This matches today's dialog already distinguishing create from edit via `isFormulaEditable`.)
 - No new automated-testing framework or approach is introduced; this feature is verified with the same `flutter test` unit/widget-test conventions already used elsewhere in this codebase.
+- The bottom navigation bar (User Story 5) is a single shared widget used across the entire app, not scoped to the Expense Control screen — fixing it here corrects its appearance on every screen, not just Expense Control.
