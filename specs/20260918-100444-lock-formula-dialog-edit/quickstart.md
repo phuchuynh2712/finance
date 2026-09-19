@@ -40,7 +40,7 @@ How to verify this feature once implemented, mapped to the spec's acceptance sce
 ## Verify: Bottom navigation bar visual details match the design (User Story 5)
 
 1. Open any screen and look at the bottom navigation bar → confirm the selected tab's indicator pill is the app's brand primary color (matching, e.g., the "Lưu công thức" button's color), not the default teal.
-2. Look at all five tab labels → confirm every one ("Tổng quan", "Kiểm soát", "Thu chi", "Lịch sử/Báo cáo", "Hồ sơ") renders on a single line, none wrapping to two.
+2. Look at all five tab labels → confirm every one ("Tổng quan", "Kiểm soát", "Thu chi", "Báo cáo", "Hồ sơ") renders on a single line, none wrapping to two.
 3. Look at the top edge of the bar → confirm a thin border line is visible separating it from the screen content above.
 4. Switch between all five tabs → confirm the indicator color and single-line labels hold on every tab, not just the first.
 
