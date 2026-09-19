@@ -499,4 +499,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyPlaceholderMessage => 'Coming soon.';
+
+  @override
+  String get expenseControlDiscardPromptTitle => 'Save changes?';
+
+  @override
+  String get expenseControlDiscardPromptMessage =>
+      'You have unsaved changes in Expense Control. Do you want to save before leaving?';
+
+  @override
+  String get expenseControlDiscardPromptSaveAction => 'Save';
+
+  @override
+  String get expenseControlDiscardPromptDiscardAction => 'Don\'t save';
 }

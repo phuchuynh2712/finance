@@ -30,6 +30,13 @@ class AppTheme {
       // this app's own secondary-badge backgrounds.
       surfaceContainerHighest: Color(0xFFF3EFE9),
     ),
+    // FR-016: without this, NavigationBar falls back to Material 3's
+    // default (colorScheme.secondary-derived) indicator instead of the
+    // brand primary — set once here rather than per-instance, so any
+    // future second NavigationBar doesn't need to repeat the override.
+    navigationBarTheme: const NavigationBarThemeData(
+      indicatorColor: AppColors.lightPrimary,
+    ),
     extensions: const [AppSemanticColors.light],
   );
 
@@ -45,6 +52,9 @@ class AppTheme {
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkOnSurface,
       surfaceContainerHighest: Color(0xFF332F29),
+    ),
+    navigationBarTheme: const NavigationBarThemeData(
+      indicatorColor: AppColors.darkPrimary,
     ),
     extensions: const [AppSemanticColors.dark],
   );

@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../auth/auth_state_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_semantic_colors.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/account/presentation/forgot_password_screen.dart';
 import '../../features/account/presentation/reset_password_screen.dart';
@@ -13,6 +14,7 @@ import '../../features/account/presentation/sign_up_screen.dart';
 import '../../features/envelopes/presentation/overview_screen.dart';
 import '../../features/expense_control/presentation/expense_control_providers.dart';
 import '../../features/expense_control/presentation/expense_control_screen.dart';
+import '../../features/expense_control/presentation/formatting.dart';
 import '../../features/expenses/presentation/spending_screen.dart';
 import '../../features/history/presentation/history_placeholder_screen.dart';
 
@@ -169,57 +171,182 @@ class _AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<_AppShell> {
-  int? _previousIndex;
+  // Guards against a second tap re-entering `_handleDestinationSelected`
+  // while the FR-009 confirmation prompt from a first tap is still showing
+  // — `onDestinationSelected` is `void Function(int)`, so Flutter itself
+  // doesn't await or debounce it.
+  bool _prompting = false;
+
+  Future<void> _handleDestinationSelected(int index) async {
+    final currentIndex = widget.navigationShell.currentIndex;
+    if (_prompting) return;
+
+    // FR-009: only intercept when actually *leaving* Kiểm soát with
+    // unsaved staged edits — not when re-tapping the current tab, and not
+    // when leaving any other tab.
+    final hasPendingEdits = ref.read(pendingItemEditsProvider).isNotEmpty;
+    if (currentIndex == _expenseControlBranchIndex &&
+        index != currentIndex &&
+        hasPendingEdits) {
+      setState(() => _prompting = true);
+      final choice = await showDialog<_DiscardPromptChoice>(
+        context: context,
+        builder: (_) => const _DiscardPromptDialog(),
+      );
+      if (!mounted) return;
+      setState(() => _prompting = false);
+
+      switch (choice) {
+        case _DiscardPromptChoice.save:
+          // The dialog only pops `.save` after a successful commit — a
+          // blocked save keeps the dialog open with its inline error
+          // instead, so reaching here means it's safe to navigate now
+          // (FR-010, Scenario 2).
+          break;
+        case _DiscardPromptChoice.discard:
+          // FR-011, Scenario 3: clear without persisting, then navigate.
+          ref.read(pendingItemEditsProvider.notifier).state = {};
+          break;
+        case null:
+        case _DiscardPromptChoice.cancel:
+          // FR-009 Edge Case: neither navigates nor discards.
+          return;
+      }
+    }
+
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == currentIndex,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentIndex = widget.navigationShell.currentIndex;
-
-    // Edge Case: navigating away from Kiểm soát without tapping "Lưu công
-    // thức" discards pending inline formula edits. `IndexedStack` keeps the
-    // screen mounted across tab switches, so a plain `autoDispose` provider
-    // would never fire here on its own — this explicit index-change check
-    // is the primary discard mechanism (research.md §9).
-    if (_previousIndex == _expenseControlBranchIndex &&
-        currentIndex != _expenseControlBranchIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.invalidate(pendingFormulaEditsProvider);
-      });
-    }
-    _previousIndex = currentIndex;
+    final semantic = Theme.of(context).extension<AppSemanticColors>()!;
 
     return Scaffold(
       body: widget.navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) => widget.navigationShell.goBranch(
-          index,
-          initialLocation: index == currentIndex,
+      // FR-018: a thin top border separating the bar from content above,
+      // matching the app's other fixed headers (e.g.
+      // expense_control_screen.dart's own header Container).
+      bottomNavigationBar: DecoratedBox(
+        key: const Key('bottomNavTopBorder'),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: semantic.border1)),
         ),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(LucideIcons.layoutDashboard),
-            label: l10n.tabOverview,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.slidersHorizontal),
-            label: l10n.tabExpenseControl,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.receipt),
-            label: l10n.tabSpending,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.history),
-            label: l10n.tabHistory,
-          ),
-          NavigationDestination(
-            icon: const Icon(LucideIcons.user),
-            label: l10n.tabAccount,
-          ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: _handleDestinationSelected,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(LucideIcons.layoutDashboard),
+              label: l10n.tabOverview,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.slidersHorizontal),
+              label: l10n.tabExpenseControl,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.receipt),
+              label: l10n.tabSpending,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.history),
+              label: l10n.tabHistory,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.user),
+              label: l10n.tabAccount,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _DiscardPromptChoice { save, discard, cancel }
+
+/// FR-009–FR-012: shown when switching away from Kiểm soát with unsaved
+/// staged edits. Its "Lưu" choice reuses the exact same commit path as the
+/// screen's own "Lưu công thức" button (T017) — including the same
+/// over-budget validation — so a blocked save here behaves identically to
+/// a blocked save there, just surfaced inline in this dialog instead.
+class _DiscardPromptDialog extends ConsumerStatefulWidget {
+  const _DiscardPromptDialog();
+
+  @override
+  ConsumerState<_DiscardPromptDialog> createState() =>
+      _DiscardPromptDialogState();
+}
+
+class _DiscardPromptDialogState extends ConsumerState<_DiscardPromptDialog> {
+  bool _isSaving = false;
+  double? _blockedTotal;
+
+  Future<void> _handleSave() async {
+    final pendingEdits = ref.read(pendingItemEditsProvider);
+    final items = ref.read(expenseControlItemsStreamProvider).valueOrNull ?? [];
+    final planService = ref.read(expenseControlPlanServiceProvider);
+    final validation = planService.validateBudget(
+      items,
+      pendingEdits: pendingEdits,
+    );
+    if (!validation.isValid) {
+      setState(() => _blockedTotal = validation.violatingTotal ?? 0);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    await ref.read(expenseControlRepositoryProvider).saveFormulas(pendingEdits);
+    ref.read(pendingItemEditsProvider.notifier).state = {};
+    if (!mounted) return;
+    Navigator.of(context).pop(_DiscardPromptChoice.save);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final blockedTotal = _blockedTotal;
+    return AlertDialog(
+      title: Text(l10n.expenseControlDiscardPromptTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.expenseControlDiscardPromptMessage),
+          if (blockedTotal != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l10n.expenseControlSaveFormulaBlockedMessage(
+                  formatPercent(blockedTotal),
+                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving
+              ? null
+              : () => Navigator.of(context).pop(_DiscardPromptChoice.cancel),
+          child: Text(l10n.cancelAction),
+        ),
+        TextButton(
+          onPressed: _isSaving
+              ? null
+              : () => Navigator.of(context).pop(_DiscardPromptChoice.discard),
+          child: Text(l10n.expenseControlDiscardPromptDiscardAction),
+        ),
+        FilledButton(
+          onPressed: _isSaving ? null : _handleSave,
+          child: Text(l10n.expenseControlDiscardPromptSaveAction),
+        ),
+      ],
     );
   }
 }

@@ -18,27 +18,19 @@ class ExpenseGroupCard extends StatefulWidget {
     super.key,
     required this.node,
     required this.index,
-    required this.onValueChanged,
     required this.onEditItem,
     required this.onDeleteLeaf,
     required this.onDeleteGroup,
     required this.onAddChild,
-    this.pendingEditIds = const {},
     this.groupSubtotal,
   });
 
   final ExpenseControlNode node;
   final int index;
-  final void Function(String itemId, ExpenseFormulaEdit edit) onValueChanged;
   final void Function(ExpenseControlItem item) onEditItem;
   final void Function(ExpenseControlItem item) onDeleteLeaf;
   final void Function(ExpenseControlItem group) onDeleteGroup;
   final void Function(ExpenseControlItem group) onAddChild;
-
-  /// Ids of items with a currently-staged formula edit (research.md §9) —
-  /// threaded down to [ExpenseItemRow] so its text field can tell "still
-  /// pending" apart from "just committed/discarded" and resync accordingly.
-  final Set<String> pendingEditIds;
 
   /// A group carries no formula of its own (FR-003/FR-004); its effective
   /// value is the live sum of its children, computed by the caller and
@@ -80,7 +72,9 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: isGroup ? () => setState(() => _expanded = !_expanded) : null,
+            onTap: isGroup
+                ? () => setState(() => _expanded = !_expanded)
+                : null,
             child: Row(
               children: [
                 ReorderableDragStartListener(
@@ -122,17 +116,22 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (widget.groupSubtotal case final subtotal?)
-                        Text(
-                          l10n.allocationSummaryAllocatedLine(
-                            formatPercent(subtotal.percentAllocated),
-                            subtotal.fixedItemCount,
+                      // FR-014: only shown while collapsed — while
+                      // expanded, the children list below already shows
+                      // this information, so the summary would duplicate
+                      // it. FR-015: never truncated when it IS shown, so
+                      // no `overflow` — it wraps naturally instead.
+                      if (!_expanded)
+                        if (widget.groupSubtotal case final subtotal?)
+                          Text(
+                            l10n.allocationSummaryAllocatedLine(
+                              formatPercent(subtotal.percentAllocated),
+                              subtotal.fixedItemCount,
+                            ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: semantic.fg2,
+                            ),
                           ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: semantic.fg2,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
                     ],
                   ),
                 ),
@@ -141,7 +140,11 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                   label: l10n.expenseControlEditSemantic(item.name),
                   child: IconButton(
                     onPressed: () => widget.onEditItem(item),
-                    icon: Icon(LucideIcons.pencil, size: 15, color: semantic.fg3),
+                    icon: Icon(
+                      LucideIcons.pencil,
+                      size: 15,
+                      color: semantic.fg3,
+                    ),
                     constraints: const BoxConstraints(
                       minWidth: 48,
                       minHeight: 48,
@@ -155,7 +158,11 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                     onPressed: () => isGroup
                         ? widget.onDeleteGroup(item)
                         : widget.onDeleteLeaf(item),
-                    icon: Icon(LucideIcons.trash2, size: 16, color: semantic.fg3),
+                    icon: Icon(
+                      LucideIcons.trash2,
+                      size: 16,
+                      color: semantic.fg3,
+                    ),
                     constraints: const BoxConstraints(
                       minWidth: 48,
                       minHeight: 48,
@@ -190,10 +197,8 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                     padding: const EdgeInsets.only(top: 8, bottom: 8),
                     child: ExpenseItemRow(
                       item: child,
-                      onValueChanged: widget.onValueChanged,
                       onEdit: () => widget.onEditItem(child),
                       onDelete: () => widget.onDeleteLeaf(child),
-                      hasPendingEdit: widget.pendingEditIds.contains(child.id),
                     ),
                   ),
                 ),
@@ -206,12 +211,7 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
               ),
             ),
           ] else if (!isGroup) ...[
-            ExpenseItemRow(
-              item: item,
-              showHeader: false,
-              onValueChanged: widget.onValueChanged,
-              hasPendingEdit: widget.pendingEditIds.contains(item.id),
-            ),
+            ExpenseItemRow(item: item, showHeader: false),
             // FR-002: a leaf becomes a group the moment it gets its first
             // child — this affordance must be available on every leaf, not
             // only after it's already a group (that would make the
@@ -256,7 +256,11 @@ class _AddChildButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(LucideIcons.plus, size: 13, color: theme.colorScheme.primary),
+                Icon(
+                  LucideIcons.plus,
+                  size: 13,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   label,

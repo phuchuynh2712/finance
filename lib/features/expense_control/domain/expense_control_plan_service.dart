@@ -47,13 +47,20 @@ class ExpenseControlPlanService {
 
   List<ExpenseControlItem> _applyOverlay(
     List<ExpenseControlItem> items,
-    Map<String, ExpenseFormulaEdit>? pendingEdits,
+    Map<String, PendingItemEdit>? pendingEdits,
   ) {
     if (pendingEdits == null || pendingEdits.isEmpty) return items;
     return items.map((item) {
       final edit = pendingEdits[item.id];
       if (edit == null) return item;
+      // FR-005: every staged field, not just the formula, must be visible
+      // wherever the tree is read — copyWith's `??` already leaves a null
+      // field's committed value untouched, so this naturally covers "some
+      // fields changed, others didn't" per PendingItemEdit's own contract.
       return item.copyWith(
+        name: edit.name,
+        iconKey: edit.iconKey,
+        description: edit.description,
         allocationMethod: edit.method,
         allocationValue: edit.value,
       );
@@ -75,7 +82,7 @@ class ExpenseControlPlanService {
   /// Builds the top-level + children tree from a flat list (FR-002/FR-003).
   List<ExpenseControlNode> buildTree(
     List<ExpenseControlItem> items, {
-    Map<String, ExpenseFormulaEdit>? pendingEdits,
+    Map<String, PendingItemEdit>? pendingEdits,
   }) {
     final merged = _applyOverlay(items, pendingEdits);
     final topLevel = merged.where((item) => item.parentId == null).toList()
@@ -106,7 +113,7 @@ class ExpenseControlPlanService {
   /// formula never contributes (FR-003/FR-004).
   ExpenseControlTotals computeTotals(
     List<ExpenseControlItem> items, {
-    Map<String, ExpenseFormulaEdit>? pendingEdits,
+    Map<String, PendingItemEdit>? pendingEdits,
   }) {
     final leaves = _leaves(_applyOverlay(items, pendingEdits));
     var percentSum = 0.0;
@@ -134,7 +141,7 @@ class ExpenseControlPlanService {
   /// candidate before it's persisted (FR-012).
   ExpenseControlValidation validateBudget(
     List<ExpenseControlItem> items, {
-    Map<String, ExpenseFormulaEdit>? pendingEdits,
+    Map<String, PendingItemEdit>? pendingEdits,
   }) {
     final merged = _applyOverlay(items, pendingEdits);
     final leaves = _leaves(merged);
@@ -153,7 +160,10 @@ class ExpenseControlPlanService {
 
   /// FR-002: a row that is itself a child (non-null `parentId`) MUST NOT be
   /// used as another row's `parentId` — nesting is capped at one level.
-  bool isNestingAllowed(List<ExpenseControlItem> items, String candidateParentId) {
+  bool isNestingAllowed(
+    List<ExpenseControlItem> items,
+    String candidateParentId,
+  ) {
     for (final item in items) {
       if (item.id == candidateParentId) return item.parentId == null;
     }

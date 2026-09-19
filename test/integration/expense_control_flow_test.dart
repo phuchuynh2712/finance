@@ -82,12 +82,15 @@ void main() {
 
       // 3. Inline-edit formula -> "Lưu công thức" (per quickstart.md item 7).
       final pending = {
-        groceriesId: const ExpenseFormulaEdit(
+        groceriesId: const PendingItemEdit(
           method: ExpenseAllocationMethod.percentage,
           value: 25,
         ),
       };
-      final validation = planService.validateBudget(items, pendingEdits: pending);
+      final validation = planService.validateBudget(
+        items,
+        pendingEdits: pending,
+      );
       expect(validation.isValid, isTrue);
       await repository.saveFormulas(pending);
 

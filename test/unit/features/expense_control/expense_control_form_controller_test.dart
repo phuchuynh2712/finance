@@ -24,7 +24,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   Future<void> reorderTopLevel(List<String> orderedIds) async {}
 
   @override
-  Future<void> saveFormulas(Map<String, ExpenseFormulaEdit> changes) async {}
+  Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {}
 
   @override
   Stream<List<ExpenseControlItem>> watchAll() => const Stream.empty();
@@ -50,6 +50,7 @@ ExpenseControlItem _item({
 
 void main() {
   late _FakeExpenseControlRepository repository;
+  late Map<String, PendingItemEdit> staged;
   const planService = ExpenseControlPlanService();
 
   ExpenseControlFormController buildController({
@@ -64,21 +65,26 @@ void main() {
       getAllItems: () => allItems,
       existingItem: existingItem,
       isFormulaEditable: isFormulaEditable,
+      onStageEdit: (itemId, edit) => staged[itemId] = edit,
     );
   }
 
   setUp(() {
     repository = _FakeExpenseControlRepository();
+    staged = {};
   });
 
-  test('blank name is rejected — canSave is false and save() is a no-op', () async {
-    final controller = buildController();
-    controller.setValue(10);
-    expect(controller.isNameValid, isFalse);
-    expect(controller.canSave, isFalse);
-    await controller.save();
-    expect(repository.created, isEmpty);
-  });
+  test(
+    'blank name is rejected — canSave is false and save() is a no-op',
+    () async {
+      final controller = buildController();
+      controller.setValue(10);
+      expect(controller.isNameValid, isFalse);
+      expect(controller.canSave, isFalse);
+      await controller.save();
+      expect(repository.created, isEmpty);
+    },
+  );
 
   test('zero/blank value is rejected for a leaf', () async {
     final controller = buildController();
@@ -113,7 +119,7 @@ void main() {
   });
 
   test(
-    'switching formula mode on an existing item replaces — not converts or retains — the stored value (FR-006)',
+    'switching formula mode on an existing leaf stages — not writes — the replaced value (FR-006, research.md Decision 3)',
     () async {
       final existing = _item(
         id: '1',
@@ -130,10 +136,14 @@ void main() {
       controller.setValue(25);
       await controller.save();
 
-      expect(repository.updated, hasLength(1));
-      final saved = repository.updated.single;
-      expect(saved.allocationMethod, ExpenseAllocationMethod.percentage);
-      expect(saved.allocationValue, 25);
+      // Editing an existing leaf never writes to the repository directly —
+      // it stages into pendingItemEditsProvider (here, the onStageEdit
+      // capture) until "Lưu công thức" commits it.
+      expect(repository.updated, isEmpty);
+      expect(staged, hasLength(1));
+      final edit = staged['1']!;
+      expect(edit.method, ExpenseAllocationMethod.percentage);
+      expect(edit.value, 25);
     },
   );
 

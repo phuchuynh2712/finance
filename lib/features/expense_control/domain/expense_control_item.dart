@@ -72,11 +72,30 @@ class ExpenseControlItem {
   }
 }
 
-/// A pending formula edit staged in presentation state until "Lưu công thức"
-/// commits it (research.md §9, data-model.md).
-class ExpenseFormulaEdit {
-  const ExpenseFormulaEdit({required this.method, required this.value});
+/// A pending whole-item edit staged in presentation state until "Lưu công
+/// thức" commits it (data-model.md, replacing the narrower formula-only
+/// `ExpenseFormulaEdit`). Every field is nullable, meaning "unchanged from
+/// the last-committed item" — not "changed to null." At least one field is
+/// expected to be non-null whenever an entry exists in the pending map (the
+/// dialog only ever stages something the user actually changed).
+///
+/// `description`'s "unchanged" vs. "cleared to empty" states are not
+/// distinguished (plain `String?`, not a tri-state wrapper): the dialog's
+/// `TextField` produces the same value either way, and the spec does not
+/// call out clearing an existing description as a scenario needing separate
+/// handling (data-model.md's Open Question, resolved here as: not needed).
+class PendingItemEdit {
+  const PendingItemEdit({
+    this.name,
+    this.iconKey,
+    this.description,
+    this.method,
+    this.value,
+  });
 
-  final ExpenseAllocationMethod method;
-  final double value;
+  final String? name;
+  final String? iconKey;
+  final String? description;
+  final ExpenseAllocationMethod? method;
+  final double? value;
 }

@@ -27,8 +27,11 @@ abstract interface class ExpenseControlRepository {
   /// contain exactly the current set of top-level item ids for this user.
   Future<void> reorderTopLevel(List<String> orderedIds);
 
-  /// Batch-commits pending formula edits for existing items — the
-  /// data-layer half of the "Lưu công thức" flow (research.md §9). Callers
-  /// MUST validate the resulting full plan before calling this.
-  Future<void> saveFormulas(Map<String, ExpenseFormulaEdit> changes);
+  /// Batch-commits pending whole-item edits for existing items — the
+  /// data-layer half of the "Lưu công thức" flow (data-model.md — widened
+  /// from formula-only to also cover name/icon/description). Callers MUST
+  /// validate the resulting full plan before calling this. A `null` field
+  /// on a [PendingItemEdit] means "leave that field unchanged," not "clear
+  /// it."
+  Future<void> saveFormulas(Map<String, PendingItemEdit> changes);
 }

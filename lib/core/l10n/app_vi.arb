@@ -16,9 +16,9 @@
   "@tabExpenseControl": {
     "description": "Bottom navigation tab label for the Expense Control screen (FR-020)"
   },
-  "tabHistory": "Lịch sử/Báo cáo",
+  "tabHistory": "Báo cáo",
   "@tabHistory": {
-    "description": "Bottom navigation tab label for the History/Report placeholder screen (FR-020)"
+    "description": "Bottom navigation tab label for the History/Report placeholder screen (FR-020, FR-017) — matches the design mockup exactly (\"Báo cáo\" alone, not \"Lịch sử/Báo cáo\"), which also happens to fix the label wrapping to two lines"
   },
   "tabAccount": "Hồ sơ",
   "@tabAccount": {
@@ -690,5 +690,21 @@
   "historyPlaceholderMessage": "Tính năng đang được phát triển.",
   "@historyPlaceholderMessage": {
     "description": "Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)"
+  },
+  "expenseControlDiscardPromptTitle": "Lưu thay đổi?",
+  "@expenseControlDiscardPromptTitle": {
+    "description": "Title of the confirmation prompt shown when switching tabs with unsaved pending edits (FR-009, US3)"
+  },
+  "expenseControlDiscardPromptMessage": "Bạn có thay đổi chưa lưu trong Kiểm soát chi tiêu. Bạn có muốn lưu trước khi rời đi không?",
+  "@expenseControlDiscardPromptMessage": {
+    "description": "Body text of the tab-switch confirmation prompt (FR-009, US3)"
+  },
+  "expenseControlDiscardPromptSaveAction": "Lưu",
+  "@expenseControlDiscardPromptSaveAction": {
+    "description": "Button that saves pending edits then navigates away (FR-010, US3 Scenario 2)"
+  },
+  "expenseControlDiscardPromptDiscardAction": "Không lưu",
+  "@expenseControlDiscardPromptDiscardAction": {
+    "description": "Button that discards pending edits then navigates away (FR-011, US3 Scenario 3)"
   }
 }

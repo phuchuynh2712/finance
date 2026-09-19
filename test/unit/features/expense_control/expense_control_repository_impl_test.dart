@@ -40,35 +40,38 @@ void main() {
     await db.close();
   });
 
-  test('saveFormulas persists all changed items in one transaction with outbox rows', () async {
-    await repository.create(_leaf('a', value: 10));
-    await repository.create(_leaf('b', value: 20));
+  test(
+    'saveFormulas persists all changed items in one transaction with outbox rows',
+    () async {
+      await repository.create(_leaf('a', value: 10));
+      await repository.create(_leaf('b', value: 20));
 
-    await repository.saveFormulas({
-      'a': const ExpenseFormulaEdit(
-        method: ExpenseAllocationMethod.percentage,
-        value: 40,
-      ),
-      'b': const ExpenseFormulaEdit(
-        method: ExpenseAllocationMethod.fixed,
-        value: 200000,
-      ),
-    });
+      await repository.saveFormulas({
+        'a': const PendingItemEdit(
+          method: ExpenseAllocationMethod.percentage,
+          value: 40,
+        ),
+        'b': const PendingItemEdit(
+          method: ExpenseAllocationMethod.fixed,
+          value: 200000,
+        ),
+      });
 
-    final all = await repository.getAll();
-    final a = all.firstWhere((item) => item.id == 'a');
-    final b = all.firstWhere((item) => item.id == 'b');
-    expect(a.allocationValue, 40);
-    expect(b.allocationMethod, ExpenseAllocationMethod.fixed);
-    expect(b.allocationValue, 200000);
+      final all = await repository.getAll();
+      final a = all.firstWhere((item) => item.id == 'a');
+      final b = all.firstWhere((item) => item.id == 'b');
+      expect(a.allocationValue, 40);
+      expect(b.allocationMethod, ExpenseAllocationMethod.fixed);
+      expect(b.allocationValue, 200000);
 
-    final outboxRows = await db.select(db.syncOutbox).get();
-    final formulaUpdates = outboxRows.where(
-      (row) => row.entityTable == 'expense_control_items',
-    );
-    // insert(a) + insert(b) + update(a) + update(b) from saveFormulas.
-    expect(formulaUpdates.length, 4);
-  });
+      final outboxRows = await db.select(db.syncOutbox).get();
+      final formulaUpdates = outboxRows.where(
+        (row) => row.entityTable == 'expense_control_items',
+      );
+      // insert(a) + insert(b) + update(a) + update(b) from saveFormulas.
+      expect(formulaUpdates.length, 4);
+    },
+  );
 
   test('reorderTopLevel persists new sort order', () async {
     await repository.create(_leaf('a', sortOrder: 0));
@@ -108,13 +111,16 @@ void main() {
     },
   );
 
-  test('delete() cascades to direct children in one transaction (FR-016)', () async {
-    await repository.create(_leaf('family', value: 30));
-    await repository.create(_leaf('child', parentId: 'family', value: 15));
+  test(
+    'delete() cascades to direct children in one transaction (FR-016)',
+    () async {
+      await repository.create(_leaf('family', value: 30));
+      await repository.create(_leaf('child', parentId: 'family', value: 15));
 
-    await repository.delete('family');
+      await repository.delete('family');
 
-    final remaining = await repository.getAll();
-    expect(remaining, isEmpty);
-  });
+      final remaining = await repository.getAll();
+      expect(remaining, isEmpty);
+    },
+  );
 }

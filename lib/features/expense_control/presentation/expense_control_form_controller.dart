@@ -67,12 +67,18 @@ class ExpenseControlFormState {
   }
 }
 
-/// Handles the "Thêm khoản mới" create flow (name/icon/description +
-/// initial formula, FR-017) and the pencil-dialog edit flow
-/// (name/icon/description only — [isFormulaEditable] false; formula edits
-/// to an existing item go through the inline "Lưu công thức" flow instead,
-/// research.md §9).
-class ExpenseControlFormController extends StateNotifier<ExpenseControlFormState> {
+/// Handles three distinct save destinations, per research.md Decision 3:
+/// creating a brand-new item (`existingItem == null`) always commits
+/// immediately via [ExpenseControlRepository.create]; editing an existing
+/// **group** (`isFormulaEditable == false`) always commits immediately via
+/// [ExpenseControlRepository.update], unchanged from before this feature;
+/// editing an existing **leaf** (`isFormulaEditable == true`) now stages the
+/// whole edit — name/icon/description AND formula together — via
+/// [onStageEdit] instead of writing to the repository at all. Only "Lưu
+/// công thức" (or the tab-switch confirmation's "Lưu" choice) later commits
+/// a staged leaf edit.
+class ExpenseControlFormController
+    extends StateNotifier<ExpenseControlFormState> {
   ExpenseControlFormController({
     required this.repository,
     required this.planService,
@@ -81,6 +87,7 @@ class ExpenseControlFormController extends StateNotifier<ExpenseControlFormState
     this.existingItem,
     this.parentId,
     this.isFormulaEditable = true,
+    this.onStageEdit,
   }) : super(
          existingItem == null
              ? const ExpenseControlFormState()
@@ -104,6 +111,12 @@ class ExpenseControlFormController extends StateNotifier<ExpenseControlFormState
   final ExpenseControlItem? existingItem;
   final String? parentId;
   final bool isFormulaEditable;
+
+  /// Called instead of [repository.update] when saving an existing
+  /// **leaf**'s edit dialog (research.md Decision 3) — `null` in call sites
+  /// that don't need staging (e.g. unit tests exercising only the
+  /// create/group branches).
+  final void Function(String itemId, PendingItemEdit edit)? onStageEdit;
 
   void setName(String value) => state = state.copyWith(
     name: value,
@@ -170,25 +183,42 @@ class ExpenseControlFormController extends StateNotifier<ExpenseControlFormState
     if (!canSave) return;
     state = state.copyWith(isSubmitting: true, clearErrorMessage: true);
     try {
-      final item = ExpenseControlItem(
-        id: existingItem?.id ?? _uuid.v4(),
-        userId: userId,
-        parentId: _effectiveParentId,
-        name: state.name.trim(),
-        iconKey: state.iconKey,
-        description: state.description,
-        sortOrder: existingItem?.sortOrder ?? _nextSortOrder(),
-        allocationMethod: isFormulaEditable
-            ? state.method
-            : existingItem?.allocationMethod,
-        allocationValue: isFormulaEditable
-            ? state.value
-            : existingItem?.allocationValue,
-      );
-      if (existingItem != null) {
-        await repository.update(item);
+      final existing = existingItem;
+      if (existing != null && isFormulaEditable) {
+        // Editing an existing leaf: stage, don't write (research.md
+        // Decision 3/4) — the caller's onStageEdit is expected to write
+        // into pendingItemEditsProvider (or an equivalent test double).
+        onStageEdit?.call(
+          existing.id,
+          PendingItemEdit(
+            name: state.name.trim(),
+            iconKey: state.iconKey,
+            description: state.description,
+            method: state.method,
+            value: state.value,
+          ),
+        );
       } else {
-        await repository.create(item);
+        final item = ExpenseControlItem(
+          id: existing?.id ?? _uuid.v4(),
+          userId: userId,
+          parentId: _effectiveParentId,
+          name: state.name.trim(),
+          iconKey: state.iconKey,
+          description: state.description,
+          sortOrder: existing?.sortOrder ?? _nextSortOrder(),
+          allocationMethod: isFormulaEditable
+              ? state.method
+              : existing?.allocationMethod,
+          allocationValue: isFormulaEditable
+              ? state.value
+              : existing?.allocationValue,
+        );
+        if (existing != null) {
+          await repository.update(item);
+        } else {
+          await repository.create(item);
+        }
       }
       state = state.copyWith(saved: true, isSubmitting: false);
     } catch (e) {
@@ -220,5 +250,8 @@ final expenseControlFormControllerProvider = StateNotifierProvider.autoDispose
         existingItem: params.existingItem,
         parentId: params.parentId,
         isFormulaEditable: params.isFormulaEditable,
+        onStageEdit: (itemId, edit) => ref
+            .read(pendingItemEditsProvider.notifier)
+            .update((state) => {...state, itemId: edit}),
       );
     });

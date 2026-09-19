@@ -122,10 +122,10 @@ abstract class AppLocalizations {
   /// **'Kiểm soát'**
   String get tabExpenseControl;
 
-  /// Bottom navigation tab label for the History/Report placeholder screen (FR-020)
+  /// Bottom navigation tab label for the History/Report placeholder screen (FR-020, FR-017) — matches the design mockup exactly ("Báo cáo" alone, not "Lịch sử/Báo cáo"), which also happens to fix the label wrapping to two lines
   ///
   /// In vi, this message translates to:
-  /// **'Lịch sử/Báo cáo'**
+  /// **'Báo cáo'**
   String get tabHistory;
 
   /// Bottom navigation tab label for the Account screen (renamed from "Cá nhân" to "Hồ sơ" per FR-020)
@@ -949,6 +949,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tính năng đang được phát triển.'**
   String get historyPlaceholderMessage;
+
+  /// Title of the confirmation prompt shown when switching tabs with unsaved pending edits (FR-009, US3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu thay đổi?'**
+  String get expenseControlDiscardPromptTitle;
+
+  /// Body text of the tab-switch confirmation prompt (FR-009, US3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thay đổi chưa lưu trong Kiểm soát chi tiêu. Bạn có muốn lưu trước khi rời đi không?'**
+  String get expenseControlDiscardPromptMessage;
+
+  /// Button that saves pending edits then navigates away (FR-010, US3 Scenario 2)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get expenseControlDiscardPromptSaveAction;
+
+  /// Button that discards pending edits then navigates away (FR-011, US3 Scenario 3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Không lưu'**
+  String get expenseControlDiscardPromptDiscardAction;
 }
 
 class _AppLocalizationsDelegate
