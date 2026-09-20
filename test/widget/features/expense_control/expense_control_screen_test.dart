@@ -98,6 +98,7 @@ ExpenseControlItem _leaf(
     sortOrder: 0,
     allocationMethod: method,
     allocationValue: value,
+    balance: 0,
   );
 }
 
@@ -314,6 +315,7 @@ void main() {
           sortOrder: 0,
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 5,
+          balance: 0,
         ),
       ]);
       await tester.pumpWidget(_harness(repository));
@@ -469,6 +471,7 @@ void main() {
             sortOrder: 0,
             allocationMethod: null,
             allocationValue: null,
+            balance: 0,
           ),
           ExpenseControlItem(
             id: 'child',
@@ -480,6 +483,7 @@ void main() {
             sortOrder: 0,
             allocationMethod: ExpenseAllocationMethod.percentage,
             allocationValue: 5,
+            balance: 0,
           ),
         ]);
         await tester.pumpWidget(_harness(repository));

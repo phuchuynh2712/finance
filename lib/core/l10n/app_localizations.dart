@@ -206,281 +206,11 @@ abstract class AppLocalizations {
   /// **'Đăng nhập bằng vân tay'**
   String get signInWithBiometricAction;
 
-  /// Title of the Overview screen
-  ///
-  /// In vi, this message translates to:
-  /// **'Tổng quan'**
-  String get overviewTitle;
-
-  /// Shown on Overview when the user has no envelopes yet
-  ///
-  /// In vi, this message translates to:
-  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước.'**
-  String get overviewEmptyState;
-
-  /// Button/action on Overview that opens the income allocation (Plan) flow
-  ///
-  /// In vi, this message translates to:
-  /// **'Lập kế hoạch'**
-  String get overviewPlanAction;
-
-  /// Title of the Plan (income allocation) screen
-  ///
-  /// In vi, this message translates to:
-  /// **'Lập kế hoạch'**
-  String get planTitle;
-
-  /// Label for the income amount input field on the Plan screen
-  ///
-  /// In vi, this message translates to:
-  /// **'Số tiền thu nhập'**
-  String get planIncomeLabel;
-
-  /// Heading above the per-envelope allocation preview list
-  ///
-  /// In vi, this message translates to:
-  /// **'Xem trước phân bổ'**
-  String get planPreviewHeading;
-
-  /// Shown when combined fixed+percentage allocations exceed the income entered (FR-011a)
-  ///
-  /// In vi, this message translates to:
-  /// **'Tổng phân bổ vượt quá thu nhập {excess} ₫. Vui lòng điều chỉnh trước khi xác nhận.'**
-  String planOverAllocationWarning(String excess);
-
-  /// Shown when a nonzero leftover exists but no envelope is flagged as the rounding-remainder receiver (FR-013)
-  ///
-  /// In vi, this message translates to:
-  /// **'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Kiểm soát.'**
-  String get planMissingReceiverWarning;
-
-  /// Shown when any envelope's resulting balance would still be negative after this allocation (FR-011)
-  ///
-  /// In vi, this message translates to:
-  /// **'Một hoặc nhiều khoản sẽ vẫn bị âm sau khi phân bổ.'**
-  String get planNegativeBalanceWarning;
-
-  /// Button to confirm and apply the allocation event
-  ///
-  /// In vi, this message translates to:
-  /// **'Xác nhận'**
-  String get planConfirmAction;
-
-  /// Shown when confirming the allocation event fails
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể xác nhận kế hoạch: {error}'**
-  String planErrorPrefix(String error);
-
-  /// Title of the Spending screen
-  ///
-  /// In vi, this message translates to:
-  /// **'Chi tiêu'**
-  String get spendingTitle;
-
-  /// Shown on Spending when no expenses exist yet
-  ///
-  /// In vi, this message translates to:
-  /// **'Chưa có khoản chi nào.'**
-  String get spendingEmptyState;
-
-  /// Action to open the expense entry form
-  ///
-  /// In vi, this message translates to:
-  /// **'Thêm khoản chi'**
-  String get spendingAddAction;
-
-  /// Shown instead of the add-expense action when the user has zero envelopes (FR-030)
-  ///
-  /// In vi, this message translates to:
-  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.'**
-  String get spendingNoEnvelopesWarning;
-
-  /// Title of the confirmation dialog before deleting an expense entry
-  ///
-  /// In vi, this message translates to:
-  /// **'Xóa khoản chi?'**
-  String get spendingDeleteConfirmTitle;
-
-  /// Confirm button in the delete-expense dialog
-  ///
-  /// In vi, this message translates to:
-  /// **'Xóa'**
-  String get spendingDeleteConfirmAction;
-
   /// Generic cancel button label
   ///
   /// In vi, this message translates to:
   /// **'Hủy'**
   String get cancelAction;
-
-  /// Title of the expense form screen when creating a new entry
-  ///
-  /// In vi, this message translates to:
-  /// **'Ghi khoản chi'**
-  String get expenseFormTitleCreate;
-
-  /// Title of the expense form screen when editing an existing entry
-  ///
-  /// In vi, this message translates to:
-  /// **'Sửa khoản chi'**
-  String get expenseFormTitleEdit;
-
-  /// Label for the amount input field on the expense form
-  ///
-  /// In vi, this message translates to:
-  /// **'Số tiền'**
-  String get expenseFormAmountLabel;
-
-  /// Label for the envelope selector on the expense form
-  ///
-  /// In vi, this message translates to:
-  /// **'Khoản'**
-  String get expenseFormEnvelopeLabel;
-
-  /// Label for the optional note field on the expense form
-  ///
-  /// In vi, this message translates to:
-  /// **'Ghi chú (không bắt buộc)'**
-  String get expenseFormNoteLabel;
-
-  /// Save button on the expense form
-  ///
-  /// In vi, this message translates to:
-  /// **'Lưu'**
-  String get expenseFormSaveAction;
-
-  /// Shown when saving the expense fails
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể lưu khoản chi: {error}'**
-  String expenseFormErrorPrefix(String error);
-
-  /// Title of the covering-envelope prompt shown on overspend
-  ///
-  /// In vi, this message translates to:
-  /// **'Chọn khoản để bù'**
-  String get coveringPromptTitle;
-
-  /// Body text of the covering-envelope prompt, showing the shortfall
-  ///
-  /// In vi, this message translates to:
-  /// **'Khoản chi này vượt quá số dư {shortfall} ₫. Chọn một khoản khác để bù phần thiếu.'**
-  String coveringPromptMessage(String shortfall);
-
-  /// Title of the Envelopes CRUD screen
-  ///
-  /// In vi, this message translates to:
-  /// **'Khoản'**
-  String get envelopesTitle;
-
-  /// Shown on the Envelopes screen when no envelopes exist yet
-  ///
-  /// In vi, this message translates to:
-  /// **'Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.'**
-  String get envelopesEmptyState;
-
-  /// Action to open the envelope creation form
-  ///
-  /// In vi, this message translates to:
-  /// **'Thêm khoản'**
-  String get envelopesAddAction;
-
-  /// Badge shown on the envelope currently flagged as the rounding-remainder receiver
-  ///
-  /// In vi, this message translates to:
-  /// **'Nhận phần dư'**
-  String get envelopesReceiverBadge;
-
-  /// Title of the envelope form screen when creating a new envelope
-  ///
-  /// In vi, this message translates to:
-  /// **'Tạo khoản'**
-  String get envelopeFormTitleCreate;
-
-  /// Title of the envelope form screen when editing an existing envelope
-  ///
-  /// In vi, this message translates to:
-  /// **'Sửa khoản'**
-  String get envelopeFormTitleEdit;
-
-  /// Label for the envelope name input field
-  ///
-  /// In vi, this message translates to:
-  /// **'Tên khoản'**
-  String get envelopeFormNameLabel;
-
-  /// Label for the allocation method selector (percentage or fixed)
-  ///
-  /// In vi, this message translates to:
-  /// **'Cách phân bổ'**
-  String get envelopeFormMethodLabel;
-
-  /// Option label for percentage-based allocation
-  ///
-  /// In vi, this message translates to:
-  /// **'Theo phần trăm'**
-  String get envelopeFormMethodPercentage;
-
-  /// Option label for fixed-amount allocation
-  ///
-  /// In vi, this message translates to:
-  /// **'Số tiền cố định'**
-  String get envelopeFormMethodFixed;
-
-  /// Label for the allocation value field when method is percentage
-  ///
-  /// In vi, this message translates to:
-  /// **'Phần trăm (%)'**
-  String get envelopeFormValueLabelPercentage;
-
-  /// Label for the allocation value field when method is fixed
-  ///
-  /// In vi, this message translates to:
-  /// **'Số tiền cố định'**
-  String get envelopeFormValueLabelFixed;
-
-  /// Toggle label for flagging this envelope as the rounding-remainder receiver
-  ///
-  /// In vi, this message translates to:
-  /// **'Nhận phần dư khi làm tròn'**
-  String get envelopeFormReceiverToggle;
-
-  /// Save button on the envelope form
-  ///
-  /// In vi, this message translates to:
-  /// **'Lưu'**
-  String get envelopeFormSaveAction;
-
-  /// Shown when saving the envelope fails
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể lưu khoản: {error}'**
-  String envelopeFormErrorPrefix(String error);
-
-  /// Title of the delete-envelope confirmation dialog
-  ///
-  /// In vi, this message translates to:
-  /// **'Xóa khoản \"{name}\"?'**
-  String envelopeDeleteConfirmTitle(String name);
-
-  /// Warning shown when deleting an envelope with a non-zero balance (FR-027)
-  ///
-  /// In vi, this message translates to:
-  /// **'Khoản này vẫn còn số dư {balance} ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.'**
-  String envelopeDeleteNonZeroWarning(String balance);
-
-  /// Confirm button in the delete-envelope dialog
-  ///
-  /// In vi, this message translates to:
-  /// **'Xóa'**
-  String get envelopeDeleteConfirmAction;
-
-  /// Title of the dialog requiring a new rounding-remainder receiver before deleting the current one (FR-028)
-  ///
-  /// In vi, this message translates to:
-  /// **'Chọn khoản nhận phần dư mới'**
-  String get envelopeReassignReceiverTitle;
 
   /// Title of the Account screen
   ///
@@ -973,6 +703,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Không lưu'**
   String get expenseControlDiscardPromptDiscardAction;
+
+  /// Eyebrow label above the balance list on the Thu chi screen, distinguishing it from Kiểm soát chi tiêu's formula wording (FR-006)
+  ///
+  /// In vi, this message translates to:
+  /// **'Số dư từng khoản'**
+  String get spendingBalanceListLabel;
+
+  /// Shown on Thu chi when Kiểm soát chi tiêu has zero groups/items yet (FR-010)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát chi tiêu trước.'**
+  String get spendingBalanceEmptyState;
+
+  /// Label of the income entry-point button on Thu chi (FR-007)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập'**
+  String get spendingIncomeAction;
+
+  /// Label of the expense entry-point button on Thu chi (FR-007)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiêu'**
+  String get spendingExpenseAction;
+
+  /// Label of the transaction-history row on Thu chi (FR-008)
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem lịch sử giao dịch'**
+  String get spendingHistoryAction;
+
+  /// Generic 'not yet available' placeholder message, shared by every scaffolded entry point (research.md Decision 4)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tính năng đang được phát triển.'**
+  String get notAvailablePlaceholderMessage;
+
+  /// Title of the placeholder screen reached from Thu chi's Thu nhập button (FR-009)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập'**
+  String get incomePlaceholderTitle;
+
+  /// Title of the placeholder screen reached from Thu chi's Chi tiêu button (FR-009)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiêu'**
+  String get expensePlaceholderTitle;
+
+  /// Title of the placeholder screen reached from Thu chi's Xem lịch sử giao dịch row (FR-009)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch sử giao dịch'**
+  String get transactionHistoryPlaceholderTitle;
+
+  /// Title of the placeholder shown on the Tổng quan tab (FR-017)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng quan'**
+  String get overviewPlaceholderTitle;
 }
 
 class _AppLocalizationsDelegate

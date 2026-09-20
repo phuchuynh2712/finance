@@ -11,12 +11,11 @@ import '../../features/account/presentation/forgot_password_screen.dart';
 import '../../features/account/presentation/reset_password_screen.dart';
 import '../../features/account/presentation/sign_in_screen.dart';
 import '../../features/account/presentation/sign_up_screen.dart';
-import '../../features/envelopes/presentation/overview_screen.dart';
 import '../../features/expense_control/presentation/expense_control_providers.dart';
 import '../../features/expense_control/presentation/expense_control_screen.dart';
 import '../../features/expense_control/presentation/formatting.dart';
 import '../../features/expenses/presentation/spending_screen.dart';
-import '../../features/history/presentation/history_placeholder_screen.dart';
+import '../widgets/not_available_placeholder_screen.dart';
 
 /// A bare [Listenable] that [GoRouter] watches to know when to re-evaluate
 /// its [GoRouterRedirect] — fired manually via [ping] rather than wrapping a
@@ -114,7 +113,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/overview',
-                builder: (context, state) => const OverviewScreen(),
+                builder: (context, state) {
+                  final l10n = AppLocalizations.of(context);
+                  return NotAvailablePlaceholderScreen(
+                    icon: LucideIcons.layoutDashboard,
+                    title: l10n.overviewPlaceholderTitle,
+                    message: l10n.notAvailablePlaceholderMessage,
+                  );
+                },
               ),
             ],
           ),
@@ -138,7 +144,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const HistoryPlaceholderScreen(),
+                builder: (context, state) {
+                  final l10n = AppLocalizations.of(context);
+                  return NotAvailablePlaceholderScreen(
+                    icon: LucideIcons.history,
+                    title: l10n.tabHistory,
+                    message: l10n.historyPlaceholderMessage,
+                  );
+                },
               ),
             ],
           ),

@@ -24,6 +24,7 @@ ExpenseControlItem _leaf(
     sortOrder: sortOrder,
     allocationMethod: method,
     allocationValue: value,
+    balance: 0,
   );
 }
 
@@ -101,6 +102,7 @@ void main() {
           sortOrder: 0,
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 15,
+          balance: 0,
         ),
       );
 

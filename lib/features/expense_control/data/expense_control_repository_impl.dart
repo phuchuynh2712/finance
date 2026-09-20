@@ -34,6 +34,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
         null => null,
       },
       allocationValue: row.allocationValue,
+      balance: row.balance,
     );
   }
 
@@ -76,6 +77,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
     'sort_order': item.sortOrder,
     'allocation_method': item.allocationMethod?.name,
     'allocation_value': item.allocationValue,
+    'balance': item.balance,
   };
 
   @override

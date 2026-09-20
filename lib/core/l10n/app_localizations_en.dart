@@ -65,162 +65,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInWithBiometricAction => 'Log in with fingerprint';
 
   @override
-  String get overviewTitle => 'Overview';
-
-  @override
-  String get overviewEmptyState =>
-      'No envelopes yet. Create one in the Control tab first.';
-
-  @override
-  String get overviewPlanAction => 'Plan';
-
-  @override
-  String get planTitle => 'Plan';
-
-  @override
-  String get planIncomeLabel => 'Income amount';
-
-  @override
-  String get planPreviewHeading => 'Allocation preview';
-
-  @override
-  String planOverAllocationWarning(String excess) {
-    return 'Total allocation exceeds income by $excess ₫. Please adjust before confirming.';
-  }
-
-  @override
-  String get planMissingReceiverWarning =>
-      'There is leftover after allocation, but no envelope is set to receive it. Please set one in the Control tab.';
-
-  @override
-  String get planNegativeBalanceWarning =>
-      'One or more envelopes will still be negative after this allocation.';
-
-  @override
-  String get planConfirmAction => 'Confirm';
-
-  @override
-  String planErrorPrefix(String error) {
-    return 'Could not confirm the plan: $error';
-  }
-
-  @override
-  String get spendingTitle => 'Spending';
-
-  @override
-  String get spendingEmptyState => 'No expenses yet.';
-
-  @override
-  String get spendingAddAction => 'Add expense';
-
-  @override
-  String get spendingNoEnvelopesWarning =>
-      'No envelopes yet. Create one in the Control tab before recording an expense.';
-
-  @override
-  String get spendingDeleteConfirmTitle => 'Delete this expense?';
-
-  @override
-  String get spendingDeleteConfirmAction => 'Delete';
-
-  @override
   String get cancelAction => 'Cancel';
-
-  @override
-  String get expenseFormTitleCreate => 'Add Expense';
-
-  @override
-  String get expenseFormTitleEdit => 'Edit Expense';
-
-  @override
-  String get expenseFormAmountLabel => 'Amount';
-
-  @override
-  String get expenseFormEnvelopeLabel => 'Envelope';
-
-  @override
-  String get expenseFormNoteLabel => 'Note (optional)';
-
-  @override
-  String get expenseFormSaveAction => 'Save';
-
-  @override
-  String expenseFormErrorPrefix(String error) {
-    return 'Could not save the expense: $error';
-  }
-
-  @override
-  String get coveringPromptTitle => 'Choose a covering envelope';
-
-  @override
-  String coveringPromptMessage(String shortfall) {
-    return 'This expense exceeds the balance by $shortfall ₫. Choose another envelope to cover the shortfall.';
-  }
-
-  @override
-  String get envelopesTitle => 'Envelopes';
-
-  @override
-  String get envelopesEmptyState =>
-      'No envelopes yet. Tap the button below to create your first one.';
-
-  @override
-  String get envelopesAddAction => 'Add envelope';
-
-  @override
-  String get envelopesReceiverBadge => 'Receives leftover';
-
-  @override
-  String get envelopeFormTitleCreate => 'Create Envelope';
-
-  @override
-  String get envelopeFormTitleEdit => 'Edit Envelope';
-
-  @override
-  String get envelopeFormNameLabel => 'Envelope name';
-
-  @override
-  String get envelopeFormMethodLabel => 'Allocation method';
-
-  @override
-  String get envelopeFormMethodPercentage => 'Percentage';
-
-  @override
-  String get envelopeFormMethodFixed => 'Fixed amount';
-
-  @override
-  String get envelopeFormValueLabelPercentage => 'Percentage (%)';
-
-  @override
-  String get envelopeFormValueLabelFixed => 'Fixed amount';
-
-  @override
-  String get envelopeFormReceiverToggle => 'Receives the rounding leftover';
-
-  @override
-  String get envelopeFormSaveAction => 'Save';
-
-  @override
-  String envelopeFormErrorPrefix(String error) {
-    return 'Could not save the envelope: $error';
-  }
-
-  @override
-  String envelopeDeleteConfirmTitle(String name) {
-    return 'Delete \"$name\"?';
-  }
-
-  @override
-  String envelopeDeleteNonZeroWarning(String balance) {
-    return 'This envelope still has a balance of $balance ₫. Deleting it will affect that balance and its related transaction history.';
-  }
-
-  @override
-  String get envelopeDeleteConfirmAction => 'Delete';
-
-  @override
-  String get envelopeReassignReceiverTitle =>
-      'Choose a new rounding-remainder receiver';
 
   @override
   String get accountTitle => 'Account';
@@ -512,4 +357,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseControlDiscardPromptDiscardAction => 'Don\'t save';
+
+  @override
+  String get spendingBalanceListLabel => 'Balance per item';
+
+  @override
+  String get spendingBalanceEmptyState =>
+      'No items yet. Set them up in Expense Control first.';
+
+  @override
+  String get spendingIncomeAction => 'Income';
+
+  @override
+  String get spendingExpenseAction => 'Expense';
+
+  @override
+  String get spendingHistoryAction => 'View transaction history';
+
+  @override
+  String get notAvailablePlaceholderMessage =>
+      'This feature is under development.';
+
+  @override
+  String get incomePlaceholderTitle => 'Income';
+
+  @override
+  String get expensePlaceholderTitle => 'Expense';
+
+  @override
+  String get transactionHistoryPlaceholderTitle => 'Transaction History';
+
+  @override
+  String get overviewPlaceholderTitle => 'Overview';
 }

@@ -158,6 +158,14 @@ class ExpenseControlPlanService {
     );
   }
 
+  /// FR-001: a leaf's displayed balance is its own stored value; a group's
+  /// displayed balance is the live sum of its children's balances, never
+  /// its own (unused) stored column value (data-model.md).
+  int computeItemBalance(ExpenseControlNode node) {
+    if (!node.isGroup) return node.item.balance;
+    return node.children.fold<int>(0, (sum, child) => sum + child.balance);
+  }
+
   /// FR-002: a row that is itself a child (non-null `parentId`) MUST NOT be
   /// used as another row's `parentId` — nesting is capped at one level.
   bool isNestingAllowed(

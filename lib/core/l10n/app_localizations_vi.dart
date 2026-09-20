@@ -65,161 +65,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get signInWithBiometricAction => 'Đăng nhập bằng vân tay';
 
   @override
-  String get overviewTitle => 'Tổng quan';
-
-  @override
-  String get overviewEmptyState =>
-      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước.';
-
-  @override
-  String get overviewPlanAction => 'Lập kế hoạch';
-
-  @override
-  String get planTitle => 'Lập kế hoạch';
-
-  @override
-  String get planIncomeLabel => 'Số tiền thu nhập';
-
-  @override
-  String get planPreviewHeading => 'Xem trước phân bổ';
-
-  @override
-  String planOverAllocationWarning(String excess) {
-    return 'Tổng phân bổ vượt quá thu nhập $excess ₫. Vui lòng điều chỉnh trước khi xác nhận.';
-  }
-
-  @override
-  String get planMissingReceiverWarning =>
-      'Còn dư sau khi phân bổ nhưng chưa có khoản nào được đặt làm nơi nhận phần dư. Vui lòng đặt một khoản trong tab Kiểm soát.';
-
-  @override
-  String get planNegativeBalanceWarning =>
-      'Một hoặc nhiều khoản sẽ vẫn bị âm sau khi phân bổ.';
-
-  @override
-  String get planConfirmAction => 'Xác nhận';
-
-  @override
-  String planErrorPrefix(String error) {
-    return 'Không thể xác nhận kế hoạch: $error';
-  }
-
-  @override
-  String get spendingTitle => 'Chi tiêu';
-
-  @override
-  String get spendingEmptyState => 'Chưa có khoản chi nào.';
-
-  @override
-  String get spendingAddAction => 'Thêm khoản chi';
-
-  @override
-  String get spendingNoEnvelopesWarning =>
-      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát trước khi ghi chi tiêu.';
-
-  @override
-  String get spendingDeleteConfirmTitle => 'Xóa khoản chi?';
-
-  @override
-  String get spendingDeleteConfirmAction => 'Xóa';
-
-  @override
   String get cancelAction => 'Hủy';
-
-  @override
-  String get expenseFormTitleCreate => 'Ghi khoản chi';
-
-  @override
-  String get expenseFormTitleEdit => 'Sửa khoản chi';
-
-  @override
-  String get expenseFormAmountLabel => 'Số tiền';
-
-  @override
-  String get expenseFormEnvelopeLabel => 'Khoản';
-
-  @override
-  String get expenseFormNoteLabel => 'Ghi chú (không bắt buộc)';
-
-  @override
-  String get expenseFormSaveAction => 'Lưu';
-
-  @override
-  String expenseFormErrorPrefix(String error) {
-    return 'Không thể lưu khoản chi: $error';
-  }
-
-  @override
-  String get coveringPromptTitle => 'Chọn khoản để bù';
-
-  @override
-  String coveringPromptMessage(String shortfall) {
-    return 'Khoản chi này vượt quá số dư $shortfall ₫. Chọn một khoản khác để bù phần thiếu.';
-  }
-
-  @override
-  String get envelopesTitle => 'Khoản';
-
-  @override
-  String get envelopesEmptyState =>
-      'Chưa có khoản nào. Nhấn nút bên dưới để tạo khoản đầu tiên.';
-
-  @override
-  String get envelopesAddAction => 'Thêm khoản';
-
-  @override
-  String get envelopesReceiverBadge => 'Nhận phần dư';
-
-  @override
-  String get envelopeFormTitleCreate => 'Tạo khoản';
-
-  @override
-  String get envelopeFormTitleEdit => 'Sửa khoản';
-
-  @override
-  String get envelopeFormNameLabel => 'Tên khoản';
-
-  @override
-  String get envelopeFormMethodLabel => 'Cách phân bổ';
-
-  @override
-  String get envelopeFormMethodPercentage => 'Theo phần trăm';
-
-  @override
-  String get envelopeFormMethodFixed => 'Số tiền cố định';
-
-  @override
-  String get envelopeFormValueLabelPercentage => 'Phần trăm (%)';
-
-  @override
-  String get envelopeFormValueLabelFixed => 'Số tiền cố định';
-
-  @override
-  String get envelopeFormReceiverToggle => 'Nhận phần dư khi làm tròn';
-
-  @override
-  String get envelopeFormSaveAction => 'Lưu';
-
-  @override
-  String envelopeFormErrorPrefix(String error) {
-    return 'Không thể lưu khoản: $error';
-  }
-
-  @override
-  String envelopeDeleteConfirmTitle(String name) {
-    return 'Xóa khoản \"$name\"?';
-  }
-
-  @override
-  String envelopeDeleteNonZeroWarning(String balance) {
-    return 'Khoản này vẫn còn số dư $balance ₫. Xóa sẽ ảnh hưởng đến số dư và lịch sử giao dịch liên quan.';
-  }
-
-  @override
-  String get envelopeDeleteConfirmAction => 'Xóa';
-
-  @override
-  String get envelopeReassignReceiverTitle => 'Chọn khoản nhận phần dư mới';
 
   @override
   String get accountTitle => 'Cá nhân';
@@ -510,4 +356,36 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get expenseControlDiscardPromptDiscardAction => 'Không lưu';
+
+  @override
+  String get spendingBalanceListLabel => 'Số dư từng khoản';
+
+  @override
+  String get spendingBalanceEmptyState =>
+      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát chi tiêu trước.';
+
+  @override
+  String get spendingIncomeAction => 'Thu nhập';
+
+  @override
+  String get spendingExpenseAction => 'Chi tiêu';
+
+  @override
+  String get spendingHistoryAction => 'Xem lịch sử giao dịch';
+
+  @override
+  String get notAvailablePlaceholderMessage =>
+      'Tính năng đang được phát triển.';
+
+  @override
+  String get incomePlaceholderTitle => 'Thu nhập';
+
+  @override
+  String get expensePlaceholderTitle => 'Chi tiêu';
+
+  @override
+  String get transactionHistoryPlaceholderTitle => 'Lịch sử giao dịch';
+
+  @override
+  String get overviewPlaceholderTitle => 'Tổng quan';
 }

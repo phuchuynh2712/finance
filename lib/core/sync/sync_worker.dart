@@ -7,30 +7,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../database/app_database.dart';
 import 'sync_outbox_table.dart';
 
-/// Reported when a synced envelope's local balance diverges from the
-/// server-recomputed `envelope_balances` view (research.md §2). Surfaced,
-/// never silently auto-corrected — per the constitution's Offline-First
-/// mandate that a locally computed balance must not be trusted as final.
-class ReconciliationWarning {
-  ReconciliationWarning({
-    required this.envelopeId,
-    required this.localBalance,
-    required this.serverComputedBalance,
-  });
-
-  final String envelopeId;
-  final int localBalance;
-  final int serverComputedBalance;
-}
-
-/// Drains the local outbox to Supabase and periodically reconciles envelope
-/// balances against the server's transaction-log-derived view.
+/// Drains the local outbox to Supabase on a periodic timer.
 ///
 /// Scheduling is intentionally minimal for v1 (periodic polling, no
 /// connectivity-change listener) per research.md §7 — the transactional
 /// outbox write path (every local write appends a row here) is the part
 /// that must be correct from day one; drain scheduling can iterate later
 /// without changing that contract.
+///
+/// FR-019: this worker previously also reconciled `Envelope` balances
+/// against the Supabase `envelope_balances` view; that logic is deleted
+/// outright (not stubbed) along with the view and its backing tables
+/// (research.md Decision 9) — a future feature redesigns reconciliation
+/// for `ExpenseControlItem.balance` if and when that becomes necessary.
 class SyncWorker {
   SyncWorker(
     this._db,
@@ -43,13 +32,8 @@ class SyncWorker {
   final Duration _interval;
   Timer? _timer;
 
-  final _reconciliationController =
-      StreamController<ReconciliationWarning>.broadcast();
-  Stream<ReconciliationWarning> get reconciliationWarnings =>
-      _reconciliationController.stream;
-
   void start() {
-    _timer ??= Timer.periodic(_interval, (_) => drainAndReconcile());
+    _timer ??= Timer.periodic(_interval, (_) => drainOutbox());
   }
 
   void stop() {
@@ -57,12 +41,7 @@ class SyncWorker {
     _timer = null;
   }
 
-  Future<void> drainAndReconcile() async {
-    await _drainOutbox();
-    await _reconcileBalances();
-  }
-
-  Future<void> _drainOutbox() async {
+  Future<void> drainOutbox() async {
     final pending = await (_db.select(
       _db.syncOutbox,
     )..where((row) => row.syncedAt.isNull())).get();
@@ -89,43 +68,7 @@ class SyncWorker {
     }
   }
 
-  Future<void> _reconcileBalances() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
-
-    final localEnvelopes =
-        await (_db.select(_db.envelopes)..where(
-              (row) => row.userId.equals(userId) & row.deletedAt.isNull(),
-            ))
-            .get();
-    if (localEnvelopes.isEmpty) return;
-
-    final serverRows = await _client
-        .from('envelope_balances')
-        .select('envelope_id, computed_balance')
-        .eq('user_id', userId);
-
-    final serverBalanceByEnvelopeId = <String, int>{
-      for (final row in serverRows as List)
-        row['envelope_id'] as String: (row['computed_balance'] as num).toInt(),
-    };
-
-    for (final envelope in localEnvelopes) {
-      final serverBalance = serverBalanceByEnvelopeId[envelope.id];
-      if (serverBalance != null && serverBalance != envelope.balance) {
-        _reconciliationController.add(
-          ReconciliationWarning(
-            envelopeId: envelope.id,
-            localBalance: envelope.balance,
-            serverComputedBalance: serverBalance,
-          ),
-        );
-      }
-    }
-  }
-
   void dispose() {
     stop();
-    _reconciliationController.close();
   }
 }

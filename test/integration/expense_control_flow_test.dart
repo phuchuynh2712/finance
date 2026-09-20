@@ -41,6 +41,7 @@ void main() {
           sortOrder: 0,
           allocationMethod: ExpenseAllocationMethod.fixed,
           allocationValue: 5000000,
+          balance: 0,
         ),
       );
       await repository.create(
@@ -54,6 +55,7 @@ void main() {
           sortOrder: 1,
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 30,
+          balance: 0,
         ),
       );
 
@@ -71,6 +73,7 @@ void main() {
           sortOrder: 0,
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 15,
+          balance: 0,
         ),
       );
 

@@ -16,6 +16,7 @@ ExpenseControlItem _leaf(double value) => ExpenseControlItem(
   sortOrder: 0,
   allocationMethod: ExpenseAllocationMethod.percentage,
   allocationValue: value,
+  balance: 0,
 );
 
 Widget _harness(ExpenseControlItem item) {
@@ -72,6 +73,7 @@ void main() {
         sortOrder: 0,
         allocationMethod: ExpenseAllocationMethod.fixed,
         allocationValue: 4000000,
+        balance: 0,
       );
       await tester.pumpWidget(_harness(fixedLeaf));
 

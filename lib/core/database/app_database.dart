@@ -1,27 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
-import 'tables/allocation_event_lines_table.dart';
-import 'tables/allocation_events_table.dart';
-import 'tables/envelope_coverages_table.dart';
-import 'tables/envelopes_table.dart';
 import 'tables/expense_control_items_table.dart';
-import 'tables/expense_entries_table.dart';
 import '../sync/sync_outbox_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    Envelopes,
-    AllocationEvents,
-    AllocationEventLines,
-    ExpenseEntries,
-    EnvelopeCoverages,
-    ExpenseControlItems,
-    SyncOutbox,
-  ],
-)
+@DriftDatabase(tables: [ExpenseControlItems, SyncOutbox])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'finance'));
 
@@ -30,22 +15,25 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
       if (from == 1) {
         await m.createTable(expenseControlItems);
-        // Expense Control replaces the "Khoản" (Envelope) screen; its data
-        // is test-only and explicitly discarded, not migrated (FR-019,
-        // research.md §3) — soft-delete every existing envelope row so the
-        // renamed "Thu chi"/"Hồ sơ" screens show their empty states.
-        await (update(
-          envelopes,
-        )..where((row) => row.deletedAt.isNull())).write(
-          EnvelopesCompanion(deletedAt: Value(DateTime.now())),
-        );
+      }
+      if (from == 2) {
+        // FR-011, FR-020: add the balance column, then retire Envelope and
+        // everything built on it in dependency-safe order (data-model.md's
+        // Drop order) — the view first, then tables in FK-dependency order,
+        // since `PRAGMA foreign_keys = ON` (below) enforces it.
+        await m.addColumn(expenseControlItems, expenseControlItems.balance);
+        await customStatement('DROP TABLE IF EXISTS envelope_coverages');
+        await customStatement('DROP TABLE IF EXISTS allocation_event_lines');
+        await customStatement('DROP TABLE IF EXISTS allocation_events');
+        await customStatement('DROP TABLE IF EXISTS expense_entries');
+        await customStatement('DROP TABLE IF EXISTS envelopes');
       }
     },
     beforeOpen: (details) async {

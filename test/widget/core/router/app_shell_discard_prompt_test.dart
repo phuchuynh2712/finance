@@ -12,9 +12,6 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/router/app_router.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
-import 'package:finance/features/envelopes/domain/envelope.dart';
-import 'package:finance/features/envelopes/domain/envelope_repository.dart';
-import 'package:finance/features/envelopes/presentation/envelopes_providers.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
@@ -26,23 +23,6 @@ import 'package:finance/features/expense_control/presentation/expense_control_pr
 /// overridden directly (narrower than faking a full Supabase `AuthState`).
 /// This is the only way to verify the actual tap → dialog → navigate chain,
 /// not just its decision logic in isolation.
-class _FakeEnvelopeRepository implements EnvelopeRepository {
-  @override
-  Stream<List<Envelope>> watchAll() => Stream.value(const []);
-
-  @override
-  Future<List<Envelope>> getAll() async => [];
-
-  @override
-  Future<void> create(Envelope envelope) async {}
-
-  @override
-  Future<void> update(Envelope envelope) async {}
-
-  @override
-  Future<void> delete(String id) async {}
-}
-
 class _FakeAccountAuthActions implements AccountAuthActions {
   @override
   Future<void> updateAvatar(String avatarUrl) async {}
@@ -125,6 +105,7 @@ ExpenseControlItem _leaf(String id, {double value = 10}) {
     sortOrder: 0,
     allocationMethod: ExpenseAllocationMethod.percentage,
     allocationValue: value,
+    balance: 0,
   );
 }
 
@@ -157,7 +138,6 @@ ProviderContainer _containerFor(
       isSignedInProvider.overrideWithValue(true),
       isPasswordRecoveryProvider.overrideWithValue(false),
       currentUserIdProvider.overrideWithValue('u1'),
-      envelopeRepositoryProvider.overrideWithValue(_FakeEnvelopeRepository()),
       accountAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
       expenseControlRepositoryProvider.overrideWithValue(
         expenseControlRepository,

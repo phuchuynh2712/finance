@@ -164,6 +164,7 @@ class ExpenseControlFormController
       sortOrder: existingItem?.sortOrder ?? 0,
       allocationMethod: state.method,
       allocationValue: state.value,
+      balance: existingItem?.balance ?? 0,
     );
     final others = getAllItems().where((item) => item.id != id).toList();
     return planService.validateBudget([...others, candidate]);
@@ -213,6 +214,7 @@ class ExpenseControlFormController
           allocationValue: isFormulaEditable
               ? state.value
               : existing?.allocationValue,
+          balance: existing?.balance ?? 0,
         );
         if (existing != null) {
           await repository.update(item);

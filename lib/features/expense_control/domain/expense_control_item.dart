@@ -20,6 +20,7 @@ class ExpenseControlItem {
     required this.sortOrder,
     required this.allocationMethod,
     required this.allocationValue,
+    required this.balance,
   });
 
   final String id;
@@ -32,6 +33,12 @@ class ExpenseControlItem {
   final ExpenseAllocationMethod? allocationMethod;
   final double? allocationValue;
 
+  /// Actual current balance (VND, whole units) for a leaf item. Meaningless
+  /// for a group — never read from a group's own row, only from the live
+  /// sum of its children (data-model.md). Defaults to 0; only ever written
+  /// by a future income/expense-recording feature, never by this one.
+  final int balance;
+
   bool get isTopLevel => parentId == null;
 
   ExpenseControlItem copyWith({
@@ -41,6 +48,7 @@ class ExpenseControlItem {
     int? sortOrder,
     ExpenseAllocationMethod? allocationMethod,
     double? allocationValue,
+    int? balance,
   }) {
     return ExpenseControlItem(
       id: id,
@@ -52,11 +60,13 @@ class ExpenseControlItem {
       sortOrder: sortOrder ?? this.sortOrder,
       allocationMethod: allocationMethod ?? this.allocationMethod,
       allocationValue: allocationValue ?? this.allocationValue,
+      balance: balance ?? this.balance,
     );
   }
 
   /// Returns a copy with the formula cleared — used when this item gains
-  /// its first child and stops being a leaf (FR-004).
+  /// its first child and stops being a leaf (FR-004). `balance` is
+  /// preserved unchanged (data-model.md).
   ExpenseControlItem clearFormula() {
     return ExpenseControlItem(
       id: id,
@@ -68,6 +78,7 @@ class ExpenseControlItem {
       sortOrder: sortOrder,
       allocationMethod: null,
       allocationValue: null,
+      balance: balance,
     );
   }
 }

@@ -18,6 +18,7 @@ class ExpenseControlItems extends Table {
   TextColumn get allocationMethod =>
       textEnum<ExpenseAllocationMethod>().nullable()();
   RealColumn get allocationValue => real().nullable()();
+  IntColumn get balance => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get deletedAt => dateTime().nullable()();
