@@ -45,6 +45,7 @@ ExpenseControlItem _item({
     sortOrder: 0,
     allocationMethod: method,
     allocationValue: value,
+    balance: 0,
   );
 }
 

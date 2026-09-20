@@ -3,9 +3,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_semantic_colors.dart';
+import '../../domain/expense_control_icons.dart';
 import '../../domain/expense_control_item.dart';
 import '../formatting.dart';
-import 'icon_picker.dart';
 
 /// One leaf item's row: icon/name/edit/delete header, plus its formula
 /// shown as a non-interactive static label (FR-001/FR-002 — editing moved

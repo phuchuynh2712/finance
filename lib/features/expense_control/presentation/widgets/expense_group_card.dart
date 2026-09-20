@@ -3,11 +3,11 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_semantic_colors.dart';
+import '../../domain/expense_control_icons.dart';
 import '../../domain/expense_control_item.dart';
 import '../../domain/expense_control_plan_service.dart';
 import '../formatting.dart';
 import 'dashed_border.dart';
-import 'icon_picker.dart';
 import 'expense_item_row.dart';
 
 /// One top-level card — a leaf (its own formula row) or a group (children

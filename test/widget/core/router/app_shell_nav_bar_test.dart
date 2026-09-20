@@ -11,38 +11,15 @@ import 'package:finance/core/router/app_router.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
-import 'package:finance/features/envelopes/domain/envelope.dart';
-import 'package:finance/features/envelopes/domain/envelope_repository.dart';
-import 'package:finance/features/envelopes/presentation/envelopes_providers.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
-import 'package:finance/features/expenses/domain/expense_entry.dart';
-import 'package:finance/features/expenses/domain/expense_repository.dart';
-import 'package:finance/features/expenses/presentation/expenses_providers.dart';
 
 /// FR-016–FR-018, SC-006 — visual correctness of the shared bottom
 /// [NavigationBar], verified via the real [_AppShell] (through
 /// [appRouterProvider], the only way to reach it — see
 /// app_shell_discard_prompt_test.dart's header comment for why this needs a
 /// fully rendered shell rather than a decision-only unit test).
-class _FakeEnvelopeRepository implements EnvelopeRepository {
-  @override
-  Stream<List<Envelope>> watchAll() => Stream.value(const []);
-
-  @override
-  Future<List<Envelope>> getAll() async => [];
-
-  @override
-  Future<void> create(Envelope envelope) async {}
-
-  @override
-  Future<void> update(Envelope envelope) async {}
-
-  @override
-  Future<void> delete(String id) async {}
-}
-
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
   @override
   Stream<List<ExpenseControlItem>> watchAll() => Stream.value(const []);
@@ -64,26 +41,6 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {}
-}
-
-class _FakeExpenseRepository implements ExpenseRepository {
-  @override
-  Stream<List<ExpenseEntry>> watchAll() => Stream.value(const []);
-
-  @override
-  Future<void> create({
-    required ExpenseEntry expense,
-    String? coveringEnvelopeId,
-  }) async {}
-
-  @override
-  Future<void> update({
-    required ExpenseEntry expense,
-    String? coveringEnvelopeId,
-  }) async {}
-
-  @override
-  Future<void> delete(String id) async {}
 }
 
 class _FakeAccountAuthActions implements AccountAuthActions {
@@ -123,8 +80,6 @@ ProviderContainer _container() {
       isSignedInProvider.overrideWithValue(true),
       isPasswordRecoveryProvider.overrideWithValue(false),
       currentUserIdProvider.overrideWithValue('u1'),
-      envelopeRepositoryProvider.overrideWithValue(_FakeEnvelopeRepository()),
-      expenseRepositoryProvider.overrideWithValue(_FakeExpenseRepository()),
       expenseControlRepositoryProvider.overrideWithValue(
         _FakeExpenseControlRepository(),
       ),
@@ -143,7 +98,7 @@ const _oneLineHeightCeiling = 24.0;
 
 void main() {
   testWidgets(
-    'the selected indicator uses colorScheme.primary, and a top border separates the bar from content above (FR-016, FR-018)',
+    'selection is indicated by icon/label color alone, with no pill background, and a top border separates the bar from content above (FR-013, FR-014, FR-018)',
     (tester) async {
       final container = _container();
       addTearDown(container.dispose);
@@ -153,10 +108,23 @@ void main() {
       final context = tester.element(find.byType(NavigationBar));
       final theme = Theme.of(context);
 
-      expect(
-        theme.navigationBarTheme.indicatorColor,
-        theme.colorScheme.primary,
+      expect(theme.navigationBarTheme.indicatorColor, Colors.transparent);
+
+      final selectedIcon = theme.navigationBarTheme.iconTheme!.resolve({
+        WidgetState.selected,
+      })!;
+      final unselectedIcon = theme.navigationBarTheme.iconTheme!.resolve({});
+      expect(selectedIcon.color, theme.colorScheme.primary);
+      expect(unselectedIcon!.color, theme.colorScheme.onSurfaceVariant);
+
+      final selectedLabel = theme.navigationBarTheme.labelTextStyle!.resolve({
+        WidgetState.selected,
+      })!;
+      final unselectedLabel = theme.navigationBarTheme.labelTextStyle!.resolve(
+        {},
       );
+      expect(selectedLabel.color, theme.colorScheme.primary);
+      expect(unselectedLabel!.color, theme.colorScheme.onSurfaceVariant);
 
       // T027 names its top-border wrapper with this key so the test
       // doesn't have to guess which widget/decoration shape implements it.
@@ -166,6 +134,29 @@ void main() {
       final decoration = borderBox.decoration as BoxDecoration;
       final semantic = theme.extension<AppSemanticColors>()!;
       expect(decoration.border?.top.color, semantic.border1);
+    },
+  );
+
+  testWidgets(
+    'switching tabs moves the selected color without leaving a residual indicator shape (FR-013, SC-005)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      for (final label in _tabLabels) {
+        if (label != _tabLabels.first) {
+          await tester.tap(find.text(label).last);
+          await tester.pumpAndSettle();
+        }
+
+        final navBar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+        final context = tester.element(find.byType(NavigationBar));
+        final theme = Theme.of(context);
+        expect(theme.navigationBarTheme.indicatorColor, Colors.transparent);
+        expect(navBar.selectedIndex, _tabLabels.indexOf(label));
+      }
     },
   );
 

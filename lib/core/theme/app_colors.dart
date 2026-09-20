@@ -29,6 +29,10 @@ class AppColors {
 
   // Dark
   static const darkPrimary = Color(0xFF3B8DF8);
+  // Bottom-nav selected-icon/label color in dark mode — lighter than
+  // darkPrimary so it reads clearly against darkSurface/darkBgApp
+  // (theme-tokens.json's primaryAccentText token).
+  static const darkPrimaryAccentText = Color(0xFF6AADFF);
   // Reused bgApp token, not white — white-on-primary measures 3.31:1 and
   // fails AA; bgApp-on-primary measures 5.40:1 (research.md §5).
   static const darkOnPrimary = Color(0xFF1A1714);

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/features/expense_control/domain/expense_control_icons.dart';
 import 'package:finance/features/expense_control/presentation/widgets/icon_picker.dart';
 
 void main() {
-  Widget harness({required String? selected, required ValueChanged<String> onSelected}) {
+  Widget harness({
+    required String? selected,
+    required ValueChanged<String> onSelected,
+  }) {
     return MaterialApp(
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,

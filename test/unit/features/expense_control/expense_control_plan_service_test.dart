@@ -9,6 +9,7 @@ ExpenseControlItem _item({
   double? value,
   int sortOrder = 0,
   String name = 'Item',
+  int balance = 0,
 }) {
   return ExpenseControlItem(
     id: id,
@@ -20,6 +21,7 @@ ExpenseControlItem _item({
     sortOrder: sortOrder,
     allocationMethod: method,
     allocationValue: value,
+    balance: balance,
   );
 }
 
@@ -203,5 +205,33 @@ void main() {
         expect(service.isNestingAllowed(items, 'child'), isFalse);
       },
     );
+  });
+
+  group('computeItemBalance (FR-001)', () {
+    test('a leaf node returns its own stored balance', () {
+      final items = [_item(id: 'leaf', balance: 150000)];
+      final node = service.buildTree(items).single;
+      expect(service.computeItemBalance(node), 150000);
+    });
+
+    test(
+      'a group node with 2+ children returns the live sum of their balances, not its own stored value',
+      () {
+        final items = [
+          _item(id: 'group', balance: 999999),
+          _item(id: 'child1', parentId: 'group', balance: 100000),
+          _item(id: 'child2', parentId: 'group', balance: 25000),
+        ];
+        final node = service.buildTree(items).single;
+        expect(service.computeItemBalance(node), 125000);
+      },
+    );
+
+    test('a group with zero children returns 0', () {
+      final items = [_item(id: 'empty', balance: 0)];
+      final node = service.buildTree(items).single;
+      expect(node.isGroup, isFalse);
+      expect(service.computeItemBalance(node), 0);
+    });
   });
 }

@@ -21,6 +21,7 @@ ExpenseControlItem _item(String id, {String? parentId, String name = 'Item'}) {
         ? ExpenseAllocationMethod.percentage
         : null,
     allocationValue: parentId == null ? 20 : null,
+    balance: 0,
   );
 }
 

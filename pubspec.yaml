@@ -83,6 +83,11 @@ dev_dependencies:
   drift_dev: ^2.22.1
   riverpod_generator: ^2.6.3
 
+  # Was already an undeclared transitive dependency via drift/drift_flutter;
+  # declared explicitly since the v2→v3 migration integration test seeds a
+  # raw SQLite fixture directly (spec.md SC-007)
+  sqlite3: ^2.9.4
+
   # App icon and splash screen generation (dev-time only, no runtime dependency)
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.7
