@@ -35,6 +35,27 @@ class ExpenseControlValidation {
   final double? violatingTotal;
 }
 
+/// Result of [ExpenseControlPlanService.computeIncomeAllocation] — how much
+/// of one income save each leaf item received, and how much (if any)
+/// remains unallocated (spec.md FR-012/FR-013).
+class IncomeAllocationResult {
+  const IncomeAllocationResult({
+    required this.deltas,
+    required this.unallocatedAmount,
+  });
+
+  /// Leaf item id → amount to add to that item's stored `balance`. Only
+  /// entries with a positive amount are present — a leaf that received
+  /// nothing (never reached because the sequence already halted) has no
+  /// entry here at all.
+  final Map<String, int> deltas;
+
+  /// Income left over after both the main sequential pass and the
+  /// savings-receiver step — `0` in the common case; `> 0` only when no
+  /// leaf was marked as the savings receiver and a leftover existed.
+  final int unallocatedAmount;
+}
+
 /// Pure Dart — no Flutter/Drift imports (Constitution Recommended
 /// Architecture). Owns tree-building, totals, percentage-budget validation
 /// (FR-007/FR-008/FR-012), and the one-level nesting cap (FR-002).
@@ -164,6 +185,65 @@ class ExpenseControlPlanService {
   int computeItemBalance(ExpenseControlNode node) {
     if (!node.isGroup) return node.item.balance;
     return node.children.fold<int>(0, (sum, child) => sum + child.balance);
+  }
+
+  /// Flattens [tree] into every leaf, in the exact order the tree is
+  /// already displayed: top-level nodes in their own order, with a group's
+  /// children interleaved at that group's position in their own order —
+  /// never "all top-level leaves then all group children."
+  List<ExpenseControlItem> _flattenLeaves(List<ExpenseControlNode> tree) {
+    return [
+      for (final node in tree)
+        if (node.isGroup) ...node.children else node.item,
+    ];
+  }
+
+  /// Distributes [totalIncome] sequentially across every leaf in [tree], in
+  /// display order, per each leaf's own formula (percentage of
+  /// [totalIncome], or a fixed amount) — spec.md FR-005/FR-006/FR-007. If a
+  /// leaf can't be fully covered by the income remaining at its turn, it
+  /// receives whatever remains and the sequence halts immediately; no
+  /// later leaf receives anything. Any income left over after every leaf
+  /// has been processed is added to the sole leaf marked
+  /// [ExpenseControlItem.isSavingsReceiver] (FR-012), or left unallocated
+  /// if none is marked (FR-013). If more than one leaf is transiently
+  /// marked (an accepted, rare multi-device sync race — spec.md Edge
+  /// Cases), only the first in display order receives it.
+  IncomeAllocationResult computeIncomeAllocation(
+    List<ExpenseControlNode> tree,
+    int totalIncome,
+  ) {
+    final leaves = _flattenLeaves(tree);
+    final deltas = <String, int>{};
+    var remaining = totalIncome;
+
+    for (final leaf in leaves) {
+      if (remaining <= 0) break;
+      final share = switch (leaf.allocationMethod) {
+        ExpenseAllocationMethod.fixed => leaf.allocationValue!.round(),
+        ExpenseAllocationMethod.percentage =>
+          (totalIncome * leaf.allocationValue! / 100).round(),
+        null => 0,
+      };
+      final allocated = share <= remaining ? share : remaining;
+      if (allocated > 0) {
+        deltas[leaf.id] = allocated;
+        remaining -= allocated;
+      }
+      if (allocated < share) break;
+    }
+
+    if (remaining > 0) {
+      for (final leaf in leaves) {
+        if (leaf.isSavingsReceiver) {
+          deltas[leaf.id] = (deltas[leaf.id] ?? 0) + remaining;
+          remaining = 0;
+          break;
+        }
+      }
+    }
+
+    return IncomeAllocationResult(deltas: deltas, unallocatedAmount: remaining);
   }
 
   /// FR-002: a row that is itself a child (non-null `parentId`) MUST NOT be

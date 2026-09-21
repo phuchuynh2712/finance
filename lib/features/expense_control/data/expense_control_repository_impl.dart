@@ -35,6 +35,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
       },
       allocationValue: row.allocationValue,
       balance: row.balance,
+      isSavingsReceiver: row.isSavingsReceiver,
     );
   }
 
@@ -78,6 +79,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
     'allocation_method': item.allocationMethod?.name,
     'allocation_value': item.allocationValue,
     'balance': item.balance,
+    'is_savings_receiver': item.isSavingsReceiver,
   };
 
   @override
@@ -122,6 +124,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
           const ExpenseControlItemsCompanion(
             allocationMethod: Value(null),
             allocationValue: Value(null),
+            isSavingsReceiver: Value(false),
           ),
         );
         await _appendOutbox(
@@ -144,6 +147,7 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
               sortOrder: Value(item.sortOrder),
               allocationMethod: Value(_toTableMethod(item.allocationMethod)),
               allocationValue: Value(item.allocationValue),
+              isSavingsReceiver: Value(item.isSavingsReceiver),
             ),
           );
       await _appendOutbox(item.id, SyncOperation.insert, _payloadOf(item));
@@ -235,6 +239,9 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
             allocationValue: edit.value == null
                 ? const Value.absent()
                 : Value(edit.value),
+            isSavingsReceiver: edit.isSavingsReceiver == null
+                ? const Value.absent()
+                : Value(edit.isSavingsReceiver!),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -245,7 +252,53 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
           if (edit.description != null) 'description': edit.description,
           if (edit.method != null) 'allocation_method': edit.method!.name,
           if (edit.value != null) 'allocation_value': edit.value,
+          if (edit.isSavingsReceiver != null)
+            'is_savings_receiver': edit.isSavingsReceiver,
         });
+      }
+    });
+  }
+
+  @override
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {
+    await _db.transaction(() async {
+      final now = DateTime.now();
+      for (final entry in balanceDeltas.entries) {
+        final itemId = entry.key;
+        final delta = entry.value;
+        // A single atomic `balance = balance + delta` statement — not a
+        // read-then-write pair — so a concurrent write to the same row
+        // within this transaction window can never be silently lost
+        // (Constitution Principle II: money-math correctness).
+        //
+        // `customUpdate` (not `customStatement`) is required here: a raw
+        // `customStatement` writes to SQLite correctly but does NOT notify
+        // Drift's reactive `.watch()` streams, since Drift can't infer
+        // which table a raw statement touches — `watchAll()`'s stream
+        // would silently never re-emit after this write, even though the
+        // data itself is correct (caught during T036's manual walkthrough:
+        // "Thu chi" balances stayed at 0 on screen despite the DB holding
+        // the right values). `updates: {expenseControlItems}` tells Drift
+        // exactly which table changed so dependent streams refresh.
+        await _db.customUpdate(
+          'UPDATE expense_control_items SET balance = balance + ?, '
+          'updated_at = ? WHERE id = ?',
+          variables: [
+            Variable(delta),
+            Variable(now.millisecondsSinceEpoch ~/ 1000),
+            Variable(itemId),
+          ],
+          updates: {_db.expenseControlItems},
+          updateKind: UpdateKind.update,
+        );
+        final row = await (_db.select(
+          _db.expenseControlItems,
+        )..where((r) => r.id.equals(itemId))).getSingle();
+        await _appendOutbox(
+          itemId,
+          SyncOperation.update,
+          _payloadOf(_toDomain(row)),
+        );
       }
     });
   }

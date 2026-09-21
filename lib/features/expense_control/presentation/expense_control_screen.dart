@@ -469,6 +469,50 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
                     ),
                   ),
                 ),
+              // FR-008/FR-010: only ever shown for a leaf (a group has no
+              // formula section at all, per the isFormulaEditable gate
+              // above it already sits inside).
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.savingsReceiverToggleLabel),
+                value: state.isSavingsReceiver,
+                onChanged: controller.setIsSavingsReceiver,
+              ),
+              if (state.savingsReceiverRejected)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.savingsReceiverBlockedError,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              // FR-011, per spec.md Clarifications: shown on THIS dialog
+              // when it is creating a child under a parent that currently
+              // holds the savings-receiver mark — the mark will be cleared
+              // the moment this child is saved.
+              if (params.existingItem == null &&
+                  params.parentId != null &&
+                  (ref
+                          .watch(expenseControlItemsStreamProvider)
+                          .valueOrNull
+                          ?.any(
+                            (item) =>
+                                item.id == params.parentId &&
+                                item.isSavingsReceiver,
+                          ) ??
+                      false))
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    l10n.savingsReceiverAutoClearWarning,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
             ],
           ],
         ),

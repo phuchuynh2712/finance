@@ -110,5 +110,21 @@
   "incomePlaceholderTitle": "Income",
   "expensePlaceholderTitle": "Expense",
   "transactionHistoryPlaceholderTitle": "Transaction History",
-  "overviewPlaceholderTitle": "Overview"
+  "overviewPlaceholderTitle": "Overview",
+  "incomeScreenTitle": "Income",
+  "incomeTotalLabel": "Total income",
+  "incomeSourcesEyebrow": "Income sources",
+  "incomeSourceNameLabel": "Income source name",
+  "incomeSourceAmountLabel": "Amount",
+  "incomeSourceDeleteSemantic": "Delete income source {name}",
+  "incomeAddSourceAction": "Add another income source",
+  "incomeSaveAction": "Save income",
+  "incomeEmptyStateMessage": "No items yet. Set them up in Expense Control first.",
+  "incomeErrorInvalidTotal": "Please enter a total income amount greater than 0.",
+  "incomeErrorMissingRowName": "Please name this income source.",
+  "incomeErrorMissingRowAmount": "Please enter an amount for this income source.",
+  "incomeErrorWriteFailedPrefix": "Could not save the income: {error}",
+  "savingsReceiverToggleLabel": "Receives leftover income",
+  "savingsReceiverBlockedError": "Only one item can be marked as the savings receiver. Unmark the other item first.",
+  "savingsReceiverAutoClearWarning": "This item currently receives leftover income. Adding a child item will automatically clear that mark."
 }

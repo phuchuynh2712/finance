@@ -22,6 +22,7 @@ ExpenseControlItem _item(String id, {String? parentId, String name = 'Item'}) {
         : null,
     allocationValue: parentId == null ? 20 : null,
     balance: 0,
+    isSavingsReceiver: false,
   );
 }
 

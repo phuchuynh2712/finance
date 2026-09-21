@@ -21,6 +21,7 @@ class ExpenseControlItem {
     required this.allocationMethod,
     required this.allocationValue,
     required this.balance,
+    required this.isSavingsReceiver,
   });
 
   final String id;
@@ -39,6 +40,14 @@ class ExpenseControlItem {
   /// by a future income/expense-recording feature, never by this one.
   final int balance;
 
+  /// Marks this leaf as the sole recipient of any income left over after
+  /// every item's formula has been applied (data-model.md). Meaningless for
+  /// a group — MUST be `false` for any item with children, enforced by
+  /// [clearFormula] the moment a first child is added. At most one item per
+  /// user may have this `true` at any time, enforced at the application
+  /// layer only (spec.md Clarifications) — not a database constraint.
+  final bool isSavingsReceiver;
+
   bool get isTopLevel => parentId == null;
 
   ExpenseControlItem copyWith({
@@ -49,6 +58,7 @@ class ExpenseControlItem {
     ExpenseAllocationMethod? allocationMethod,
     double? allocationValue,
     int? balance,
+    bool? isSavingsReceiver,
   }) {
     return ExpenseControlItem(
       id: id,
@@ -61,12 +71,14 @@ class ExpenseControlItem {
       allocationMethod: allocationMethod ?? this.allocationMethod,
       allocationValue: allocationValue ?? this.allocationValue,
       balance: balance ?? this.balance,
+      isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
     );
   }
 
   /// Returns a copy with the formula cleared — used when this item gains
   /// its first child and stops being a leaf (FR-004). `balance` is
-  /// preserved unchanged (data-model.md).
+  /// preserved unchanged (data-model.md). `isSavingsReceiver` is reset to
+  /// `false` — a group can never hold this mark (FR-011).
   ExpenseControlItem clearFormula() {
     return ExpenseControlItem(
       id: id,
@@ -79,6 +91,7 @@ class ExpenseControlItem {
       allocationMethod: null,
       allocationValue: null,
       balance: balance,
+      isSavingsReceiver: false,
     );
   }
 }
@@ -102,6 +115,7 @@ class PendingItemEdit {
     this.description,
     this.method,
     this.value,
+    this.isSavingsReceiver,
   });
 
   final String? name;
@@ -109,4 +123,8 @@ class PendingItemEdit {
   final String? description;
   final ExpenseAllocationMethod? method;
   final double? value;
+
+  /// `null` means "leave unchanged," matching every other field here — see
+  /// [ExpenseControlItem.isSavingsReceiver] for what the flag itself means.
+  final bool? isSavingsReceiver;
 }

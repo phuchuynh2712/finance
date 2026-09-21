@@ -34,4 +34,15 @@ abstract interface class ExpenseControlRepository {
   /// on a [PendingItemEdit] means "leave that field unchanged," not "clear
   /// it."
   Future<void> saveFormulas(Map<String, PendingItemEdit> changes);
+
+  /// Adds each delta to the named item's existing `balance`, atomically, in
+  /// one transaction with one sync_outbox row per changed item — the
+  /// data-layer half of an income save (FR-005–FR-014). Deltas MUST already
+  /// be non-negative (the allocation algorithm never produces a negative
+  /// delta); this method does not itself validate that. Each increment MUST
+  /// be applied as a single `balance = balance + delta` SQL statement, never
+  /// a read-then-write pair, to avoid losing a concurrent write to the same
+  /// row within the same local transaction window (see the implementation's
+  /// own doc comment for why).
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas);
 }

@@ -1,0 +1,12 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    { "lucideName": "chevron-left", "flutterConstant": "LucideIcons.chevronLeft", "usedIn": "Header — nút quay lại", "sizePx": 22, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696", "tapTargetPx": 44 },
+    { "lucideName": "arrow-up-circle", "flutterConstant": "LucideIcons.arrowUpCircle", "usedIn": "Header icon badge", "sizePx": 17, "colorLight": "success #237A50 on success-soft chip", "colorDark": "#62BB91 on rgba(35,122,80,.16) chip" },
+    { "lucideName": "dynamic (s.icon, ví dụ briefcase, banknote)", "flutterConstant": "n/a — chọn theo loại nguồn thu, xem icons-used.json gốc project", "usedIn": "Icon 32×32 mỗi dòng nguồn thu nhập", "sizePx": 16, "colorLight": "blue-600 on blue-50 chip", "colorDark": "#6AADFF on rgba(59,141,248,.16) chip" },
+    { "lucideName": "trash-2", "flutterConstant": "LucideIcons.trash2", "usedIn": "Nút xoá dòng nguồn thu nhập", "sizePx": 16, "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073", "tapTargetPx": 44 },
+    { "lucideName": "plus", "flutterConstant": "LucideIcons.plus", "usedIn": "Nút 'Thêm nguồn thu nhập khác'", "sizePx": 15, "colorLight": "blue-600 #1A72E0", "colorDark": "#6AADFF" },
+    { "lucideName": "check", "flutterConstant": "LucideIcons.check", "usedIn": "Nút chính 'Lưu thu nhập'", "sizePx": 20, "colorLight": "#FFFFFF", "colorDark": "#FFFFFF" }
+  ]
+}

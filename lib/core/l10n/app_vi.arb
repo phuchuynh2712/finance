@@ -531,5 +531,79 @@
   "overviewPlaceholderTitle": "Tổng quan",
   "@overviewPlaceholderTitle": {
     "description": "Title of the placeholder shown on the Tổng quan tab (FR-017)"
+  },
+  "incomeScreenTitle": "Thu nhập",
+  "@incomeScreenTitle": {
+    "description": "Header title of the income-entry screen (FR-017)"
+  },
+  "incomeTotalLabel": "Tổng thu nhập",
+  "@incomeTotalLabel": {
+    "description": "Label above the running total on the income-entry screen (FR-003)"
+  },
+  "incomeSourcesEyebrow": "Các nguồn thu nhập",
+  "@incomeSourcesEyebrow": {
+    "description": "Eyebrow label above the income source list (reference/thu-nhap-spec.md)"
+  },
+  "incomeSourceNameLabel": "Tên nguồn thu nhập",
+  "@incomeSourceNameLabel": {
+    "description": "Label/placeholder for an income source row's name field (FR-001)"
+  },
+  "incomeSourceAmountLabel": "Số tiền",
+  "@incomeSourceAmountLabel": {
+    "description": "Label/placeholder for an income source row's amount field (FR-001)"
+  },
+  "incomeSourceDeleteSemantic": "Xóa nguồn thu nhập {name}",
+  "@incomeSourceDeleteSemantic": {
+    "description": "Accessibility label for an income source row's delete button (FR-002)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomeAddSourceAction": "Thêm nguồn thu nhập khác",
+  "@incomeAddSourceAction": {
+    "description": "Button to add another income source row (FR-002, Scenario 1)"
+  },
+  "incomeSaveAction": "Lưu thu nhập",
+  "@incomeSaveAction": {
+    "description": "Primary save button on the income-entry screen (FR-005)"
+  },
+  "incomeEmptyStateMessage": "Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát chi tiêu trước.",
+  "@incomeEmptyStateMessage": {
+    "description": "Shown on the income-entry screen when Kiểm soát chi tiêu has zero leaf items (FR-018)"
+  },
+  "incomeErrorInvalidTotal": "Vui lòng nhập số tiền thu nhập lớn hơn 0.",
+  "@incomeErrorInvalidTotal": {
+    "description": "Validation message shown when the total income amount is zero or blank (FR-004, Scenario 5)"
+  },
+  "incomeErrorMissingRowName": "Vui lòng đặt tên cho nguồn thu nhập này.",
+  "@incomeErrorMissingRowName": {
+    "description": "Validation message shown on a row missing its name (FR-004, US2 Scenario 3)"
+  },
+  "incomeErrorMissingRowAmount": "Vui lòng nhập số tiền cho nguồn thu nhập này.",
+  "@incomeErrorMissingRowAmount": {
+    "description": "Validation message shown on a row missing a positive amount (FR-004)"
+  },
+  "incomeErrorWriteFailedPrefix": "Không thể lưu thu nhập: {error}",
+  "@incomeErrorWriteFailedPrefix": {
+    "description": "Shown when persisting the income allocation fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsReceiverToggleLabel": "Nhận phần dư thu nhập",
+  "@savingsReceiverToggleLabel": {
+    "description": "Label for the savings-receiver toggle in the item create/edit dialog (FR-008)"
+  },
+  "savingsReceiverBlockedError": "Chỉ một khoản được đánh dấu nhận phần dư. Hãy bỏ đánh dấu khoản kia trước.",
+  "@savingsReceiverBlockedError": {
+    "description": "Shown when attempting to mark a second item as the savings receiver while one is already marked (FR-009)"
+  },
+  "savingsReceiverAutoClearWarning": "Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.",
+  "@savingsReceiverAutoClearWarning": {
+    "description": "Warning shown on the child-create dialog when the parent currently holds the savings-receiver mark (FR-011, per spec.md Clarifications — shown at the point of child creation)"
   }
 }

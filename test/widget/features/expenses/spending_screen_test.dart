@@ -51,6 +51,9 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {}
+
+  @override
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
 }
 
 ExpenseControlItem _leaf(
@@ -58,6 +61,7 @@ ExpenseControlItem _leaf(
   String? parentId,
   int balance = 0,
   String name = 'Item',
+  bool isSavingsReceiver = false,
 }) {
   return ExpenseControlItem(
     id: id,
@@ -72,6 +76,7 @@ ExpenseControlItem _leaf(
         : null,
     allocationValue: parentId == null ? 20 : null,
     balance: balance,
+    isSavingsReceiver: isSavingsReceiver,
   );
 }
 
@@ -256,7 +261,7 @@ void main() {
   );
 
   testWidgets(
-    'Thu nhập/Chi tiêu buttons and the history row each navigate to a distinct placeholder (FR-007, FR-008, FR-009, US3)',
+    'Chi tiêu button and the history row each navigate to a distinct placeholder (FR-007, FR-008, FR-009, US3)',
     (tester) async {
       final repository = _FakeExpenseControlRepository([_leaf('a')]);
       await tester.pumpWidget(_harness(repository));
@@ -268,17 +273,11 @@ void main() {
       expect(find.text(l10n.spendingExpenseAction), findsOneWidget);
       expect(find.text(l10n.spendingHistoryAction), findsOneWidget);
 
-      await tester.tap(find.text(l10n.spendingIncomeAction));
-      await tester.pumpAndSettle();
-      expect(find.byType(NotAvailablePlaceholderScreen), findsOneWidget);
-      expect(find.text(l10n.incomePlaceholderTitle), findsOneWidget);
-      expect(find.byType(BackButton), findsOneWidget);
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
-
       await tester.tap(find.text(l10n.spendingExpenseAction));
       await tester.pumpAndSettle();
+      expect(find.byType(NotAvailablePlaceholderScreen), findsOneWidget);
       expect(find.text(l10n.expensePlaceholderTitle), findsOneWidget);
+      expect(find.byType(BackButton), findsOneWidget);
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
 
@@ -288,6 +287,23 @@ void main() {
         find.text(l10n.transactionHistoryPlaceholderTitle),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'Thu nhập button navigates to the real income-entry screen, not a placeholder (FR-017)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+
+      await tester.tap(find.text(l10n.spendingIncomeAction));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NotAvailablePlaceholderScreen), findsNothing);
+      expect(find.text(l10n.incomeScreenTitle), findsOneWidget);
     },
   );
 }

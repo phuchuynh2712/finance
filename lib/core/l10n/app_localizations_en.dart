@@ -389,4 +389,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewPlaceholderTitle => 'Overview';
+
+  @override
+  String get incomeScreenTitle => 'Income';
+
+  @override
+  String get incomeTotalLabel => 'Total income';
+
+  @override
+  String get incomeSourcesEyebrow => 'Income sources';
+
+  @override
+  String get incomeSourceNameLabel => 'Income source name';
+
+  @override
+  String get incomeSourceAmountLabel => 'Amount';
+
+  @override
+  String incomeSourceDeleteSemantic(String name) {
+    return 'Delete income source $name';
+  }
+
+  @override
+  String get incomeAddSourceAction => 'Add another income source';
+
+  @override
+  String get incomeSaveAction => 'Save income';
+
+  @override
+  String get incomeEmptyStateMessage =>
+      'No items yet. Set them up in Expense Control first.';
+
+  @override
+  String get incomeErrorInvalidTotal =>
+      'Please enter a total income amount greater than 0.';
+
+  @override
+  String get incomeErrorMissingRowName => 'Please name this income source.';
+
+  @override
+  String get incomeErrorMissingRowAmount =>
+      'Please enter an amount for this income source.';
+
+  @override
+  String incomeErrorWriteFailedPrefix(String error) {
+    return 'Could not save the income: $error';
+  }
+
+  @override
+  String get savingsReceiverToggleLabel => 'Receives leftover income';
+
+  @override
+  String get savingsReceiverBlockedError =>
+      'Only one item can be marked as the savings receiver. Unmark the other item first.';
+
+  @override
+  String get savingsReceiverAutoClearWarning =>
+      'This item currently receives leftover income. Adding a child item will automatically clear that mark.';
 }
