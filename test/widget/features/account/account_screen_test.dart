@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,10 +32,14 @@ class _FakeAccountAuthActions implements AccountAuthActions {
 
   SignOutScope? signOutScope;
   bool biometricEnabled = false;
+  Completer<void>? signOutGate;
+  int signOutCallCount = 0;
 
   @override
   Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {
     signOutScope = scope;
+    signOutCallCount++;
+    if (signOutGate != null) await signOutGate!.future;
   }
 
   @override
@@ -294,4 +300,29 @@ void main() {
 
     expect(fake.signOutScope, SignOutScope.local);
   });
+
+  testWidgets(
+    'shows a spinner and blocks a second tap while sign-out is in flight',
+    (tester) async {
+      final fake = _FakeAccountAuthActions()..signOutGate = Completer<void>();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Đăng xuất'));
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // A second tap while signing out must not call signOut again.
+      await tester.tap(find.text('Đăng xuất'));
+      await tester.pump();
+
+      expect(fake.signOutCallCount, 1);
+
+      fake.signOutGate!.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    },
+  );
 }

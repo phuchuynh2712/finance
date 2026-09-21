@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../core/error/error_mapper.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/widgets/empty_state_view.dart';
@@ -514,6 +515,20 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
                   ),
                 ),
             ],
+            // FR-012: shown inline within the dialog, not via
+            // ScaffoldMessenger/SnackBar — a SnackBar triggered from inside
+            // an AlertDialog can render behind the dialog's modal barrier
+            // and go unseen (research.md/contracts/error_mapper.md Pattern
+            // B still applies: the controller keeps the raw error, this
+            // widget maps it to a friendly message at display time).
+            if (state.errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  mapErrorToMessage(state.errorMessage!, l10n),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
           ],
         ),
       ),

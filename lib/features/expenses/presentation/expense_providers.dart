@@ -21,8 +21,12 @@ class ExpenseFormState {
   final bool isSubmitting;
   final ExpenseSaveError? saveError;
 
-  /// Only set alongside [ExpenseSaveError.writeFailed].
-  final String? writeErrorDetail;
+  /// Only set alongside [ExpenseSaveError.writeFailed] — the underlying
+  /// caught exception, kept as the original `Object` (not `.toString()`'d)
+  /// so the widget-side `ref.listen` can classify it via the shared
+  /// `mapErrorToMessage` mapper at display time (contracts/error_mapper.md
+  /// Pattern B).
+  final Object? writeErrorDetail;
   final bool saved;
 
   ExpenseFormState copyWith({
@@ -31,7 +35,7 @@ class ExpenseFormState {
     String? itemId,
     bool? isSubmitting,
     ExpenseSaveError? saveError,
-    String? writeErrorDetail,
+    Object? writeErrorDetail,
     bool? saved,
     bool clearError = false,
   }) {
@@ -106,7 +110,7 @@ class ExpenseFormController extends StateNotifier<ExpenseFormState> {
     } catch (e) {
       state = state.copyWith(
         saveError: ExpenseSaveError.writeFailed,
-        writeErrorDetail: e.toString(),
+        writeErrorDetail: e,
         isSubmitting: false,
       );
     }
@@ -142,7 +146,13 @@ class ScanFormState {
   final String? itemId;
   final bool isSubmitting;
   final ExpenseSaveError? saveError;
-  final String? writeErrorDetail;
+
+  /// Only set alongside [ExpenseSaveError.writeFailed] — the underlying
+  /// caught exception, kept as the original `Object` (not `.toString()`'d)
+  /// so the widget-side `ref.listen` can classify it via the shared
+  /// `mapErrorToMessage` mapper at display time (contracts/error_mapper.md
+  /// Pattern B).
+  final Object? writeErrorDetail;
   final bool saved;
 
   ScanFormState copyWith({
@@ -150,7 +160,7 @@ class ScanFormState {
     String? itemId,
     bool? isSubmitting,
     ExpenseSaveError? saveError,
-    String? writeErrorDetail,
+    Object? writeErrorDetail,
     bool? saved,
     bool clearError = false,
   }) {
@@ -200,7 +210,7 @@ class ScanFormController extends StateNotifier<ScanFormState> {
     } catch (e) {
       state = state.copyWith(
         saveError: ExpenseSaveError.writeFailed,
-        writeErrorDetail: e.toString(),
+        writeErrorDetail: e,
         isSubmitting: false,
       );
     }

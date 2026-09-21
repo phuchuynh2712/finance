@@ -2,11 +2,11 @@
   "@@locale": "en",
   "appTitle": "Finance Manager",
   "tabOverview": "Overview",
-  "tabSpending": "Income & Expense",
+  "tabSpending": "My Wallet",
   "tabExpenseControl": "Control",
   "tabHistory": "History",
   "tabAccount": "Profile",
-  "signInAppName": "Khai Tam",
+  "signInAppName": "Budget Control",
   "signInAppSubtitle": "Smart income & expense management",
   "signInTitle": "Sign In",
   "signInIdentifierLabel": "Phone number or email",
@@ -142,5 +142,11 @@
   "expenseScanFrameHint": "Fit the receipt in the frame",
   "expenseScanCaptureAction": "Capture receipt",
   "expenseScanRecognizedLabel": "Recognized: {amount} · {merchant}",
-  "expenseScanConfirmAction": "Confirm & save"
+  "expenseScanConfirmAction": "Confirm & save",
+  "errorMapperInvalidCredentials": "Wrong email or password. Please try again.",
+  "errorMapperEmailExists": "This email is already registered. Sign in with your password.",
+  "errorMapperWeakPassword": "This password isn't strong enough. Please choose another one.",
+  "errorMapperRateLimited": "Too many attempts. Please wait a moment and try again.",
+  "errorMapperNetworkFailure": "Couldn't reach the server. Please check your connection and try again.",
+  "errorMapperGeneric": "Something went wrong. Please try again."
 }

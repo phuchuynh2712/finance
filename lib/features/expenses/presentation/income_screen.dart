@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../core/error/error_mapper.dart';
 import '../../../core/formatting/currency_formatter.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
@@ -49,7 +50,7 @@ class IncomeScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              l10n.incomeErrorWriteFailedPrefix(next.writeErrorDetail ?? ''),
+              mapErrorToMessage(next.writeErrorDetail!, l10n),
             ),
           ),
         );

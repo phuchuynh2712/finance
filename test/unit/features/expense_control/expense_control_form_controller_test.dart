@@ -7,9 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
   final List<ExpenseControlItem> created = [];
   final List<ExpenseControlItem> updated = [];
+  Object? throwOnCreate;
 
   @override
-  Future<void> create(ExpenseControlItem item) async => created.add(item);
+  Future<void> create(ExpenseControlItem item) async {
+    if (throwOnCreate != null) throw throwOnCreate!;
+    created.add(item);
+  }
 
   @override
   Future<void> update(ExpenseControlItem item) async => updated.add(item);
@@ -115,6 +119,20 @@ void main() {
     expect(repository.created.single.name, 'Rent');
     expect(repository.created.single.allocationValue, 30);
   });
+
+  test(
+    'a save failure sets state.errorMessage (FR-012 — previously captured but never displayed)',
+    () async {
+      repository.throwOnCreate = Exception('boom');
+      final controller = buildController();
+      controller.setName('Rent');
+      controller.setValue(30);
+      await controller.save();
+      expect(controller.state.errorMessage, isNotNull);
+      expect(controller.state.isSubmitting, isFalse);
+      expect(controller.state.saved, isFalse);
+    },
+  );
 
   test('an over-budget candidate is rejected via the plan service', () async {
     final existing = [

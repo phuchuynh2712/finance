@@ -8,7 +8,7 @@
 
 **Input**: User description: "Tôi muốn thay đổi refactor lại toàn bộ login và signup page, không còn google authen hay các liên quan khác nữa, mà đổi thành sử dụng vân tay để có thể login nhanh. Hiện tại mockup mới tôi để trong folder \"E:\\Study\\design\\handoff\", sau khi đọc hiểu thì hãy copy lại những cái liên quan để sử dụng refer sau này."
 
-**Supersedes**: The Google Sign-In portions of `specs/20260726-register-login-google-oauth/` (previously shipped email/password + Google OAuth), and that feature's FR-015 (mandatory email confirmation before sign-in). This feature removes Google Sign-In entirely — from the Login screen, the Sign Up screen, and the Account screen's account-linking section — replaces it with device biometric (fingerprint/Face ID) quick login, drops the email confirmation gate so sign-up signs a user in immediately, and rebuilds both screens to match the new "Khai Tâm" design handoff.
+**Supersedes**: The Google Sign-In portions of `specs/20260726-register-login-google-oauth/` (previously shipped email/password + Google OAuth), and that feature's FR-015 (mandatory email confirmation before sign-in). This feature removes Google Sign-In entirely — from the Login screen, the Sign Up screen, and the Account screen's account-linking section — replaces it with device biometric (fingerprint/Face ID) quick login, drops the email confirmation gate so sign-up signs a user in immediately, and rebuilds both screens to match the new "Kiểm Soát" design handoff.
 
 **Reference assets**: Design handoff files copied for planning under `reference/` in this feature directory (`login-signup-spec.md`, `icons.json`, `theme-tokens.json`, `README.md`, `app-icon-khai-tam.svg` + `app-icon-khai-tam-green.svg`).
 

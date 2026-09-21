@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   final List<ExpenseControlItem> _items;
   final _controller = StreamController<List<ExpenseControlItem>>.broadcast();
   Map<String, int>? lastAppliedDeltas;
+  Object? throwOnApplyIncomeAllocation;
 
   @override
   Stream<List<ExpenseControlItem>> watchAll() {
@@ -46,6 +48,9 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {
+    if (throwOnApplyIncomeAllocation != null) {
+      throw throwOnApplyIncomeAllocation!;
+    }
     lastAppliedDeltas = balanceDeltas;
   }
 
@@ -158,6 +163,31 @@ void main() {
       expect(find.text('Open'), findsOneWidget);
       expect(repository.lastAppliedDeltas, isNotNull);
       expect(repository.lastAppliedDeltas!['a'], 1000000); // 20% of 5,000,000
+    },
+  );
+
+  testWidgets(
+    'a save failure shows the friendly network-failure message, not raw exception text',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')])
+        ..throwOnApplyIncomeAllocation = const SocketException(
+          'Connection refused',
+        );
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('income-amount-0')),
+        '5000000',
+      );
+      await tester.pump();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      await tester.enterText(find.byType(TextFormField).first, 'Lương chính');
+      await tester.tap(find.text(l10n.incomeSaveAction));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.errorMapperNetworkFailure), findsOneWidget);
     },
   );
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,8 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   /// When set, [recordExpense] awaits this before resolving — lets a test
   /// simulate an in-flight save to assert double-tap prevention.
   Completer<void>? recordExpenseGate;
+
+  Object? throwOnRecordExpense;
 
   @override
   Stream<List<ExpenseControlItem>> watchAll() {
@@ -64,6 +67,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
     lastItemId = itemId;
     lastAmount = amount;
     if (recordExpenseGate != null) await recordExpenseGate!.future;
+    if (throwOnRecordExpense != null) throw throwOnRecordExpense!;
   }
 }
 
@@ -193,6 +197,28 @@ void main() {
       expect(repository.lastItemId, 'a');
       expect(repository.lastAmount, 50000);
       expect(find.text('Open'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a manual-entry save failure shows the friendly network-failure message, not raw exception text',
+    (tester) async {
+      _useTallSurface(tester);
+      final repository = _FakeExpenseControlRepository([
+        _leaf('a', name: 'Ăn uống'),
+      ])..throwOnRecordExpense = const SocketException('Connection refused');
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await _tapKeypadDigits(tester, '50000');
+      await tester.tap(find.text('Ăn uống'));
+      await tester.pump();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      await tester.tap(find.text(l10n.expenseSaveAction));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.errorMapperNetworkFailure), findsOneWidget);
     },
   );
 
@@ -544,6 +570,31 @@ void main() {
         expect(repository.recordExpenseCallCount, 1);
         expect(repository.lastItemId, 'a');
         expect(repository.lastAmount, 450000);
+      },
+    );
+
+    testWidgets(
+      'a save failure shows the friendly network-failure message, not raw exception text',
+      (tester) async {
+        _useTallSurface(tester);
+        final repository = _FakeExpenseControlRepository([
+          _leaf('a', name: 'Ăn uống'),
+        ])..throwOnRecordExpense = const SocketException('Connection refused');
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+        await tester.tap(find.text(l10n.expenseTabScan));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.expenseScanCaptureAction));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Ăn uống'));
+        await tester.pump();
+        await tester.tap(find.text(l10n.expenseScanConfirmAction));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.errorMapperNetworkFailure), findsOneWidget);
       },
     );
   });

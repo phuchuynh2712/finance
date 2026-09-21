@@ -26,7 +26,7 @@ void main() {
 
     expect(l10n.tabExpenseControl, 'Control');
     expect(l10n.tabHistory, 'History');
-    expect(l10n.tabSpending, 'Income & Expense');
+    expect(l10n.tabSpending, 'My Wallet');
     expect(l10n.tabAccount, 'Profile');
     expect(l10n.expenseControlScreenTitle, 'Expense Control');
     expect(

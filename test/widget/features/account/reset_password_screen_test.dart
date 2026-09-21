@@ -100,6 +100,8 @@ void main() {
     await tester.tap(find.text('Đặt lại mật khẩu'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Không thể đặt lại mật khẩu'), findsOneWidget);
+    // Friendly, localized fallback message — not raw exception text.
+    final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+    expect(find.text(l10n.errorMapperGeneric), findsOneWidget);
   });
 }

@@ -59,8 +59,11 @@ class IncomeFormState {
   final String? errorRowId;
 
   /// Only set alongside [IncomeSaveError.writeFailed] — the underlying
-  /// exception's text, for a generic fallback message.
-  final String? writeErrorDetail;
+  /// caught exception, kept as the original `Object` (not `.toString()`'d)
+  /// so the widget-side `ref.listen` can classify it via the shared
+  /// `mapErrorToMessage` mapper at display time (contracts/error_mapper.md
+  /// Pattern B).
+  final Object? writeErrorDetail;
   final bool saved;
 
   int get totalAmount => rows.fold(0, (sum, row) => sum + (row.amount ?? 0));
@@ -70,7 +73,7 @@ class IncomeFormState {
     bool? isSubmitting,
     IncomeSaveError? saveError,
     String? errorRowId,
-    String? writeErrorDetail,
+    Object? writeErrorDetail,
     bool? saved,
     bool clearError = false,
   }) {
@@ -198,7 +201,7 @@ class IncomeFormController extends StateNotifier<IncomeFormState> {
     } catch (e) {
       state = state.copyWith(
         saveError: IncomeSaveError.writeFailed,
-        writeErrorDetail: e.toString(),
+        writeErrorDetail: e,
         isSubmitting: false,
       );
     }

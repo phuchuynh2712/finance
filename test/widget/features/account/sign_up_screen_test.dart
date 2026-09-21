@@ -308,6 +308,11 @@ void main() {
       expect(passwordField.controller!.text, isEmpty);
       expect(confirmPasswordField.controller!.text, isEmpty);
 
+      // Friendly, localized network-failure message — not raw exception
+      // text — via the shared mapper's fallback branch (FR-011).
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(find.text(l10n.errorMapperNetworkFailure), findsOneWidget);
+
       fake.throwOnSignUp = null;
       await tester.enterText(_passwordField, 'password123');
       await tester.enterText(_confirmPasswordField, 'password123');

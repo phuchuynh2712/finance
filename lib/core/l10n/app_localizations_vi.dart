@@ -27,7 +27,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabAccount => 'Hồ sơ';
 
   @override
-  String get signInAppName => 'Khai Tâm';
+  String get signInAppName => 'Kiểm Soát';
 
   @override
   String get signInAppSubtitle => 'Quản lý thu chi thông minh';
@@ -496,4 +496,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get expenseScanConfirmAction => 'Xác nhận & lưu';
+
+  @override
+  String get errorMapperInvalidCredentials =>
+      'Sai email hoặc mật khẩu. Vui lòng thử lại.';
+
+  @override
+  String get errorMapperEmailExists =>
+      'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.';
+
+  @override
+  String get errorMapperWeakPassword =>
+      'Mật khẩu chưa đủ mạnh. Vui lòng chọn mật khẩu khác.';
+
+  @override
+  String get errorMapperRateLimited =>
+      'Bạn đã thử quá nhiều lần. Vui lòng đợi một chút rồi thử lại.';
+
+  @override
+  String get errorMapperNetworkFailure =>
+      'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.';
+
+  @override
+  String get errorMapperGeneric => 'Đã có lỗi xảy ra. Vui lòng thử lại.';
 }

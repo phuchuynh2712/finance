@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_state_provider.dart';
+import '../../../core/error/error_mapper.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import 'sign_up_validation.dart';
@@ -65,7 +66,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       context.go('/sign-in');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = l10n.resetPasswordError(e.toString()));
+      setState(() => _errorMessage = mapErrorToMessage(e, l10n));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

@@ -17,7 +17,7 @@ Token màu dùng ký hiệu `var(--x)` + hex tương ứng — xem `theme-tokens
 | Element | Kích thước | Margin | Font | Màu (sáng) | Màu (tối) |
 |---|---|---|---|---|---|
 | App icon (ảnh) | 72×72px, radius **20px**, overflow hidden | margin: `0 auto 16px` | — | shadow `0 4px 14px rgba(174,128,21,.35)` | shadow `0 4px 14px rgba(0,0,0,.35)` |
-| Tiêu đề "Khai Tâm" | auto | — | 24px / **weight 800** | `fg-1` `#1A1714` | `#FAF8F5` |
+| Tiêu đề "Kiểm Soát" | auto | — | 24px / **weight 800** | `fg-1` `#1A1714` | `#FAF8F5` |
 | Phụ đề "Quản lý thu chi thông minh" | auto | margin-top: 4px | 13px / weight 400 | `fg-3` `#8A8073` | `#8A8073` |
 
 Căn giữa (`text-align: center`) cho cả khối.

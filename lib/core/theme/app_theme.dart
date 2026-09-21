@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_semantic_colors.dart';
 
-/// Light and dark [ThemeData], built from the "Khai Tam" brand palette.
+/// Light and dark [ThemeData], built from the "Kiểm Soát" brand palette.
 /// Hex values, WCAG AA contrast verification, and usage constraints are
 /// documented in research.md §4-§6 and data-model.md's Theme Palette
 /// tables.

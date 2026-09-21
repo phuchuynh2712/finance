@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabOverview => 'Overview';
 
   @override
-  String get tabSpending => 'Income & Expense';
+  String get tabSpending => 'My Wallet';
 
   @override
   String get tabExpenseControl => 'Control';
@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabAccount => 'Profile';
 
   @override
-  String get signInAppName => 'Khai Tam';
+  String get signInAppName => 'Budget Control';
 
   @override
   String get signInAppSubtitle => 'Smart income & expense management';
@@ -498,4 +498,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseScanConfirmAction => 'Confirm & save';
+
+  @override
+  String get errorMapperInvalidCredentials =>
+      'Wrong email or password. Please try again.';
+
+  @override
+  String get errorMapperEmailExists =>
+      'This email is already registered. Sign in with your password.';
+
+  @override
+  String get errorMapperWeakPassword =>
+      'This password isn\'t strong enough. Please choose another one.';
+
+  @override
+  String get errorMapperRateLimited =>
+      'Too many attempts. Please wait a moment and try again.';
+
+  @override
+  String get errorMapperNetworkFailure =>
+      'Couldn\'t reach the server. Please check your connection and try again.';
+
+  @override
+  String get errorMapperGeneric => 'Something went wrong. Please try again.';
 }

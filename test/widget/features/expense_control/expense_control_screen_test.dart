@@ -21,6 +21,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   final _controller = StreamController<List<ExpenseControlItem>>.broadcast();
   final List<Map<String, PendingItemEdit>> savedFormulaBatches = [];
   final List<List<String>> reorderCalls = [];
+  Object? throwOnCreate;
 
   void _emit() => _controller.add(List.of(_items));
 
@@ -35,6 +36,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> create(ExpenseControlItem item) async {
+    if (throwOnCreate != null) throw throwOnCreate!;
     // Mirrors ExpenseControlRepositoryImpl.create()'s real transaction:
     // adding a first child clears the parent's own formula (FR-004) and
     // savings-receiver mark (FR-011).
@@ -199,6 +201,34 @@ void main() {
     expect(repository._items.single.name, 'Rent');
     expect(find.text('Rent'), findsOneWidget);
   });
+
+  testWidgets(
+    'a save failure shows a friendly, localized message on screen (FR-012 — '
+    'previously a silent gap, no widget displayed it at all)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([])
+        ..throwOnCreate = Exception('boom');
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Thêm khoản mới').first);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Tên khoản'),
+        'Rent',
+      );
+      await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '30');
+      await tester.pump();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(find.text(l10n.errorMapperGeneric), findsOneWidget);
+      expect(repository._items, isEmpty);
+    },
+  );
 
   testWidgets(
     'save is blocked at 105% total with the offending total flagged',

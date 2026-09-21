@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// Brand name shown in the Login screen's logo block (FR-003)
   ///
   /// In vi, this message translates to:
-  /// **'Khai Tâm'**
+  /// **'Kiểm Soát'**
   String get signInAppName;
 
   /// Subtitle shown under the brand name on the Login screen (FR-003)
@@ -955,6 +955,42 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Xác nhận & lưu'**
   String get expenseScanConfirmAction;
+
+  /// No description provided for @errorMapperInvalidCredentials.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sai email hoặc mật khẩu. Vui lòng thử lại.'**
+  String get errorMapperInvalidCredentials;
+
+  /// No description provided for @errorMapperEmailExists.
+  ///
+  /// In vi, this message translates to:
+  /// **'Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.'**
+  String get errorMapperEmailExists;
+
+  /// No description provided for @errorMapperWeakPassword.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu chưa đủ mạnh. Vui lòng chọn mật khẩu khác.'**
+  String get errorMapperWeakPassword;
+
+  /// No description provided for @errorMapperRateLimited.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đã thử quá nhiều lần. Vui lòng đợi một chút rồi thử lại.'**
+  String get errorMapperRateLimited;
+
+  /// No description provided for @errorMapperNetworkFailure.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'**
+  String get errorMapperNetworkFailure;
+
+  /// No description provided for @errorMapperGeneric.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã có lỗi xảy ra. Vui lòng thử lại.'**
+  String get errorMapperGeneric;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/auth/auth_state_provider.dart';
+import '../../../core/error/error_mapper.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import 'biometric_enable_prompt.dart';
@@ -79,7 +80,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       if (mounted) ref.read(appLockProvider.notifier).unlock();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = l10n.signInError(e.toString()));
+      setState(() => _errorMessage = mapErrorToMessage(e, l10n));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
