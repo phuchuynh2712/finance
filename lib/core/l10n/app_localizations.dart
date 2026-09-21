@@ -763,6 +763,102 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tổng quan'**
   String get overviewPlaceholderTitle;
+
+  /// Header title of the income-entry screen (FR-017)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập'**
+  String get incomeScreenTitle;
+
+  /// Label above the running total on the income-entry screen (FR-003)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng thu nhập'**
+  String get incomeTotalLabel;
+
+  /// Eyebrow label above the income source list (reference/thu-nhap-spec.md)
+  ///
+  /// In vi, this message translates to:
+  /// **'Các nguồn thu nhập'**
+  String get incomeSourcesEyebrow;
+
+  /// Label/placeholder for an income source row's name field (FR-001)
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên nguồn thu nhập'**
+  String get incomeSourceNameLabel;
+
+  /// Label/placeholder for an income source row's amount field (FR-001)
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền'**
+  String get incomeSourceAmountLabel;
+
+  /// Accessibility label for an income source row's delete button (FR-002)
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa nguồn thu nhập {name}'**
+  String incomeSourceDeleteSemantic(String name);
+
+  /// Button to add another income source row (FR-002, Scenario 1)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm nguồn thu nhập khác'**
+  String get incomeAddSourceAction;
+
+  /// Primary save button on the income-entry screen (FR-005)
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu thu nhập'**
+  String get incomeSaveAction;
+
+  /// Shown on the income-entry screen when Kiểm soát chi tiêu has zero leaf items (FR-018)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát chi tiêu trước.'**
+  String get incomeEmptyStateMessage;
+
+  /// Validation message shown when the total income amount is zero or blank (FR-004, Scenario 5)
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập số tiền thu nhập lớn hơn 0.'**
+  String get incomeErrorInvalidTotal;
+
+  /// Validation message shown on a row missing its name (FR-004, US2 Scenario 3)
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng đặt tên cho nguồn thu nhập này.'**
+  String get incomeErrorMissingRowName;
+
+  /// Validation message shown on a row missing a positive amount (FR-004)
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập số tiền cho nguồn thu nhập này.'**
+  String get incomeErrorMissingRowAmount;
+
+  /// Shown when persisting the income allocation fails
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu thu nhập: {error}'**
+  String incomeErrorWriteFailedPrefix(String error);
+
+  /// Label for the savings-receiver toggle in the item create/edit dialog (FR-008)
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận phần dư thu nhập'**
+  String get savingsReceiverToggleLabel;
+
+  /// Shown when attempting to mark a second item as the savings receiver while one is already marked (FR-009)
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉ một khoản được đánh dấu nhận phần dư. Hãy bỏ đánh dấu khoản kia trước.'**
+  String get savingsReceiverBlockedError;
+
+  /// Warning shown on the child-create dialog when the parent currently holds the savings-receiver mark (FR-011, per spec.md Clarifications — shown at the point of child creation)
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.'**
+  String get savingsReceiverAutoClearWarning;
 }
 
 class _AppLocalizationsDelegate

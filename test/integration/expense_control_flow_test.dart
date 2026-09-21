@@ -42,6 +42,7 @@ void main() {
           allocationMethod: ExpenseAllocationMethod.fixed,
           allocationValue: 5000000,
           balance: 0,
+          isSavingsReceiver: false,
         ),
       );
       await repository.create(
@@ -56,6 +57,7 @@ void main() {
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 30,
           balance: 0,
+          isSavingsReceiver: false,
         ),
       );
 
@@ -74,6 +76,7 @@ void main() {
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 15,
           balance: 0,
+          isSavingsReceiver: false,
         ),
       );
 

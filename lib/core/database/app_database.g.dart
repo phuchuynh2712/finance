@@ -116,6 +116,21 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isSavingsReceiverMeta = const VerificationMeta(
+    'isSavingsReceiver',
+  );
+  @override
+  late final GeneratedColumn<bool> isSavingsReceiver = GeneratedColumn<bool>(
+    'is_savings_receiver',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_savings_receiver" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -163,6 +178,7 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
     allocationMethod,
     allocationValue,
     balance,
+    isSavingsReceiver,
     createdAt,
     updatedAt,
     deletedAt,
@@ -244,6 +260,15 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
         balance.isAcceptableOrUnknown(data['balance']!, _balanceMeta),
       );
     }
+    if (data.containsKey('is_savings_receiver')) {
+      context.handle(
+        _isSavingsReceiverMeta,
+        isSavingsReceiver.isAcceptableOrUnknown(
+          data['is_savings_receiver']!,
+          _isSavingsReceiverMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -314,6 +339,10 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
         DriftSqlType.int,
         data['${effectivePrefix}balance'],
       )!,
+      isSavingsReceiver: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_savings_receiver'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -356,6 +385,7 @@ class ExpenseControlItemRow extends DataClass
   final ExpenseAllocationMethod? allocationMethod;
   final double? allocationValue;
   final int balance;
+  final bool isSavingsReceiver;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -370,6 +400,7 @@ class ExpenseControlItemRow extends DataClass
     this.allocationMethod,
     this.allocationValue,
     required this.balance,
+    required this.isSavingsReceiver,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -399,6 +430,7 @@ class ExpenseControlItemRow extends DataClass
       map['allocation_value'] = Variable<double>(allocationValue);
     }
     map['balance'] = Variable<int>(balance);
+    map['is_savings_receiver'] = Variable<bool>(isSavingsReceiver);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -427,6 +459,7 @@ class ExpenseControlItemRow extends DataClass
           ? const Value.absent()
           : Value(allocationValue),
       balance: Value(balance),
+      isSavingsReceiver: Value(isSavingsReceiver),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -452,6 +485,7 @@ class ExpenseControlItemRow extends DataClass
           .fromJson(serializer.fromJson<String?>(json['allocationMethod'])),
       allocationValue: serializer.fromJson<double?>(json['allocationValue']),
       balance: serializer.fromJson<int>(json['balance']),
+      isSavingsReceiver: serializer.fromJson<bool>(json['isSavingsReceiver']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -475,6 +509,7 @@ class ExpenseControlItemRow extends DataClass
       ),
       'allocationValue': serializer.toJson<double?>(allocationValue),
       'balance': serializer.toJson<int>(balance),
+      'isSavingsReceiver': serializer.toJson<bool>(isSavingsReceiver),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -492,6 +527,7 @@ class ExpenseControlItemRow extends DataClass
     Value<ExpenseAllocationMethod?> allocationMethod = const Value.absent(),
     Value<double?> allocationValue = const Value.absent(),
     int? balance,
+    bool? isSavingsReceiver,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -510,6 +546,7 @@ class ExpenseControlItemRow extends DataClass
         ? allocationValue.value
         : this.allocationValue,
     balance: balance ?? this.balance,
+    isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -532,6 +569,9 @@ class ExpenseControlItemRow extends DataClass
           ? data.allocationValue.value
           : this.allocationValue,
       balance: data.balance.present ? data.balance.value : this.balance,
+      isSavingsReceiver: data.isSavingsReceiver.present
+          ? data.isSavingsReceiver.value
+          : this.isSavingsReceiver,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -551,6 +591,7 @@ class ExpenseControlItemRow extends DataClass
           ..write('allocationMethod: $allocationMethod, ')
           ..write('allocationValue: $allocationValue, ')
           ..write('balance: $balance, ')
+          ..write('isSavingsReceiver: $isSavingsReceiver, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -570,6 +611,7 @@ class ExpenseControlItemRow extends DataClass
     allocationMethod,
     allocationValue,
     balance,
+    isSavingsReceiver,
     createdAt,
     updatedAt,
     deletedAt,
@@ -588,6 +630,7 @@ class ExpenseControlItemRow extends DataClass
           other.allocationMethod == this.allocationMethod &&
           other.allocationValue == this.allocationValue &&
           other.balance == this.balance &&
+          other.isSavingsReceiver == this.isSavingsReceiver &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -605,6 +648,7 @@ class ExpenseControlItemsCompanion
   final Value<ExpenseAllocationMethod?> allocationMethod;
   final Value<double?> allocationValue;
   final Value<int> balance;
+  final Value<bool> isSavingsReceiver;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -620,6 +664,7 @@ class ExpenseControlItemsCompanion
     this.allocationMethod = const Value.absent(),
     this.allocationValue = const Value.absent(),
     this.balance = const Value.absent(),
+    this.isSavingsReceiver = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -636,6 +681,7 @@ class ExpenseControlItemsCompanion
     this.allocationMethod = const Value.absent(),
     this.allocationValue = const Value.absent(),
     this.balance = const Value.absent(),
+    this.isSavingsReceiver = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -655,6 +701,7 @@ class ExpenseControlItemsCompanion
     Expression<String>? allocationMethod,
     Expression<double>? allocationValue,
     Expression<int>? balance,
+    Expression<bool>? isSavingsReceiver,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -671,6 +718,7 @@ class ExpenseControlItemsCompanion
       if (allocationMethod != null) 'allocation_method': allocationMethod,
       if (allocationValue != null) 'allocation_value': allocationValue,
       if (balance != null) 'balance': balance,
+      if (isSavingsReceiver != null) 'is_savings_receiver': isSavingsReceiver,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -689,6 +737,7 @@ class ExpenseControlItemsCompanion
     Value<ExpenseAllocationMethod?>? allocationMethod,
     Value<double?>? allocationValue,
     Value<int>? balance,
+    Value<bool>? isSavingsReceiver,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -705,6 +754,7 @@ class ExpenseControlItemsCompanion
       allocationMethod: allocationMethod ?? this.allocationMethod,
       allocationValue: allocationValue ?? this.allocationValue,
       balance: balance ?? this.balance,
+      isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -749,6 +799,9 @@ class ExpenseControlItemsCompanion
     if (balance.present) {
       map['balance'] = Variable<int>(balance.value);
     }
+    if (isSavingsReceiver.present) {
+      map['is_savings_receiver'] = Variable<bool>(isSavingsReceiver.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -777,6 +830,7 @@ class ExpenseControlItemsCompanion
           ..write('allocationMethod: $allocationMethod, ')
           ..write('allocationValue: $allocationValue, ')
           ..write('balance: $balance, ')
+          ..write('isSavingsReceiver: $isSavingsReceiver, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -1297,6 +1351,7 @@ typedef $$ExpenseControlItemsTableCreateCompanionBuilder =
       Value<ExpenseAllocationMethod?> allocationMethod,
       Value<double?> allocationValue,
       Value<int> balance,
+      Value<bool> isSavingsReceiver,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -1314,6 +1369,7 @@ typedef $$ExpenseControlItemsTableUpdateCompanionBuilder =
       Value<ExpenseAllocationMethod?> allocationMethod,
       Value<double?> allocationValue,
       Value<int> balance,
+      Value<bool> isSavingsReceiver,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -1381,6 +1437,11 @@ class $$ExpenseControlItemsTableFilterComposer
 
   ColumnFilters<int> get balance => $composableBuilder(
     column: $table.balance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSavingsReceiver => $composableBuilder(
+    column: $table.isSavingsReceiver,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1459,6 +1520,11 @@ class $$ExpenseControlItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isSavingsReceiver => $composableBuilder(
+    column: $table.isSavingsReceiver,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1520,6 +1586,11 @@ class $$ExpenseControlItemsTableAnnotationComposer
 
   GeneratedColumn<int> get balance =>
       $composableBuilder(column: $table.balance, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSavingsReceiver => $composableBuilder(
+    column: $table.isSavingsReceiver,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1585,6 +1656,7 @@ class $$ExpenseControlItemsTableTableManager
                     const Value.absent(),
                 Value<double?> allocationValue = const Value.absent(),
                 Value<int> balance = const Value.absent(),
+                Value<bool> isSavingsReceiver = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -1600,6 +1672,7 @@ class $$ExpenseControlItemsTableTableManager
                 allocationMethod: allocationMethod,
                 allocationValue: allocationValue,
                 balance: balance,
+                isSavingsReceiver: isSavingsReceiver,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -1618,6 +1691,7 @@ class $$ExpenseControlItemsTableTableManager
                     const Value.absent(),
                 Value<double?> allocationValue = const Value.absent(),
                 Value<int> balance = const Value.absent(),
+                Value<bool> isSavingsReceiver = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -1633,6 +1707,7 @@ class $$ExpenseControlItemsTableTableManager
                 allocationMethod: allocationMethod,
                 allocationValue: allocationValue,
                 balance: balance,
+                isSavingsReceiver: isSavingsReceiver,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

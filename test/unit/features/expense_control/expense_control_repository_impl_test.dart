@@ -25,6 +25,7 @@ ExpenseControlItem _leaf(
     allocationMethod: method,
     allocationValue: value,
     balance: 0,
+    isSavingsReceiver: false,
   );
 }
 
@@ -103,6 +104,7 @@ void main() {
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 15,
           balance: 0,
+          isSavingsReceiver: false,
         ),
       );
 
@@ -125,4 +127,94 @@ void main() {
       expect(remaining, isEmpty);
     },
   );
+
+  group('applyIncomeAllocation (FR-005–FR-014)', () {
+    test(
+      'adds each delta to the named item\'s existing balance, leaves others untouched',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b'));
+        await repository.create(_leaf('c'));
+
+        await repository.applyIncomeAllocation({'a': 100000, 'b': 250000});
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, 100000);
+        expect(all.firstWhere((i) => i.id == 'b').balance, 250000);
+        expect(all.firstWhere((i) => i.id == 'c').balance, 0);
+      },
+    );
+
+    test(
+      'a second call adds on top of the first, rather than overwriting',
+      () async {
+        await repository.create(_leaf('a'));
+
+        await repository.applyIncomeAllocation({'a': 100000});
+        await repository.applyIncomeAllocation({'a': 50000});
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, 150000);
+      },
+    );
+
+    test('appends one sync_outbox row per changed item', () async {
+      await repository.create(_leaf('a'));
+      await repository.create(_leaf('b'));
+
+      final before = await db.select(db.syncOutbox).get();
+      await repository.applyIncomeAllocation({'a': 100000, 'b': 200000});
+      final after = await db.select(db.syncOutbox).get();
+
+      expect(after.length - before.length, 2);
+    });
+
+    test(
+      'the balance increment is a single atomic SQL statement, not a read-then-write pair — two concurrent calls to the same item never lose an increment',
+      () async {
+        await repository.create(_leaf('a'));
+
+        // Simulates a race: if the increment were read-then-write, issuing
+        // both concurrently (same starting balance read by both) would
+        // apply only one of the two deltas. A single atomic
+        // `balance = balance + delta` statement per call makes both land
+        // regardless of interleaving.
+        await Future.wait([
+          repository.applyIncomeAllocation({'a': 100000}),
+          repository.applyIncomeAllocation({'a': 200000}),
+        ]);
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, 300000);
+      },
+    );
+
+    test('an empty delta map is a valid no-op', () async {
+      await repository.create(_leaf('a'));
+      await repository.applyIncomeAllocation({});
+      final all = await repository.getAll();
+      expect(all.firstWhere((i) => i.id == 'a').balance, 0);
+    });
+
+    test(
+      'notifies watchAll() reactive streams of the balance change '
+      '(regression: raw customStatement writes are invisible to '
+      'Drift\'s stream invalidation — this must use customUpdate)',
+      () async {
+        await repository.create(_leaf('a'));
+
+        final emissions = <int>[];
+        final subscription = repository.watchAll().listen((items) {
+          emissions.add(items.firstWhere((i) => i.id == 'a').balance);
+        });
+        await pumpEventQueue();
+
+        await repository.applyIncomeAllocation({'a': 100000});
+        await pumpEventQueue();
+
+        await subscription.cancel();
+        expect(emissions, contains(100000));
+      },
+    );
+  });
 }

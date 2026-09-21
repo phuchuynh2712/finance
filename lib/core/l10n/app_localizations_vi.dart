@@ -388,4 +388,62 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overviewPlaceholderTitle => 'Tổng quan';
+
+  @override
+  String get incomeScreenTitle => 'Thu nhập';
+
+  @override
+  String get incomeTotalLabel => 'Tổng thu nhập';
+
+  @override
+  String get incomeSourcesEyebrow => 'Các nguồn thu nhập';
+
+  @override
+  String get incomeSourceNameLabel => 'Tên nguồn thu nhập';
+
+  @override
+  String get incomeSourceAmountLabel => 'Số tiền';
+
+  @override
+  String incomeSourceDeleteSemantic(String name) {
+    return 'Xóa nguồn thu nhập $name';
+  }
+
+  @override
+  String get incomeAddSourceAction => 'Thêm nguồn thu nhập khác';
+
+  @override
+  String get incomeSaveAction => 'Lưu thu nhập';
+
+  @override
+  String get incomeEmptyStateMessage =>
+      'Chưa có khoản nào. Hãy tạo khoản trong tab Kiểm soát chi tiêu trước.';
+
+  @override
+  String get incomeErrorInvalidTotal =>
+      'Vui lòng nhập số tiền thu nhập lớn hơn 0.';
+
+  @override
+  String get incomeErrorMissingRowName =>
+      'Vui lòng đặt tên cho nguồn thu nhập này.';
+
+  @override
+  String get incomeErrorMissingRowAmount =>
+      'Vui lòng nhập số tiền cho nguồn thu nhập này.';
+
+  @override
+  String incomeErrorWriteFailedPrefix(String error) {
+    return 'Không thể lưu thu nhập: $error';
+  }
+
+  @override
+  String get savingsReceiverToggleLabel => 'Nhận phần dư thu nhập';
+
+  @override
+  String get savingsReceiverBlockedError =>
+      'Chỉ một khoản được đánh dấu nhận phần dư. Hãy bỏ đánh dấu khoản kia trước.';
+
+  @override
+  String get savingsReceiverAutoClearWarning =>
+      'Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.';
 }

@@ -14,6 +14,8 @@ class ExpenseControlFormState {
     this.description,
     this.method = ExpenseAllocationMethod.percentage,
     this.value,
+    this.isSavingsReceiver = false,
+    this.savingsReceiverRejected = false,
     this.isSubmitting = false,
     this.errorMessage,
     this.saved = false,
@@ -26,6 +28,18 @@ class ExpenseControlFormState {
   final String? description;
   final ExpenseAllocationMethod method;
   final double? value;
+
+  /// Staged value of the savings-receiver toggle (FR-008). Only meaningful
+  /// — and only shown by the dialog — when this form is editing/creating a
+  /// leaf ([isFormulaEditable] true or a brand-new item); a group can never
+  /// hold this mark (FR-010).
+  final bool isSavingsReceiver;
+
+  /// FR-009: set when the last attempt to turn the toggle on was rejected
+  /// because a different item already holds the mark — drives the inline
+  /// error message even though [isSavingsReceiver] itself bounces back to
+  /// `false` (the toggle never visually shows an "on" state it can't save).
+  final bool savingsReceiverRejected;
   final bool isSubmitting;
   final String? errorMessage;
   final bool saved;
@@ -43,6 +57,8 @@ class ExpenseControlFormState {
     String? description,
     ExpenseAllocationMethod? method,
     double? value,
+    bool? isSavingsReceiver,
+    bool? savingsReceiverRejected,
     bool? isSubmitting,
     String? errorMessage,
     bool? saved,
@@ -56,6 +72,9 @@ class ExpenseControlFormState {
       description: description ?? this.description,
       method: method ?? this.method,
       value: value ?? this.value,
+      isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
+      savingsReceiverRejected:
+          savingsReceiverRejected ?? this.savingsReceiverRejected,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearErrorMessage
           ? null
@@ -99,6 +118,7 @@ class ExpenseControlFormController
                      existingItem.allocationMethod ??
                      ExpenseAllocationMethod.percentage,
                  value: existingItem.allocationValue,
+                 isSavingsReceiver: existingItem.isSavingsReceiver,
                ),
        );
 
@@ -134,6 +154,36 @@ class ExpenseControlFormController
     clearErrorMessage: true,
   );
 
+  /// FR-009: rejects turning the toggle on while a *different* item already
+  /// holds the mark — the toggle itself bounces back to off (never stages a
+  /// value it can't actually save), but [showSavingsReceiverBlockedError]
+  /// is set so the dialog still shows why, rather than giving no feedback
+  /// at all for the tap.
+  void setIsSavingsReceiver(bool value) {
+    if (value && isSavingsReceiverBlocked) {
+      state = state.copyWith(
+        isSavingsReceiver: false,
+        savingsReceiverRejected: true,
+      );
+      return;
+    }
+    state = state.copyWith(
+      isSavingsReceiver: value,
+      clearErrorMessage: true,
+      savingsReceiverRejected: false,
+    );
+  }
+
+  /// True when an item other than the one this form is editing already
+  /// holds the savings-receiver mark (FR-009) — drives both
+  /// [setIsSavingsReceiver]'s rejection and the dialog's inline explanation
+  /// of why the toggle can't be turned on right now. A group can never hold
+  /// this mark (the invariant [ExpenseControlItem.clearFormula] enforces),
+  /// so no separate leaf/group check is needed here.
+  bool get isSavingsReceiverBlocked => getAllItems().any(
+    (item) => item.id != existingItem?.id && item.isSavingsReceiver,
+  );
+
   bool get isNameValid => state.name.trim().isNotEmpty;
 
   bool get isValueValid =>
@@ -165,13 +215,17 @@ class ExpenseControlFormController
       allocationMethod: state.method,
       allocationValue: state.value,
       balance: existingItem?.balance ?? 0,
+      isSavingsReceiver: existingItem?.isSavingsReceiver ?? false,
     );
     final others = getAllItems().where((item) => item.id != id).toList();
     return planService.validateBudget([...others, candidate]);
   }
 
   bool get canSave =>
-      isNameValid && isValueValid && (budgetValidation?.isValid ?? true);
+      isNameValid &&
+      isValueValid &&
+      (budgetValidation?.isValid ?? true) &&
+      !(state.isSavingsReceiver && isSavingsReceiverBlocked);
 
   int _nextSortOrder() {
     final siblings = getAllItems().where(
@@ -197,6 +251,7 @@ class ExpenseControlFormController
             description: state.description,
             method: state.method,
             value: state.value,
+            isSavingsReceiver: state.isSavingsReceiver,
           ),
         );
       } else {
@@ -215,6 +270,11 @@ class ExpenseControlFormController
               ? state.value
               : existing?.allocationValue,
           balance: existing?.balance ?? 0,
+          // FR-010: a group (existing item being edited with formula
+          // fields hidden) can never hold this mark — only a brand-new
+          // item (which may turn out to be a leaf) carries the staged
+          // toggle value through.
+          isSavingsReceiver: existing == null ? state.isSavingsReceiver : false,
         );
         if (existing != null) {
           await repository.update(item);

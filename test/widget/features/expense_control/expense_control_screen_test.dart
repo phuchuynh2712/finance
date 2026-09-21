@@ -35,6 +35,16 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> create(ExpenseControlItem item) async {
+    // Mirrors ExpenseControlRepositoryImpl.create()'s real transaction:
+    // adding a first child clears the parent's own formula (FR-004) and
+    // savings-receiver mark (FR-011).
+    final parentId = item.parentId;
+    if (parentId != null && !_items.any((i) => i.parentId == parentId)) {
+      final parentIndex = _items.indexWhere((i) => i.id == parentId);
+      if (parentIndex != -1) {
+        _items[parentIndex] = _items[parentIndex].clearFormula();
+      }
+    }
     _items.add(item);
     _emit();
   }
@@ -76,11 +86,15 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
           description: entry.value.description,
           allocationMethod: entry.value.method,
           allocationValue: entry.value.value,
+          isSavingsReceiver: entry.value.isSavingsReceiver,
         );
       }
     }
     _emit();
   }
+
+  @override
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
 }
 
 ExpenseControlItem _leaf(
@@ -99,6 +113,7 @@ ExpenseControlItem _leaf(
     allocationMethod: method,
     allocationValue: value,
     balance: 0,
+    isSavingsReceiver: false,
   );
 }
 
@@ -316,6 +331,7 @@ void main() {
           allocationMethod: ExpenseAllocationMethod.percentage,
           allocationValue: 5,
           balance: 0,
+          isSavingsReceiver: false,
         ),
       ]);
       await tester.pumpWidget(_harness(repository));
@@ -472,6 +488,7 @@ void main() {
             allocationMethod: null,
             allocationValue: null,
             balance: 0,
+            isSavingsReceiver: false,
           ),
           ExpenseControlItem(
             id: 'child',
@@ -484,6 +501,7 @@ void main() {
             allocationMethod: ExpenseAllocationMethod.percentage,
             allocationValue: 5,
             balance: 0,
+            isSavingsReceiver: false,
           ),
         ]);
         await tester.pumpWidget(_harness(repository));
@@ -553,6 +571,183 @@ void main() {
         );
         expect(saveButton.onPressed, isNull);
         expect(container.read(pendingItemEditsProvider), isEmpty);
+      },
+    );
+  });
+
+  group('savings receiver toggle (US3)', () {
+    testWidgets(
+      'the create dialog for a new (leaf) item shows the toggle, off by default (Scenario 1)',
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Thêm khoản mới').first);
+        await tester.pumpAndSettle();
+
+        final toggle = tester.widget<SwitchListTile>(
+          find.byType(SwitchListTile),
+        );
+        expect(toggle.value, isFalse);
+      },
+    );
+
+    testWidgets('the toggle is NOT shown when editing a group (FR-010)', (
+      tester,
+    ) async {
+      final repository = _FakeExpenseControlRepository([
+        ExpenseControlItem(
+          id: 'family',
+          userId: 'u1',
+          parentId: null,
+          name: 'family',
+          iconKey: 'home',
+          description: null,
+          sortOrder: 0,
+          allocationMethod: null,
+          allocationValue: null,
+          balance: 0,
+          isSavingsReceiver: false,
+        ),
+        ExpenseControlItem(
+          id: 'child',
+          userId: 'u1',
+          parentId: 'family',
+          name: 'child',
+          iconKey: 'home',
+          description: null,
+          sortOrder: 0,
+          allocationMethod: ExpenseAllocationMethod.percentage,
+          allocationValue: 5,
+          balance: 0,
+          isSavingsReceiver: false,
+        ),
+      ]);
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.widgetWithIcon(IconButton, LucideIcons.pencil).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SwitchListTile), findsNothing);
+    });
+
+    testWidgets(
+      'marking a leaf item and saving persists isSavingsReceiver: true (Scenario 2)',
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Thêm khoản mới').first);
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Tên khoản'),
+          'Savings',
+        );
+        await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '10');
+        await tester.tap(find.byType(SwitchListTile));
+        await tester.pump();
+
+        await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
+        await tester.pumpAndSettle();
+
+        expect(repository._items.single.isSavingsReceiver, isTrue);
+      },
+    );
+
+    testWidgets(
+      'attempting to mark a second item while one is already marked blocks the save, first item unchanged (Scenario 3, FR-009)',
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          ExpenseControlItem(
+            id: 'first',
+            userId: 'u1',
+            parentId: null,
+            name: 'First',
+            iconKey: 'home',
+            description: null,
+            sortOrder: 0,
+            allocationMethod: ExpenseAllocationMethod.percentage,
+            allocationValue: 10,
+            balance: 0,
+            isSavingsReceiver: true,
+          ),
+          _leaf('second', value: 10),
+        ]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.widgetWithIcon(IconButton, LucideIcons.pencil).last,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(SwitchListTile));
+        await tester.pump();
+
+        // The toggle bounces back to off (never stages a value it can't
+        // save) — but the rejection is still surfaced inline.
+        final toggle = tester.widget<SwitchListTile>(
+          find.byType(SwitchListTile),
+        );
+        expect(toggle.value, isFalse);
+        expect(
+          find.text(
+            'Chỉ một khoản được đánh dấu nhận phần dư. Hãy bỏ đánh dấu khoản kia trước.',
+          ),
+          findsOneWidget,
+        );
+
+        final first = repository._items.firstWhere((i) => i.id == 'first');
+        expect(first.isSavingsReceiver, isTrue);
+      },
+    );
+
+    testWidgets(
+      'opening the add-child dialog for a marked parent shows the auto-clear warning, saving the child clears the parent\'s mark (Scenario 4, FR-011)',
+      (tester) async {
+        final repository = _FakeExpenseControlRepository([
+          ExpenseControlItem(
+            id: 'family',
+            userId: 'u1',
+            parentId: null,
+            name: 'Family',
+            iconKey: 'home',
+            description: null,
+            sortOrder: 0,
+            allocationMethod: ExpenseAllocationMethod.percentage,
+            allocationValue: 10,
+            balance: 0,
+            isSavingsReceiver: true,
+          ),
+        ]);
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Thêm khoản trong Family'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Tên khoản'),
+          'Child',
+        );
+        await tester.enterText(find.widgetWithText(TextField, 'Giá trị'), '5');
+        await tester.pump();
+        await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
+        await tester.pumpAndSettle();
+
+        final family = repository._items.firstWhere((i) => i.id == 'family');
+        expect(family.isSavingsReceiver, isFalse);
       },
     );
   });

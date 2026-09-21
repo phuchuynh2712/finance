@@ -41,6 +41,9 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {}
+
+  @override
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
 }
 
 class _FakeAccountAuthActions implements AccountAuthActions {

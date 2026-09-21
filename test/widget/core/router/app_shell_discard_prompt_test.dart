@@ -92,6 +92,9 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
     }
     _emit();
   }
+
+  @override
+  Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
 }
 
 ExpenseControlItem _leaf(String id, {double value = 10}) {
@@ -106,6 +109,7 @@ ExpenseControlItem _leaf(String id, {double value = 10}) {
     allocationMethod: ExpenseAllocationMethod.percentage,
     allocationValue: value,
     balance: 0,
+    isSavingsReceiver: false,
   );
 }
 

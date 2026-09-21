@@ -15,15 +15,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
-      if (from == 1) {
+      // `onUpgrade` fires ONCE per open with `from` fixed at the database's
+      // actual starting version — it does NOT re-invoke per intermediate
+      // step. A user jumping straight from v1 to v4 (e.g. after not
+      // opening the app for a long time) must still receive every step's
+      // changes in one pass, so each block below is cumulative (`<=`), not
+      // an exclusive `==` — every block whose version gate the starting
+      // version has not yet passed must run, in order.
+      if (from <= 1) {
         await m.createTable(expenseControlItems);
       }
-      if (from == 2) {
+      if (from <= 2) {
         // FR-011, FR-020: add the balance column, then retire Envelope and
         // everything built on it in dependency-safe order (data-model.md's
         // Drop order) — the view first, then tables in FK-dependency order,
@@ -34,6 +41,12 @@ class AppDatabase extends _$AppDatabase {
         await customStatement('DROP TABLE IF EXISTS allocation_events');
         await customStatement('DROP TABLE IF EXISTS expense_entries');
         await customStatement('DROP TABLE IF EXISTS envelopes');
+      }
+      if (from <= 3) {
+        await m.addColumn(
+          expenseControlItems,
+          expenseControlItems.isSavingsReceiver,
+        );
       }
     },
     beforeOpen: (details) async {

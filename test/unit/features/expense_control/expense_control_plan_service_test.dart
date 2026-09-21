@@ -10,6 +10,7 @@ ExpenseControlItem _item({
   int sortOrder = 0,
   String name = 'Item',
   int balance = 0,
+  bool isSavingsReceiver = false,
 }) {
   return ExpenseControlItem(
     id: id,
@@ -22,6 +23,7 @@ ExpenseControlItem _item({
     allocationMethod: method,
     allocationValue: value,
     balance: balance,
+    isSavingsReceiver: isSavingsReceiver,
   );
 }
 

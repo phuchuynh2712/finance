@@ -8,6 +8,7 @@ import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/not_available_placeholder_screen.dart';
 import '../../expense_control/presentation/expense_control_providers.dart';
+import 'income_screen.dart';
 import 'widgets/balance_group_card.dart';
 
 /// Read-only balance hub (FR-001–FR-012): shows every Kiểm soát chi tiêu
@@ -63,11 +64,10 @@ class SpendingScreen extends ConsumerWidget {
                           background: semantic.successSoft,
                           border: semantic.success,
                           foreground: semantic.successFg,
-                          onPressed: () => _openPlaceholder(
-                            context,
-                            icon: LucideIcons.arrowUpCircle,
-                            title: l10n.incomePlaceholderTitle,
-                            message: l10n.notAvailablePlaceholderMessage,
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const IncomeScreen(),
+                            ),
                           ),
                         ),
                       ),

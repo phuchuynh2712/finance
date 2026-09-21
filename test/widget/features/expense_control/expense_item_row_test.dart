@@ -17,6 +17,7 @@ ExpenseControlItem _leaf(double value) => ExpenseControlItem(
   allocationMethod: ExpenseAllocationMethod.percentage,
   allocationValue: value,
   balance: 0,
+  isSavingsReceiver: false,
 );
 
 Widget _harness(ExpenseControlItem item) {
@@ -74,6 +75,7 @@ void main() {
         allocationMethod: ExpenseAllocationMethod.fixed,
         allocationValue: 4000000,
         balance: 0,
+        isSavingsReceiver: false,
       );
       await tester.pumpWidget(_harness(fixedLeaf));
 
