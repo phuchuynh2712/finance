@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/auth/auth_state_provider.dart';
+import '../../../core/error/error_mapper.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import 'biometric_enable_prompt.dart';
@@ -117,7 +118,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         (error.code == 'email_exists' || error.code == 'user_already_exists')) {
       return l10n.signUpDuplicateEmailError;
     }
-    return l10n.signUpError(error.toString());
+    return mapErrorToMessage(error, l10n);
   }
 
   @override

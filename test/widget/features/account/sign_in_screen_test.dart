@@ -84,7 +84,11 @@ class _FakeBiometricLoginRepository extends BiometricLoginRepository {
   }
 }
 
-Widget _harness(_FakeAuthRepository fake, _FakeBiometricLoginRepository bio) {
+Widget _harness(
+  _FakeAuthRepository fake,
+  _FakeBiometricLoginRepository bio, {
+  Locale locale = const Locale('vi'),
+}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(fake),
@@ -109,7 +113,7 @@ Widget _harness(_FakeAuthRepository fake, _FakeBiometricLoginRepository bio) {
           ),
         ],
       ),
-      locale: const Locale('vi'),
+      locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: AppTheme.light,
@@ -118,6 +122,32 @@ Widget _harness(_FakeAuthRepository fake, _FakeBiometricLoginRepository bio) {
 }
 
 void main() {
+  testWidgets(
+    'displays "Kiểm Soát" as the app name in the Vietnamese locale (FR-001)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Kiểm Soát'), findsOneWidget);
+      expect(find.text('Khai Tâm'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'displays "Budget Control" as the app name in the English locale (FR-001)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio, locale: const Locale('en')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Budget Control'), findsOneWidget);
+      expect(find.text('Khai Tam'), findsNothing);
+    },
+  );
+
   testWidgets('successful password sign-in calls signInWithPassword', (
     tester,
   ) async {
@@ -151,10 +181,11 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
       await tester.pumpAndSettle();
 
-      // Same generic "Đăng nhập thất bại: ..." message as any other failed
+      // Same friendly invalid-credentials message as any other failed
       // credential — no special-cased "that looks like a phone number"
-      // branch anywhere in the sign-in path.
-      expect(find.textContaining('Đăng nhập thất bại'), findsOneWidget);
+      // branch anywhere in the sign-in path, and no raw exception text.
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(find.text(l10n.errorMapperInvalidCredentials), findsOneWidget);
     },
   );
 

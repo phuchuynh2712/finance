@@ -41,7 +41,12 @@ class ExpenseControlFormState {
   /// `false` (the toggle never visually shows an "on" state it can't save).
   final bool savingsReceiverRejected;
   final bool isSubmitting;
-  final String? errorMessage;
+
+  /// Set on a save failure — the underlying caught exception, kept as the
+  /// original `Object` (not `.toString()`'d) so the widget-side
+  /// `ref.listen` can classify it via the shared `mapErrorToMessage`
+  /// mapper at display time (contracts/error_mapper.md Pattern B).
+  final Object? errorMessage;
   final bool saved;
 
   /// Whether the user has interacted with the name/value field yet — an
@@ -60,7 +65,7 @@ class ExpenseControlFormState {
     bool? isSavingsReceiver,
     bool? savingsReceiverRejected,
     bool? isSubmitting,
-    String? errorMessage,
+    Object? errorMessage,
     bool? saved,
     bool? nameTouched,
     bool? valueTouched,
@@ -284,7 +289,7 @@ class ExpenseControlFormController
       }
       state = state.copyWith(saved: true, isSubmitting: false);
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString(), isSubmitting: false);
+      state = state.copyWith(errorMessage: e, isSubmitting: false);
     }
   }
 }

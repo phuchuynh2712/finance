@@ -17,7 +17,8 @@ class AccountScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final semantic = theme.extension<AppSemanticColors>()!;
-    final controller = ref.read(accountControllerProvider);
+    final controller = ref.read(accountControllerProvider.notifier);
+    final isSigningOut = ref.watch(accountControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +54,11 @@ class AccountScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _MenuCard(semantic: semantic),
           const SizedBox(height: 16),
-          _SignOutRow(semantic: semantic, onTap: controller.signOut),
+          _SignOutRow(
+            semantic: semantic,
+            isLoading: isSigningOut,
+            onTap: controller.signOut,
+          ),
         ],
       ),
     );
@@ -247,9 +252,14 @@ class _MenuRow extends StatelessWidget {
 }
 
 class _SignOutRow extends StatelessWidget {
-  const _SignOutRow({required this.semantic, required this.onTap});
+  const _SignOutRow({
+    required this.semantic,
+    required this.isLoading,
+    required this.onTap,
+  });
 
   final AppSemanticColors semantic;
+  final bool isLoading;
   final VoidCallback onTap;
 
   @override
@@ -262,7 +272,7 @@ class _SignOutRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: semantic.border1),
@@ -271,11 +281,21 @@ class _SignOutRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(
-                LucideIcons.logOut,
-                size: 18,
-                color: theme.colorScheme.error,
-              ),
+              if (isLoading)
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.error,
+                  ),
+                )
+              else
+                Icon(
+                  LucideIcons.logOut,
+                  size: 18,
+                  color: theme.colorScheme.error,
+                ),
               const SizedBox(width: 12),
               Text(
                 l10n.accountSignOutAction,

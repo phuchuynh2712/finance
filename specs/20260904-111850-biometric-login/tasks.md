@@ -44,7 +44,7 @@
 
 ## Phase 3: User Story 2 - Rebranded Login & Sign Up Screens, No Google Sign-In (Priority: P1) 🎯 MVP (visual)
 
-**Goal**: Login and Sign Up screens match the new "Khai Tâm" design handoff, Google Sign-In is fully removed, and Sign Up signs the user in immediately with no confirmation step.
+**Goal**: Login and Sign Up screens match the new "Kiểm Soát" design handoff, Google Sign-In is fully removed, and Sign Up signs the user in immediately with no confirmation step.
 
 **Independent Test**: Open both screens in light/dark mode; visually confirm they match `reference/login-signup-spec.md`; confirm no Google-branded UI exists anywhere (Login, Sign Up, or Account screen).
 

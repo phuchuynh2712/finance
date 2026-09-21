@@ -8,7 +8,7 @@
 
 **Input**: User description: "Cần điều chỉnh theme và app icon, cũng như icon ở splash screen, hỗ trợ light và dark mode, cũng có sử dụng icons lib để dùng nên cần kiểm tra lại để sử dụng cho đồng nhất. Tất cả những điểm cần thiết đã được lưu trong design handoff package. Ưu tiên sử dụng SVG là tốt nhất, khi không được thì dùng các hình ảnh type khác để sử dụng."
 
-**Supersedes**: `specs/20260724-app-icon-theme/` (previously shipped a green/network-motif icon and a green/gold-only theme). This feature replaces that brand identity end-to-end with the new "Khai Tâm" design handoff (lotus icon; blue/gold/red palette) and additionally standardizes the app's icon set, which the prior feature did not address.
+**Supersedes**: `specs/20260724-app-icon-theme/` (previously shipped a green/network-motif icon and a green/gold-only theme). This feature replaces that brand identity end-to-end with the new "Kiểm Soát" design handoff (lotus icon; blue/gold/red palette) and additionally standardizes the app's icon set, which the prior feature did not address.
 
 **Reference assets**: Design handoff files copied for planning under `reference/` in this feature directory (`theme-tokens.json`, `icons-used.json`, `README.md`, `app-icon/` source SVG + exported PNGs).
 

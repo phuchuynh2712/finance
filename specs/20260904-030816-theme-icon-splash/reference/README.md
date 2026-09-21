@@ -1,4 +1,4 @@
-# Khai Tâm — Design Handoff Package
+# Kiểm Soát — Design Handoff Package
 
 Gói bàn giao thiết kế cho app "Quản lý tài chính cá nhân" — đủ để dựng theme sáng/tối, app icon, và bộ icon trong Flutter (hoặc bất kỳ stack nào khác).
 
@@ -78,7 +78,7 @@ Xem `icons-used.json` để biết chính xác icon nào đã dùng ở đâu �
 
 ## 5. App icon
 
-- File nguồn: `app-icon/app-icon-khai-tam.svg` (hoa sen 5 cánh, nền vàng sáng, cánh trắng/xanh biển, đế đỏ — đúng 3 màu thương hiệu Khai Tâm, đổi từ nền xanh đậm gốc để icon nổi bật, dễ nhận ở kích thước nhỏ).
+- File nguồn: `app-icon/app-icon-khai-tam.svg` (hoa sen 5 cánh, nền vàng sáng, cánh trắng/xanh biển, đế đỏ — đúng 3 màu thương hiệu Kiểm Soát, đổi từ nền xanh đậm gốc để icon nổi bật, dễ nhận ở kích thước nhỏ).
 - Đã xuất sẵn PNG ở các size cần cho:
   - **iOS**: 1024 (App Store), 180, 120, 87, 60 (@1x/2x/3x các slot trong Assets.xcassets).
   - **Android**: 512 (Play Store), 192, 144, 96, 72, 48 (mipmap-xxxhdpi → mipmap-mdpi).
