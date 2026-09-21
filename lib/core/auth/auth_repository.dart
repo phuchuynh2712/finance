@@ -1,12 +1,14 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// The subset of auth operations the Account screen needs. Depending on this
-/// interface, rather than the concrete [AuthRepository] directly, keeps
-/// Account's controller testable without a live Supabase client.
+/// The subset of auth operations and identity data the Profile screen
+/// needs. Depending on this interface, rather than the concrete
+/// [AuthRepository] directly, keeps the screen testable without a live
+/// Supabase client.
 abstract interface class AccountAuthActions {
-  Future<void> updateAvatar(String avatarUrl);
-  Future<void> changePassword(String newPassword);
+  String? get currentDisplayName;
+  String? get currentEmail;
+  String? get currentAvatarUrl;
   Future<void> signOut({SignOutScope scope = SignOutScope.local});
   Future<bool> isBiometricLoginEnabled();
   Future<void> setBiometricLoginEnabled(bool enabled);
@@ -50,8 +52,8 @@ class AuthRepository implements AccountAuthActions {
   /// Registers a new email/password account (FR-003, FR-004, FR-006).
   /// [displayName] and [phoneNumber] are optional and, when provided, are
   /// stored via Supabase's `data:` metadata parameter — the same
-  /// `raw_user_meta_data` mechanism [updateAvatar] already uses for
-  /// `avatar_url`. [phoneNumber] is plain profile text with no OTP/SMS
+  /// `raw_user_meta_data` mechanism [currentAvatarUrl] reads `avatar_url`
+  /// from. [phoneNumber] is plain profile text with no OTP/SMS
   /// verification (FR-005). Signs the account in immediately — no email
   /// confirmation step (FR-019; requires the Supabase Dashboard's "Enable
   /// email confirmations" setting to be off, already done per spec.md
@@ -90,17 +92,6 @@ class AuthRepository implements AccountAuthActions {
     await _client.auth.signOut(scope: scope);
   }
 
-  @override
-  Future<void> changePassword(String newPassword) async {
-    await _client.auth.updateUser(UserAttributes(password: newPassword));
-    // FR-016b: a routine password change from an already-trusted device
-    // signs out every OTHER device/session, but not this one. Supabase does
-    // not fire AuthChangeEvent.signedOut on the current session for this
-    // scope (research.md §2) — callers must not wait on an auth-state event
-    // to confirm this succeeded.
-    await _client.auth.signOut(scope: SignOutScope.others);
-  }
-
   /// FR-015: requests a password-reset email. [redirectTo] is fixed to this
   /// app's registered deep link — there is exactly one correct value for a
   /// given build, not caller-configurable.
@@ -121,14 +112,20 @@ class AuthRepository implements AccountAuthActions {
   }
 
   @override
-  Future<void> updateAvatar(String avatarUrl) async {
-    await _client.auth.updateUser(
-      UserAttributes(data: {'avatar_url': avatarUrl}),
-    );
-  }
-
   String? get currentAvatarUrl =>
       _client.auth.currentUser?.userMetadata?['avatar_url'] as String?;
+
+  /// FR-009: the signed-in user's display name, as set at sign-up
+  /// ([signUp]'s `displayName` parameter). `null` if never set.
+  @override
+  String? get currentDisplayName =>
+      _client.auth.currentUser?.userMetadata?['display_name'] as String?;
+
+  /// FR-009: the signed-in user's email. Always present for a signed-in
+  /// user, since email/password is the only supported authentication
+  /// method (see this class's own doc comment).
+  @override
+  String? get currentEmail => _client.auth.currentUser?.email;
 
   String? get _currentUserId => _client.auth.currentUser?.id;
 

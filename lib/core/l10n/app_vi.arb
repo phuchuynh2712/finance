@@ -81,55 +81,37 @@
   "@cancelAction": {
     "description": "Generic cancel button label"
   },
-  "accountTitle": "Cá nhân",
+  "accountTitle": "Hồ sơ",
   "@accountTitle": {
-    "description": "Title of the Account screen"
+    "description": "Title of the Account/Profile screen"
   },
-  "accountAvatarUrlLabel": "Đường dẫn ảnh đại diện",
-  "@accountAvatarUrlLabel": {
-    "description": "Label for the avatar URL input field"
+  "accountAppearanceLabel": "Giao diện",
+  "@accountAppearanceLabel": {
+    "description": "Label for the Appearance (light/dark) toggle row"
   },
-  "accountAvatarSaveAction": "Cập nhật ảnh đại diện",
-  "@accountAvatarSaveAction": {
-    "description": "Button to save the avatar URL"
+  "accountAppearanceLightOption": "Sáng",
+  "@accountAppearanceLightOption": {
+    "description": "Light appearance option label"
   },
-  "accountAvatarSavedMessage": "Đã cập nhật ảnh đại diện.",
-  "@accountAvatarSavedMessage": {
-    "description": "Confirmation shown after the avatar is saved"
+  "accountAppearanceDarkOption": "Tối",
+  "@accountAppearanceDarkOption": {
+    "description": "Dark appearance option label"
   },
-  "accountAvatarErrorPrefix": "Không thể cập nhật ảnh đại diện: {error}",
-  "@accountAvatarErrorPrefix": {
-    "description": "Shown when saving the avatar fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+  "accountLanguageLabel": "Ngôn ngữ",
+  "@accountLanguageLabel": {
+    "description": "Label for the Language selector row"
   },
-  "accountNewPasswordLabel": "Mật khẩu mới",
-  "@accountNewPasswordLabel": {
-    "description": "Label for the new password input field"
+  "accountLanguageDialogTitle": "Chọn ngôn ngữ",
+  "@accountLanguageDialogTitle": {
+    "description": "Title of the language-selection dialog"
   },
-  "accountPasswordSaveAction": "Đổi mật khẩu",
-  "@accountPasswordSaveAction": {
-    "description": "Button to change the password"
+  "accountLanguageVietnamese": "Tiếng Việt",
+  "@accountLanguageVietnamese": {
+    "description": "Vietnamese language option label"
   },
-  "accountPasswordSavedMessage": "Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.",
-  "@accountPasswordSavedMessage": {
-    "description": "Confirmation shown after the password is changed (FR-016b: other devices/sessions are signed out, this one is not)"
-  },
-  "accountPasswordErrorPrefix": "Không thể đổi mật khẩu: {error}",
-  "@accountPasswordErrorPrefix": {
-    "description": "Shown when changing the password fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "accountBiometricToggleLabel": "Đăng nhập bằng vân tay",
-  "@accountBiometricToggleLabel": {
-    "description": "Label for the Account screen's biometric login on/off toggle (FR-010)"
+  "accountLanguageEnglish": "English",
+  "@accountLanguageEnglish": {
+    "description": "English language option label"
   },
   "accountSignOutAction": "Đăng xuất",
   "@accountSignOutAction": {
@@ -531,6 +513,18 @@
   "overviewPlaceholderTitle": "Tổng quan",
   "@overviewPlaceholderTitle": {
     "description": "Title of the placeholder shown on the Tổng quan tab (FR-017)"
+  },
+  "accountNotificationsRowLabel": "Thông báo",
+  "@accountNotificationsRowLabel": {
+    "description": "Label for the Notifications menu row on the Profile screen (FR-011)"
+  },
+  "accountSecurityRowLabel": "Bảo mật",
+  "@accountSecurityRowLabel": {
+    "description": "Label for the Security menu row on the Profile screen (FR-011)"
+  },
+  "accountHelpRowLabel": "Trợ giúp",
+  "@accountHelpRowLabel": {
+    "description": "Label for the Help menu row on the Profile screen (FR-011)"
   },
   "incomeScreenTitle": "Thu nhập",
   "@incomeScreenTitle": {

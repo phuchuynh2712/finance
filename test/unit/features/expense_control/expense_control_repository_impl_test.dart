@@ -196,25 +196,22 @@ void main() {
       expect(all.firstWhere((i) => i.id == 'a').balance, 0);
     });
 
-    test(
-      'notifies watchAll() reactive streams of the balance change '
-      '(regression: raw customStatement writes are invisible to '
-      'Drift\'s stream invalidation — this must use customUpdate)',
-      () async {
-        await repository.create(_leaf('a'));
+    test('notifies watchAll() reactive streams of the balance change '
+        '(regression: raw customStatement writes are invisible to '
+        'Drift\'s stream invalidation — this must use customUpdate)', () async {
+      await repository.create(_leaf('a'));
 
-        final emissions = <int>[];
-        final subscription = repository.watchAll().listen((items) {
-          emissions.add(items.firstWhere((i) => i.id == 'a').balance);
-        });
-        await pumpEventQueue();
+      final emissions = <int>[];
+      final subscription = repository.watchAll().listen((items) {
+        emissions.add(items.firstWhere((i) => i.id == 'a').balance);
+      });
+      await pumpEventQueue();
 
-        await repository.applyIncomeAllocation({'a': 100000});
-        await pumpEventQueue();
+      await repository.applyIncomeAllocation({'a': 100000});
+      await pumpEventQueue();
 
-        await subscription.cancel();
-        expect(emissions, contains(100000));
-      },
-    );
+      await subscription.cancel();
+      expect(emissions, contains(100000));
+    });
   });
 }

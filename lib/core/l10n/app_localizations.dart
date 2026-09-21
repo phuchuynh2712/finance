@@ -212,65 +212,53 @@ abstract class AppLocalizations {
   /// **'Hủy'**
   String get cancelAction;
 
-  /// Title of the Account screen
+  /// Title of the Account/Profile screen
   ///
   /// In vi, this message translates to:
-  /// **'Cá nhân'**
+  /// **'Hồ sơ'**
   String get accountTitle;
 
-  /// Label for the avatar URL input field
+  /// Label for the Appearance (light/dark) toggle row
   ///
   /// In vi, this message translates to:
-  /// **'Đường dẫn ảnh đại diện'**
-  String get accountAvatarUrlLabel;
+  /// **'Giao diện'**
+  String get accountAppearanceLabel;
 
-  /// Button to save the avatar URL
+  /// Light appearance option label
   ///
   /// In vi, this message translates to:
-  /// **'Cập nhật ảnh đại diện'**
-  String get accountAvatarSaveAction;
+  /// **'Sáng'**
+  String get accountAppearanceLightOption;
 
-  /// Confirmation shown after the avatar is saved
+  /// Dark appearance option label
   ///
   /// In vi, this message translates to:
-  /// **'Đã cập nhật ảnh đại diện.'**
-  String get accountAvatarSavedMessage;
+  /// **'Tối'**
+  String get accountAppearanceDarkOption;
 
-  /// Shown when saving the avatar fails
+  /// Label for the Language selector row
   ///
   /// In vi, this message translates to:
-  /// **'Không thể cập nhật ảnh đại diện: {error}'**
-  String accountAvatarErrorPrefix(String error);
+  /// **'Ngôn ngữ'**
+  String get accountLanguageLabel;
 
-  /// Label for the new password input field
+  /// Title of the language-selection dialog
   ///
   /// In vi, this message translates to:
-  /// **'Mật khẩu mới'**
-  String get accountNewPasswordLabel;
+  /// **'Chọn ngôn ngữ'**
+  String get accountLanguageDialogTitle;
 
-  /// Button to change the password
+  /// Vietnamese language option label
   ///
   /// In vi, this message translates to:
-  /// **'Đổi mật khẩu'**
-  String get accountPasswordSaveAction;
+  /// **'Tiếng Việt'**
+  String get accountLanguageVietnamese;
 
-  /// Confirmation shown after the password is changed (FR-016b: other devices/sessions are signed out, this one is not)
+  /// English language option label
   ///
   /// In vi, this message translates to:
-  /// **'Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.'**
-  String get accountPasswordSavedMessage;
-
-  /// Shown when changing the password fails
-  ///
-  /// In vi, this message translates to:
-  /// **'Không thể đổi mật khẩu: {error}'**
-  String accountPasswordErrorPrefix(String error);
-
-  /// Label for the Account screen's biometric login on/off toggle (FR-010)
-  ///
-  /// In vi, this message translates to:
-  /// **'Đăng nhập bằng vân tay'**
-  String get accountBiometricToggleLabel;
+  /// **'English'**
+  String get accountLanguageEnglish;
 
   /// Button to sign out of the account
   ///
@@ -763,6 +751,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tổng quan'**
   String get overviewPlaceholderTitle;
+
+  /// Label for the Notifications menu row on the Profile screen (FR-011)
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông báo'**
+  String get accountNotificationsRowLabel;
+
+  /// Label for the Security menu row on the Profile screen (FR-011)
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảo mật'**
+  String get accountSecurityRowLabel;
+
+  /// Label for the Help menu row on the Profile screen (FR-011)
+  ///
+  /// In vi, this message translates to:
+  /// **'Trợ giúp'**
+  String get accountHelpRowLabel;
 
   /// Header title of the income-entry screen (FR-017)
   ///

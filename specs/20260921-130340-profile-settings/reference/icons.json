@@ -1,0 +1,17 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    { "lucideName": "user-round", "flutterConstant": "LucideIcons.userRound", "usedIn": "Header icon badge + bottom nav tab 'Hồ sơ'", "sizePx": "17 (header) / 22 (nav)", "colorLight": "blue-600 #1A72E0 on blue-50 chip", "colorDark": "#6AADFF on rgba(59,141,248,.16) chip" },
+    { "lucideName": "sun-moon", "flutterConstant": "LucideIcons.sunMoon", "usedIn": "Dòng 'Giao diện'", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696" },
+    { "lucideName": "bell", "flutterConstant": "LucideIcons.bell", "usedIn": "Dòng 'Thông báo'", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696" },
+    { "lucideName": "shield-check", "flutterConstant": "LucideIcons.shieldCheck", "usedIn": "Dòng 'Bảo mật'", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696" },
+    { "lucideName": "circle-help", "flutterConstant": "LucideIcons.circleHelp", "usedIn": "Dòng 'Trợ giúp'", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696" },
+    { "lucideName": "chevron-right", "flutterConstant": "LucideIcons.chevronRight", "usedIn": "Cuối mỗi dòng menu (Thông báo/Bảo mật/Trợ giúp)", "sizePx": 16, "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073" },
+    { "lucideName": "log-out", "flutterConstant": "LucideIcons.logOut", "usedIn": "Dòng 'Đăng xuất'", "sizePx": 18, "colorLight": "danger #C43020", "colorDark": "#E07A6D" },
+    { "lucideName": "layout-dashboard", "flutterConstant": "LucideIcons.layoutDashboard", "usedIn": "Bottom nav — Tổng quan", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "sliders-horizontal", "flutterConstant": "LucideIcons.slidersHorizontal", "usedIn": "Bottom nav — Kiểm soát", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "arrow-left-right", "flutterConstant": "LucideIcons.arrowLeftRight", "usedIn": "Bottom nav — Thu chi", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "pie-chart", "flutterConstant": "LucideIcons.pieChart", "usedIn": "Bottom nav — Báo cáo", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" }
+  ]
+}

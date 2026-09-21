@@ -9,8 +9,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/router/app_router.dart';
+import 'package:finance/core/storage/app_preferences_storage.dart';
 import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
@@ -25,10 +28,13 @@ import 'package:finance/features/expense_control/presentation/expense_control_pr
 /// not just its decision logic in isolation.
 class _FakeAccountAuthActions implements AccountAuthActions {
   @override
-  Future<void> updateAvatar(String avatarUrl) async {}
+  String? get currentDisplayName => null;
 
   @override
-  Future<void> changePassword(String newPassword) async {}
+  String? get currentEmail => null;
+
+  @override
+  String? get currentAvatarUrl => null;
 
   @override
   Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {}
@@ -38,6 +44,20 @@ class _FakeAccountAuthActions implements AccountAuthActions {
 
   @override
   Future<void> setBiometricLoginEnabled(bool enabled) async {}
+}
+
+class _FakeAppPreferencesStorage implements AppPreferencesStorage {
+  @override
+  Future<ThemeMode?> getThemeMode() async => null;
+
+  @override
+  Future<void> setThemeMode(ThemeMode mode) async {}
+
+  @override
+  Future<Locale?> getLocale() async => null;
+
+  @override
+  Future<void> setLocale(Locale locale) async {}
 }
 
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
@@ -145,6 +165,14 @@ ProviderContainer _containerFor(
       accountAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
       expenseControlRepositoryProvider.overrideWithValue(
         expenseControlRepository,
+      ),
+      themeModeProvider.overrideWith(
+        (ref) =>
+            ThemeModeNotifier(_FakeAppPreferencesStorage(), ThemeMode.system),
+      ),
+      localeProvider.overrideWith(
+        (ref) =>
+            LocaleNotifier(_FakeAppPreferencesStorage(), const Locale('vi')),
       ),
     ],
   );

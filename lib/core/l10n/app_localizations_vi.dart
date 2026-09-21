@@ -68,39 +68,28 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cancelAction => 'Hủy';
 
   @override
-  String get accountTitle => 'Cá nhân';
+  String get accountTitle => 'Hồ sơ';
 
   @override
-  String get accountAvatarUrlLabel => 'Đường dẫn ảnh đại diện';
+  String get accountAppearanceLabel => 'Giao diện';
 
   @override
-  String get accountAvatarSaveAction => 'Cập nhật ảnh đại diện';
+  String get accountAppearanceLightOption => 'Sáng';
 
   @override
-  String get accountAvatarSavedMessage => 'Đã cập nhật ảnh đại diện.';
+  String get accountAppearanceDarkOption => 'Tối';
 
   @override
-  String accountAvatarErrorPrefix(String error) {
-    return 'Không thể cập nhật ảnh đại diện: $error';
-  }
+  String get accountLanguageLabel => 'Ngôn ngữ';
 
   @override
-  String get accountNewPasswordLabel => 'Mật khẩu mới';
+  String get accountLanguageDialogTitle => 'Chọn ngôn ngữ';
 
   @override
-  String get accountPasswordSaveAction => 'Đổi mật khẩu';
+  String get accountLanguageVietnamese => 'Tiếng Việt';
 
   @override
-  String get accountPasswordSavedMessage =>
-      'Đã đổi mật khẩu. Các thiết bị khác đã đăng nhập sẽ bị đăng xuất.';
-
-  @override
-  String accountPasswordErrorPrefix(String error) {
-    return 'Không thể đổi mật khẩu: $error';
-  }
-
-  @override
-  String get accountBiometricToggleLabel => 'Đăng nhập bằng vân tay';
+  String get accountLanguageEnglish => 'English';
 
   @override
   String get accountSignOutAction => 'Đăng xuất';
@@ -388,6 +377,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overviewPlaceholderTitle => 'Tổng quan';
+
+  @override
+  String get accountNotificationsRowLabel => 'Thông báo';
+
+  @override
+  String get accountSecurityRowLabel => 'Bảo mật';
+
+  @override
+  String get accountHelpRowLabel => 'Trợ giúp';
 
   @override
   String get incomeScreenTitle => 'Thu nhập';

@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260920-212021-income-allocation/plan.md
+specs/20260921-130340-profile-settings/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

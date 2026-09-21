@@ -50,10 +50,13 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
 class _FakeAccountAuthActions implements AccountAuthActions {
   @override
-  Future<void> updateAvatar(String avatarUrl) async {}
+  String? get currentDisplayName => null;
 
   @override
-  Future<void> changePassword(String newPassword) async {}
+  String? get currentEmail => null;
+
+  @override
+  String? get currentAvatarUrl => null;
 
   @override
   Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {}
