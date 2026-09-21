@@ -127,5 +127,20 @@
   "incomeErrorWriteFailedPrefix": "Could not save the income: {error}",
   "savingsReceiverToggleLabel": "Receives leftover income",
   "savingsReceiverBlockedError": "Only one item can be marked as the savings receiver. Unmark the other item first.",
-  "savingsReceiverAutoClearWarning": "This item currently receives leftover income. Adding a child item will automatically clear that mark."
+  "savingsReceiverAutoClearWarning": "This item currently receives leftover income. Adding a child item will automatically clear that mark.",
+  "expenseScreenTitle": "Expense",
+  "expenseTabManual": "Manual entry",
+  "expenseTabScan": "Scan receipt",
+  "expenseAmountLabel": "Amount",
+  "expensePickItemEyebrow": "DEDUCT FROM WHICH ITEM",
+  "expenseSaveAction": "Save transaction",
+  "expenseEmptyStateMessage": "No items yet. Set them up in Expense Control first.",
+  "expenseErrorInvalidAmount": "Please enter an amount greater than 0.",
+  "expenseErrorMissingItem": "Please pick which item to deduct from.",
+  "expenseErrorWriteFailedPrefix": "Could not save the expense: {error}",
+  "expenseItemPickedSemantic": "Deduct from {name}",
+  "expenseScanFrameHint": "Fit the receipt in the frame",
+  "expenseScanCaptureAction": "Capture receipt",
+  "expenseScanRecognizedLabel": "Recognized: {amount} · {merchant}",
+  "expenseScanConfirmAction": "Confirm & save"
 }

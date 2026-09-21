@@ -95,6 +95,12 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
+
+  @override
+  Future<void> recordExpense({
+    required String itemId,
+    required int amount,
+  }) async {}
 }
 
 ExpenseControlItem _leaf(

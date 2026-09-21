@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/features/expense_control/data/expense_control_repository_impl.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 
@@ -158,16 +159,30 @@ void main() {
       },
     );
 
-    test('appends one sync_outbox row per changed item', () async {
-      await repository.create(_leaf('a'));
-      await repository.create(_leaf('b'));
+    test(
+      'appends one sync_outbox row for the item AND one for its new financial_transactions row, per changed item',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b'));
 
-      final before = await db.select(db.syncOutbox).get();
-      await repository.applyIncomeAllocation({'a': 100000, 'b': 200000});
-      final after = await db.select(db.syncOutbox).get();
+        final before = await db.select(db.syncOutbox).get();
+        await repository.applyIncomeAllocation({'a': 100000, 'b': 200000});
+        final after = await db.select(db.syncOutbox).get();
 
-      expect(after.length - before.length, 2);
-    });
+        // 2 items × (1 expense_control_items outbox row + 1
+        // financial_transactions outbox row) = 4 (FR-013).
+        expect(after.length - before.length, 4);
+        final newRows = after.skip(before.length);
+        expect(
+          newRows.where((r) => r.entityTable == 'expense_control_items'),
+          hasLength(2),
+        );
+        expect(
+          newRows.where((r) => r.entityTable == 'financial_transactions'),
+          hasLength(2),
+        );
+      },
+    );
 
     test(
       'the balance increment is a single atomic SQL statement, not a read-then-write pair — two concurrent calls to the same item never lose an increment',
@@ -196,6 +211,84 @@ void main() {
       expect(all.firstWhere((i) => i.id == 'a').balance, 0);
     });
 
+    test(
+      'a call with N non-zero deltas inserts exactly N financial_transactions rows, each direction: income, amount matching its delta, all sharing one occurredAt (FR-013)',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b'));
+        await repository.create(_leaf('c'));
+
+        await repository.applyIncomeAllocation({
+          'a': 100000,
+          'b': 250000,
+          'c': 0,
+        });
+
+        final rows = await db.select(db.financialTransactions).get();
+        expect(rows, hasLength(2));
+        expect(
+          rows.every((r) => r.direction == TransactionDirection.income),
+          isTrue,
+        );
+        expect(rows.map((r) => r.expenseControlItemId).toSet(), {'a', 'b'});
+        expect(
+          rows.firstWhere((r) => r.expenseControlItemId == 'a').amount,
+          100000,
+        );
+        expect(
+          rows.firstWhere((r) => r.expenseControlItemId == 'b').amount,
+          250000,
+        );
+        expect(rows.map((r) => r.occurredAt).toSet(), hasLength(1));
+      },
+    );
+
+    test(
+      'a zero-delta entry produces no financial_transactions row for that item',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b'));
+
+        await repository.applyIncomeAllocation({'a': 0, 'b': 50000});
+
+        final rows = await db.select(db.financialTransactions).get();
+        expect(rows, hasLength(1));
+        expect(rows.single.expenseControlItemId, 'b');
+      },
+    );
+
+    test(
+      'atomicity guardrail: a failure partway through the allocation loop leaves neither a balance change nor a history row for any item in that call (FR-013, SC-004)',
+      () async {
+        await repository.create(_leaf('a'));
+        // No item 'missing' is created — the update to it succeeds as a
+        // no-op (WHERE matches nothing) but the financial_transactions
+        // insert's foreign-key-shaped read-back via getSingle() throws,
+        // forcing the whole _db.transaction() to roll back.
+        await expectLater(
+          repository.applyIncomeAllocation({'a': 100000, 'missing': 50000}),
+          throwsA(anything),
+        );
+
+        final all = await repository.getAll();
+        expect(
+          all.firstWhere((i) => i.id == 'a').balance,
+          0,
+          reason:
+              'the balance increment for "a" must roll back even though it '
+              'was applied before the failure on "missing"',
+        );
+        final rows = await db.select(db.financialTransactions).get();
+        expect(
+          rows,
+          isEmpty,
+          reason:
+              'no history row may survive when the same-call balance change '
+              'did not',
+        );
+      },
+    );
+
     test('notifies watchAll() reactive streams of the balance change '
         '(regression: raw customStatement writes are invisible to '
         'Drift\'s stream invalidation — this must use customUpdate)', () async {
@@ -213,5 +306,113 @@ void main() {
       await subscription.cancel();
       expect(emissions, contains(100000));
     });
+  });
+
+  group('recordExpense (FR-009, FR-010, SC-002)', () {
+    test(
+      'decrements the picked item\'s balance by exactly amount, leaves every other item untouched',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b'));
+        await repository.applyIncomeAllocation({'a': 500000, 'b': 500000});
+
+        await repository.recordExpense(itemId: 'a', amount: 120000);
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, 380000);
+        expect(all.firstWhere((i) => i.id == 'b').balance, 500000);
+      },
+    );
+
+    test(
+      'creates exactly one new financial_transactions row: direction expense, matching amount, occurredAt at call time',
+      () async {
+        await repository.create(_leaf('a'));
+        final before = DateTime.now();
+
+        await repository.recordExpense(itemId: 'a', amount: 75000);
+
+        final rows = await db.select(db.financialTransactions).get();
+        expect(rows, hasLength(1));
+        final row = rows.single;
+        expect(row.direction, TransactionDirection.expense);
+        expect(row.amount, 75000);
+        expect(row.expenseControlItemId, 'a');
+        expect(
+          row.occurredAt.isAfter(before.subtract(const Duration(seconds: 1))),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'appends one sync_outbox row for the changed expense_control_items row AND one for the new financial_transactions row',
+      () async {
+        await repository.create(_leaf('a'));
+        final before = await db.select(db.syncOutbox).get();
+
+        await repository.recordExpense(itemId: 'a', amount: 50000);
+
+        final after = await db.select(db.syncOutbox).get();
+        final newRows = after.skip(before.length);
+        expect(
+          newRows.where((r) => r.entityTable == 'expense_control_items'),
+          hasLength(1),
+        );
+        expect(
+          newRows.where((r) => r.entityTable == 'financial_transactions'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test(
+      'allows the balance to go negative without throwing or blocking (FR-010)',
+      () async {
+        await repository.create(_leaf('a'));
+
+        await repository.recordExpense(itemId: 'a', amount: 50000);
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, -50000);
+      },
+    );
+
+    test(
+      'the balance decrement is a single atomic SQL statement — two concurrent expenses on the same item never lose a decrement',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.applyIncomeAllocation({'a': 1000000});
+
+        await Future.wait([
+          repository.recordExpense(itemId: 'a', amount: 100000),
+          repository.recordExpense(itemId: 'a', amount: 200000),
+        ]);
+
+        final all = await repository.getAll();
+        expect(all.firstWhere((i) => i.id == 'a').balance, 700000);
+        final rows = await db.select(db.financialTransactions).get();
+        expect(
+          rows.where((r) => r.direction == TransactionDirection.expense),
+          hasLength(2),
+        );
+      },
+    );
+
+    test(
+      'atomicity guardrail: the balance decrement and the history-row insert always land together, never one without the other',
+      () async {
+        // No item 'missing' exists — mirrors applyIncomeAllocation's own
+        // atomicity test: the update is a no-op, but the subsequent
+        // read-back inside the same transaction throws, forcing a rollback.
+        await expectLater(
+          repository.recordExpense(itemId: 'missing', amount: 50000),
+          throwsA(anything),
+        );
+
+        final rows = await db.select(db.financialTransactions).get();
+        expect(rows, isEmpty);
+      },
+    );
   });
 }

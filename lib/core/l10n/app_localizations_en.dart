@@ -444,4 +444,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get savingsReceiverAutoClearWarning =>
       'This item currently receives leftover income. Adding a child item will automatically clear that mark.';
+
+  @override
+  String get expenseScreenTitle => 'Expense';
+
+  @override
+  String get expenseTabManual => 'Manual entry';
+
+  @override
+  String get expenseTabScan => 'Scan receipt';
+
+  @override
+  String get expenseAmountLabel => 'Amount';
+
+  @override
+  String get expensePickItemEyebrow => 'DEDUCT FROM WHICH ITEM';
+
+  @override
+  String get expenseSaveAction => 'Save transaction';
+
+  @override
+  String get expenseEmptyStateMessage =>
+      'No items yet. Set them up in Expense Control first.';
+
+  @override
+  String get expenseErrorInvalidAmount =>
+      'Please enter an amount greater than 0.';
+
+  @override
+  String get expenseErrorMissingItem =>
+      'Please pick which item to deduct from.';
+
+  @override
+  String expenseErrorWriteFailedPrefix(Object error) {
+    return 'Could not save the expense: $error';
+  }
+
+  @override
+  String expenseItemPickedSemantic(Object name) {
+    return 'Deduct from $name';
+  }
+
+  @override
+  String get expenseScanFrameHint => 'Fit the receipt in the frame';
+
+  @override
+  String get expenseScanCaptureAction => 'Capture receipt';
+
+  @override
+  String expenseScanRecognizedLabel(Object amount, Object merchant) {
+    return 'Recognized: $amount · $merchant';
+  }
+
+  @override
+  String get expenseScanConfirmAction => 'Confirm & save';
 }

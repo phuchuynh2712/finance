@@ -1,0 +1,15 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    { "lucideName": "chevron-left", "flutterConstant": "LucideIcons.chevronLeft", "usedIn": "Header — nút quay lại", "sizePx": 22, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696", "tapTargetPx": 44 },
+    { "lucideName": "arrow-down-circle", "flutterConstant": "LucideIcons.arrowDownCircle", "usedIn": "Header icon badge", "sizePx": 17, "colorLight": "danger #C43020 on danger-soft chip", "colorDark": "#E07A6D on rgba(196,48,32,.16) chip" },
+    { "lucideName": "pencil-line", "flutterConstant": "LucideIcons.pencilLine", "usedIn": "Tab 'Nhập tay'", "sizePx": 15, "colorLight": "active: #fff on blue-500 / inactive: fg-2 on bg-surface", "colorDark": "active: #fff on #3B8DF8 / inactive: #B0A696 on #241F1A" },
+    { "lucideName": "camera", "flutterConstant": "LucideIcons.camera", "usedIn": "Tab 'Quét hoá đơn' + icon lớn trong khung camera", "sizePx": "15 (tab) / 34 (khung)", "colorLight": "tab: theo active/inactive · khung: blue-400 #5CA3F5", "colorDark": "khung: #3B8DF8" },
+    { "lucideName": "corner-down-right", "flutterConstant": "LucideIcons.cornerDownRight", "usedIn": "Banner xem trước số dư sau giao dịch", "sizePx": 14, "colorLight": "dynamic: blue-500 hoặc danger theo previewNeg", "colorDark": "dynamic: #3B8DF8 hoặc #E07A6D" },
+    { "lucideName": "check", "flutterConstant": "LucideIcons.check", "usedIn": "Nút 'Lưu giao dịch' / 'Xác nhận & lưu'", "sizePx": 20, "colorLight": "#FFFFFF", "colorDark": "#FFFFFF" },
+    { "lucideName": "scan-line", "flutterConstant": "LucideIcons.scanLine", "usedIn": "Nút 'Chụp hoá đơn'", "sizePx": 20, "colorLight": "#FFFFFF", "colorDark": "#FFFFFF" },
+    { "lucideName": "check-circle-2", "flutterConstant": "LucideIcons.checkCircle2", "usedIn": "Badge 'Đã nhận diện' sau khi quét", "sizePx": 17, "colorLight": "success #237A50", "colorDark": "#62BB91" },
+    { "lucideName": "chevron-down", "flutterConstant": "LucideIcons.chevronDown", "usedIn": "Ô chọn nhóm sau khi nhận diện hoá đơn", "sizePx": 15, "colorLight": "fg-3 #8A8073", "colorDark": "#8A8073" }
+  ]
+}

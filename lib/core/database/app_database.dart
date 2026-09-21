@@ -2,11 +2,12 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import 'tables/expense_control_items_table.dart';
+import 'tables/financial_transactions_table.dart';
 import '../sync/sync_outbox_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [ExpenseControlItems, SyncOutbox])
+@DriftDatabase(tables: [ExpenseControlItems, FinancialTransactions, SyncOutbox])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'finance'));
 
@@ -15,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,6 +48,9 @@ class AppDatabase extends _$AppDatabase {
           expenseControlItems,
           expenseControlItems.isSavingsReceiver,
         );
+      }
+      if (from <= 4) {
+        await m.createTable(financialTransactions);
       }
     },
     beforeOpen: (details) async {

@@ -30,6 +30,12 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
 
   @override
+  Future<void> recordExpense({
+    required String itemId,
+    required int amount,
+  }) async {}
+
+  @override
   Stream<List<ExpenseControlItem>> watchAll() => const Stream.empty();
 }
 

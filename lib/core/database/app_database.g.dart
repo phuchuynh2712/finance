@@ -840,6 +840,493 @@ class ExpenseControlItemsCompanion
   }
 }
 
+class $FinancialTransactionsTable extends FinancialTransactions
+    with TableInfo<$FinancialTransactionsTable, FinancialTransactionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FinancialTransactionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expenseControlItemIdMeta =
+      const VerificationMeta('expenseControlItemId');
+  @override
+  late final GeneratedColumn<String> expenseControlItemId =
+      GeneratedColumn<String>(
+        'expense_control_item_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<TransactionDirection, String>
+  direction =
+      GeneratedColumn<String>(
+        'direction',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TransactionDirection>(
+        $FinancialTransactionsTable.$converterdirection,
+      );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    expenseControlItemId,
+    direction,
+    amount,
+    occurredAt,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'financial_transactions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FinancialTransactionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('expense_control_item_id')) {
+      context.handle(
+        _expenseControlItemIdMeta,
+        expenseControlItemId.isAcceptableOrUnknown(
+          data['expense_control_item_id']!,
+          _expenseControlItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_expenseControlItemIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FinancialTransactionRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FinancialTransactionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      expenseControlItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expense_control_item_id'],
+      )!,
+      direction: $FinancialTransactionsTable.$converterdirection.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}direction'],
+        )!,
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FinancialTransactionsTable createAlias(String alias) {
+    return $FinancialTransactionsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<TransactionDirection, String, String>
+  $converterdirection = const EnumNameConverter<TransactionDirection>(
+    TransactionDirection.values,
+  );
+}
+
+class FinancialTransactionRow extends DataClass
+    implements Insertable<FinancialTransactionRow> {
+  final String id;
+  final String userId;
+  final String expenseControlItemId;
+  final TransactionDirection direction;
+  final int amount;
+  final DateTime occurredAt;
+  final DateTime createdAt;
+  const FinancialTransactionRow({
+    required this.id,
+    required this.userId,
+    required this.expenseControlItemId,
+    required this.direction,
+    required this.amount,
+    required this.occurredAt,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['expense_control_item_id'] = Variable<String>(expenseControlItemId);
+    {
+      map['direction'] = Variable<String>(
+        $FinancialTransactionsTable.$converterdirection.toSql(direction),
+      );
+    }
+    map['amount'] = Variable<int>(amount);
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  FinancialTransactionsCompanion toCompanion(bool nullToAbsent) {
+    return FinancialTransactionsCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      expenseControlItemId: Value(expenseControlItemId),
+      direction: Value(direction),
+      amount: Value(amount),
+      occurredAt: Value(occurredAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FinancialTransactionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FinancialTransactionRow(
+      id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      expenseControlItemId: serializer.fromJson<String>(
+        json['expenseControlItemId'],
+      ),
+      direction: $FinancialTransactionsTable.$converterdirection.fromJson(
+        serializer.fromJson<String>(json['direction']),
+      ),
+      amount: serializer.fromJson<int>(json['amount']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
+      'expenseControlItemId': serializer.toJson<String>(expenseControlItemId),
+      'direction': serializer.toJson<String>(
+        $FinancialTransactionsTable.$converterdirection.toJson(direction),
+      ),
+      'amount': serializer.toJson<int>(amount),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FinancialTransactionRow copyWith({
+    String? id,
+    String? userId,
+    String? expenseControlItemId,
+    TransactionDirection? direction,
+    int? amount,
+    DateTime? occurredAt,
+    DateTime? createdAt,
+  }) => FinancialTransactionRow(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    expenseControlItemId: expenseControlItemId ?? this.expenseControlItemId,
+    direction: direction ?? this.direction,
+    amount: amount ?? this.amount,
+    occurredAt: occurredAt ?? this.occurredAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  FinancialTransactionRow copyWithCompanion(
+    FinancialTransactionsCompanion data,
+  ) {
+    return FinancialTransactionRow(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      expenseControlItemId: data.expenseControlItemId.present
+          ? data.expenseControlItemId.value
+          : this.expenseControlItemId,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinancialTransactionRow(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('expenseControlItemId: $expenseControlItemId, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    expenseControlItemId,
+    direction,
+    amount,
+    occurredAt,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FinancialTransactionRow &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.expenseControlItemId == this.expenseControlItemId &&
+          other.direction == this.direction &&
+          other.amount == this.amount &&
+          other.occurredAt == this.occurredAt &&
+          other.createdAt == this.createdAt);
+}
+
+class FinancialTransactionsCompanion
+    extends UpdateCompanion<FinancialTransactionRow> {
+  final Value<String> id;
+  final Value<String> userId;
+  final Value<String> expenseControlItemId;
+  final Value<TransactionDirection> direction;
+  final Value<int> amount;
+  final Value<DateTime> occurredAt;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const FinancialTransactionsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.expenseControlItemId = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FinancialTransactionsCompanion.insert({
+    required String id,
+    required String userId,
+    required String expenseControlItemId,
+    required TransactionDirection direction,
+    required int amount,
+    required DateTime occurredAt,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       userId = Value(userId),
+       expenseControlItemId = Value(expenseControlItemId),
+       direction = Value(direction),
+       amount = Value(amount),
+       occurredAt = Value(occurredAt);
+  static Insertable<FinancialTransactionRow> custom({
+    Expression<String>? id,
+    Expression<String>? userId,
+    Expression<String>? expenseControlItemId,
+    Expression<String>? direction,
+    Expression<int>? amount,
+    Expression<DateTime>? occurredAt,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (expenseControlItemId != null)
+        'expense_control_item_id': expenseControlItemId,
+      if (direction != null) 'direction': direction,
+      if (amount != null) 'amount': amount,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FinancialTransactionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? userId,
+    Value<String>? expenseControlItemId,
+    Value<TransactionDirection>? direction,
+    Value<int>? amount,
+    Value<DateTime>? occurredAt,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return FinancialTransactionsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      expenseControlItemId: expenseControlItemId ?? this.expenseControlItemId,
+      direction: direction ?? this.direction,
+      amount: amount ?? this.amount,
+      occurredAt: occurredAt ?? this.occurredAt,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (expenseControlItemId.present) {
+      map['expense_control_item_id'] = Variable<String>(
+        expenseControlItemId.value,
+      );
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(
+        $FinancialTransactionsTable.$converterdirection.toSql(direction.value),
+      );
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinancialTransactionsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('expenseControlItemId: $expenseControlItemId, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxRow> {
   @override
@@ -1318,10 +1805,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ExpenseControlItemsTable expenseControlItems =
       $ExpenseControlItemsTable(this);
+  late final $FinancialTransactionsTable financialTransactions =
+      $FinancialTransactionsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   late final Index expenseControlItemsUserIdIdx = Index(
     'expense_control_items_user_id_idx',
     'CREATE INDEX expense_control_items_user_id_idx ON expense_control_items (user_id)',
+  );
+  late final Index financialTransactionsUserIdOccurredAtIdx = Index(
+    'financial_transactions_user_id_occurred_at_idx',
+    'CREATE INDEX financial_transactions_user_id_occurred_at_idx ON financial_transactions (user_id, occurred_at)',
   );
   late final Index syncOutboxUnsyncedIdx = Index(
     'sync_outbox_unsynced_idx',
@@ -1333,8 +1826,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     expenseControlItems,
+    financialTransactions,
     syncOutbox,
     expenseControlItemsUserIdIdx,
+    financialTransactionsUserIdOccurredAtIdx,
     syncOutboxUnsyncedIdx,
   ];
 }
@@ -1742,6 +2237,273 @@ typedef $$ExpenseControlItemsTableProcessedTableManager =
       ExpenseControlItemRow,
       PrefetchHooks Function()
     >;
+typedef $$FinancialTransactionsTableCreateCompanionBuilder =
+    FinancialTransactionsCompanion Function({
+      required String id,
+      required String userId,
+      required String expenseControlItemId,
+      required TransactionDirection direction,
+      required int amount,
+      required DateTime occurredAt,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
+    FinancialTransactionsCompanion Function({
+      Value<String> id,
+      Value<String> userId,
+      Value<String> expenseControlItemId,
+      Value<TransactionDirection> direction,
+      Value<int> amount,
+      Value<DateTime> occurredAt,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$FinancialTransactionsTableFilterComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionsTable> {
+  $$FinancialTransactionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expenseControlItemId => $composableBuilder(
+    column: $table.expenseControlItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    TransactionDirection,
+    TransactionDirection,
+    String
+  >
+  get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FinancialTransactionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionsTable> {
+  $$FinancialTransactionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expenseControlItemId => $composableBuilder(
+    column: $table.expenseControlItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FinancialTransactionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionsTable> {
+  $$FinancialTransactionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get expenseControlItemId => $composableBuilder(
+    column: $table.expenseControlItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<TransactionDirection, String>
+  get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$FinancialTransactionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FinancialTransactionsTable,
+          FinancialTransactionRow,
+          $$FinancialTransactionsTableFilterComposer,
+          $$FinancialTransactionsTableOrderingComposer,
+          $$FinancialTransactionsTableAnnotationComposer,
+          $$FinancialTransactionsTableCreateCompanionBuilder,
+          $$FinancialTransactionsTableUpdateCompanionBuilder,
+          (
+            FinancialTransactionRow,
+            BaseReferences<
+              _$AppDatabase,
+              $FinancialTransactionsTable,
+              FinancialTransactionRow
+            >,
+          ),
+          FinancialTransactionRow,
+          PrefetchHooks Function()
+        > {
+  $$FinancialTransactionsTableTableManager(
+    _$AppDatabase db,
+    $FinancialTransactionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FinancialTransactionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$FinancialTransactionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$FinancialTransactionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> expenseControlItemId = const Value.absent(),
+                Value<TransactionDirection> direction = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FinancialTransactionsCompanion(
+                id: id,
+                userId: userId,
+                expenseControlItemId: expenseControlItemId,
+                direction: direction,
+                amount: amount,
+                occurredAt: occurredAt,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String userId,
+                required String expenseControlItemId,
+                required TransactionDirection direction,
+                required int amount,
+                required DateTime occurredAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FinancialTransactionsCompanion.insert(
+                id: id,
+                userId: userId,
+                expenseControlItemId: expenseControlItemId,
+                direction: direction,
+                amount: amount,
+                occurredAt: occurredAt,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FinancialTransactionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FinancialTransactionsTable,
+      FinancialTransactionRow,
+      $$FinancialTransactionsTableFilterComposer,
+      $$FinancialTransactionsTableOrderingComposer,
+      $$FinancialTransactionsTableAnnotationComposer,
+      $$FinancialTransactionsTableCreateCompanionBuilder,
+      $$FinancialTransactionsTableUpdateCompanionBuilder,
+      (
+        FinancialTransactionRow,
+        BaseReferences<
+          _$AppDatabase,
+          $FinancialTransactionsTable,
+          FinancialTransactionRow
+        >,
+      ),
+      FinancialTransactionRow,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       required String id,
@@ -1991,6 +2753,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$ExpenseControlItemsTableTableManager get expenseControlItems =>
       $$ExpenseControlItemsTableTableManager(_db, _db.expenseControlItems);
+  $$FinancialTransactionsTableTableManager get financialTransactions =>
+      $$FinancialTransactionsTableTableManager(_db, _db.financialTransactions);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

@@ -865,6 +865,96 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.'**
   String get savingsReceiverAutoClearWarning;
+
+  /// No description provided for @expenseScreenTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiêu'**
+  String get expenseScreenTitle;
+
+  /// No description provided for @expenseTabManual.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập tay'**
+  String get expenseTabManual;
+
+  /// No description provided for @expenseTabScan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quét hoá đơn'**
+  String get expenseTabScan;
+
+  /// No description provided for @expenseAmountLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền'**
+  String get expenseAmountLabel;
+
+  /// No description provided for @expensePickItemEyebrow.
+  ///
+  /// In vi, this message translates to:
+  /// **'TRỪ VÀO KHOẢN NÀO'**
+  String get expensePickItemEyebrow;
+
+  /// No description provided for @expenseSaveAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu giao dịch'**
+  String get expenseSaveAction;
+
+  /// No description provided for @expenseEmptyStateMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào. Hãy thiết lập ở Kiểm soát chi tiêu trước.'**
+  String get expenseEmptyStateMessage;
+
+  /// No description provided for @expenseErrorInvalidAmount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập số tiền lớn hơn 0.'**
+  String get expenseErrorInvalidAmount;
+
+  /// No description provided for @expenseErrorMissingItem.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng chọn khoản để trừ tiền.'**
+  String get expenseErrorMissingItem;
+
+  /// No description provided for @expenseErrorWriteFailedPrefix.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu giao dịch chi tiêu: {error}'**
+  String expenseErrorWriteFailedPrefix(Object error);
+
+  /// No description provided for @expenseItemPickedSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trừ vào khoản {name}'**
+  String expenseItemPickedSemantic(Object name);
+
+  /// No description provided for @expenseScanFrameHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đưa hoá đơn vào khung hình'**
+  String get expenseScanFrameHint;
+
+  /// No description provided for @expenseScanCaptureAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chụp hoá đơn'**
+  String get expenseScanCaptureAction;
+
+  /// No description provided for @expenseScanRecognizedLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã nhận diện: {amount} · {merchant}'**
+  String expenseScanRecognizedLabel(Object amount, Object merchant);
+
+  /// No description provided for @expenseScanConfirmAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận & lưu'**
+  String get expenseScanConfirmAction;
 }
 
 class _AppLocalizationsDelegate

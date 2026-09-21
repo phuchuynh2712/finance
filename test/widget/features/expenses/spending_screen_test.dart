@@ -11,6 +11,7 @@ import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expenses/presentation/expense_screen.dart';
 import 'package:finance/features/expenses/presentation/spending_screen.dart';
 import 'package:finance/features/expenses/presentation/widgets/balance_group_card.dart';
 
@@ -54,6 +55,12 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {}
+
+  @override
+  Future<void> recordExpense({
+    required String itemId,
+    required int amount,
+  }) async {}
 }
 
 ExpenseControlItem _leaf(
@@ -261,7 +268,7 @@ void main() {
   );
 
   testWidgets(
-    'Chi tiêu button and the history row each navigate to a distinct placeholder (FR-007, FR-008, FR-009, US3)',
+    'the history row still navigates to a placeholder (FR-007, US3)',
     (tester) async {
       final repository = _FakeExpenseControlRepository([_leaf('a')]);
       await tester.pumpWidget(_harness(repository));
@@ -272,14 +279,6 @@ void main() {
       expect(find.text(l10n.spendingIncomeAction), findsOneWidget);
       expect(find.text(l10n.spendingExpenseAction), findsOneWidget);
       expect(find.text(l10n.spendingHistoryAction), findsOneWidget);
-
-      await tester.tap(find.text(l10n.spendingExpenseAction));
-      await tester.pumpAndSettle();
-      expect(find.byType(NotAvailablePlaceholderScreen), findsOneWidget);
-      expect(find.text(l10n.expensePlaceholderTitle), findsOneWidget);
-      expect(find.byType(BackButton), findsOneWidget);
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
 
       await tester.tap(find.text(l10n.spendingHistoryAction));
       await tester.pumpAndSettle();
@@ -304,6 +303,24 @@ void main() {
 
       expect(find.byType(NotAvailablePlaceholderScreen), findsNothing);
       expect(find.text(l10n.incomeScreenTitle), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Chi tiêu button navigates to the real expense-entry screen, not a placeholder (FR-001)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+
+      await tester.tap(find.text(l10n.spendingExpenseAction));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NotAvailablePlaceholderScreen), findsNothing);
+      expect(find.byType(ExpenseScreen), findsOneWidget);
+      expect(find.text(l10n.expenseScreenTitle), findsOneWidget);
     },
   );
 }

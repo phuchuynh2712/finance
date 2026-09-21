@@ -45,4 +45,12 @@ abstract interface class ExpenseControlRepository {
   /// row within the same local transaction window (see the implementation's
   /// own doc comment for why).
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas);
+
+  /// Atomically decrements [itemId]'s `balance` by [amount] and records one
+  /// expense Financial Transaction row — the data-layer half of the "Chi
+  /// tiêu" save flow (FR-009). [amount] MUST be `> 0`. The balance is
+  /// allowed to go negative; this method never blocks or throws for that
+  /// reason alone (FR-010) — negative balances are a warn-only UI concern,
+  /// not a data-layer one.
+  Future<void> recordExpense({required String itemId, required int amount});
 }
