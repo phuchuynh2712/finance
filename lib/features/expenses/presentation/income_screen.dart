@@ -7,6 +7,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../expense_control/presentation/expense_control_providers.dart';
+import '../../expense_control/presentation/widgets/dashed_border.dart';
 import 'income_providers.dart';
 
 /// Income entry (FR-001–FR-019): lets the user record one or more named
@@ -278,6 +279,9 @@ class _IncomeSourceRowWidgetState extends State<_IncomeSourceRowWidget> {
           Expanded(
             child: TextFormField(
               initialValue: widget.row.name,
+              maxLines: null,
+              minLines: 1,
+              style: const TextStyle(fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: l10n.incomeSourceNameLabel,
                 border: InputBorder.none,
@@ -286,23 +290,30 @@ class _IncomeSourceRowWidgetState extends State<_IncomeSourceRowWidget> {
               onChanged: widget.onNameChanged,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 6),
           SizedBox(
-            width: 130,
-            height: 42,
+            width: 150,
             child: TextFormField(
               key: ValueKey('income-amount-${widget.row.id}'),
               controller: _amountController,
               focusNode: _amountFocusNode,
               keyboardType: TextInputType.number,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.center,
+              textAlignVertical: TextAlignVertical.center,
+              style: const TextStyle(fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: l10n.incomeSourceAmountLabel,
+                hintStyle: const TextStyle(fontWeight: FontWeight.bold),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 8,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4),
-                  borderSide: BorderSide(color: semantic.border2, width: 1.5),
+                  borderSide: BorderSide(
+                    color: semantic.border1.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               onChanged: (value) {
@@ -338,28 +349,34 @@ class _AddSourceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SizedBox(
-      height: 46,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 1.5,
-            style: BorderStyle.solid,
-          ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-        icon: Icon(
-          LucideIcons.plus,
-          size: 15,
-          color: theme.colorScheme.primary,
-        ),
-        label: Text(
-          label,
-          style: TextStyle(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.bold,
+    return DashedRectBorder(
+      color: theme.colorScheme.primary,
+      borderRadius: 6,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 46,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.plus,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
