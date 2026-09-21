@@ -5,28 +5,31 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/l10n/locale_notifier.dart';
+import 'package:finance/core/storage/app_preferences_storage.dart';
+import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/account/presentation/account_screen.dart';
 
 class _FakeAccountAuthActions implements AccountAuthActions {
-  String? updatedAvatarUrl;
-  String? changedPassword;
+  _FakeAccountAuthActions({
+    this.currentDisplayName,
+    this.currentEmail,
+    this.currentAvatarUrl,
+  });
+
+  @override
+  String? currentDisplayName;
+
+  @override
+  String? currentEmail;
+
+  @override
+  String? currentAvatarUrl;
+
   SignOutScope? signOutScope;
-  Object? throwOnUpdateAvatar;
-  Object? throwOnChangePassword;
   bool biometricEnabled = false;
-
-  @override
-  Future<void> updateAvatar(String avatarUrl) async {
-    if (throwOnUpdateAvatar != null) throw throwOnUpdateAvatar!;
-    updatedAvatarUrl = avatarUrl;
-  }
-
-  @override
-  Future<void> changePassword(String newPassword) async {
-    if (throwOnChangePassword != null) throw throwOnChangePassword!;
-    changedPassword = newPassword;
-  }
 
   @override
   Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {
@@ -42,53 +45,242 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   }
 }
 
-Widget _harness(_FakeAccountAuthActions fake) {
+class _FakeAppPreferencesStorage implements AppPreferencesStorage {
+  ThemeMode? storedThemeMode;
+  Locale? storedLocale;
+
+  @override
+  Future<ThemeMode?> getThemeMode() async => storedThemeMode;
+
+  @override
+  Future<void> setThemeMode(ThemeMode mode) async => storedThemeMode = mode;
+
+  @override
+  Future<Locale?> getLocale() async => storedLocale;
+
+  @override
+  Future<void> setLocale(Locale locale) async => storedLocale = locale;
+}
+
+Widget _harness(
+  _FakeAccountAuthActions fake, {
+  ThemeMode initialThemeMode = ThemeMode.system,
+  Locale initialLocale = const Locale('vi'),
+}) {
   return ProviderScope(
-    overrides: [accountAuthActionsProvider.overrideWithValue(fake)],
+    overrides: [
+      accountAuthActionsProvider.overrideWithValue(fake),
+      themeModeProvider.overrideWith(
+        (ref) =>
+            ThemeModeNotifier(_FakeAppPreferencesStorage(), initialThemeMode),
+      ),
+      localeProvider.overrideWith(
+        (ref) => LocaleNotifier(_FakeAppPreferencesStorage(), initialLocale),
+      ),
+    ],
     child: MaterialApp(
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: AppTheme.light,
       home: const AccountScreen(),
     ),
   );
 }
 
 void main() {
-  testWidgets(
-    'updating the avatar URL calls updateAvatar and shows confirmation',
-    (tester) async {
+  group('Appearance toggle (US1)', () {
+    testWidgets(
+      'tapping "Tối" calls setThemeMode(dark) and reflects the new active state',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(
+          _harness(fake, initialThemeMode: ThemeMode.light),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Tối'));
+        await tester.pumpAndSettle();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(AccountScreen)),
+        );
+        expect(container.read(themeModeProvider), ThemeMode.dark);
+      },
+    );
+
+    testWidgets(
+      'tapping "Sáng" calls setThemeMode(light) and reflects the new active state',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(
+          _harness(fake, initialThemeMode: ThemeMode.dark),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Sáng'));
+        await tester.pumpAndSettle();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(AccountScreen)),
+        );
+        expect(container.read(themeModeProvider), ThemeMode.light);
+      },
+    );
+  });
+
+  group('Language selector (US2)', () {
+    testWidgets(
+      'tapping the Ngôn ngữ row opens the selector showing both languages with the current one indicated',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Ngôn ngữ'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Tiếng Việt'), findsWidgets);
+        expect(find.text('English'), findsOneWidget);
+      },
+    );
+
+    testWidgets('selecting English calls setLocale(en) and closes the dialog', (
+      tester,
+    ) async {
       final fake = _FakeAccountAuthActions();
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.byType(TextField).first,
-        'https://example.com/avatar.png',
+      await tester.tap(find.text('Ngôn ngữ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AccountScreen)),
       );
-      await tester.tap(find.text('Cập nhật ảnh đại diện'));
-      await tester.pumpAndSettle();
+      expect(container.read(localeProvider), const Locale('en'));
+      expect(find.text('Chọn ngôn ngữ'), findsNothing);
+    });
+  });
 
-      expect(fake.updatedAvatarUrl, 'https://example.com/avatar.png');
-      expect(find.text('Đã cập nhật ảnh đại diện.'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'changing the password calls changePassword and shows confirmation',
-    (tester) async {
-      final fake = _FakeAccountAuthActions();
+  group('Account identity and menu (US3)', () {
+    testWidgets('renders display name and email when both are set', (
+      tester,
+    ) async {
+      final fake = _FakeAccountAuthActions(
+        currentDisplayName: 'Lan Nguyễn',
+        currentEmail: 'lan.nguyen@email.com',
+      );
       await tester.pumpWidget(_harness(fake));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).last, 'newSecurePass123');
-      await tester.tap(find.text('Đổi mật khẩu'));
-      await tester.pumpAndSettle();
+      expect(find.text('Lan Nguyễn'), findsOneWidget);
+      expect(find.text('lan.nguyen@email.com'), findsOneWidget);
+    });
 
-      expect(fake.changedPassword, 'newSecurePass123');
-      expect(find.textContaining('Đã đổi mật khẩu'), findsOneWidget);
-    },
-  );
+    testWidgets(
+      'renders an initial-letter avatar placeholder when no photo is set',
+      (tester) async {
+        final fake = _FakeAccountAuthActions(
+          currentDisplayName: 'Lan Nguyễn',
+          currentEmail: 'lan.nguyen@email.com',
+        );
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        expect(find.text('L'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'renders the avatar photo instead of an initial when currentAvatarUrl is set (FR-010)',
+      (tester) async {
+        // The test harness has no real network access, so NetworkImage's
+        // load will fail — this test only asserts *which provider* the
+        // widget wires up, not that the image successfully decodes, so
+        // that expected failure is intentionally silenced for this test.
+        final originalOnError = FlutterError.onError;
+        FlutterError.onError = (details) {
+          if (details.exception is NetworkImageLoadException) return;
+          originalOnError?.call(details);
+        };
+        addTearDown(() => FlutterError.onError = originalOnError);
+
+        final fake = _FakeAccountAuthActions(
+          currentDisplayName: 'Lan Nguyễn',
+          currentEmail: 'lan.nguyen@email.com',
+          currentAvatarUrl: 'https://example.com/avatar.png',
+        );
+        await tester.pumpWidget(_harness(fake));
+        await tester.pump();
+
+        final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+        expect(avatar.backgroundImage, isA<NetworkImage>());
+        expect(find.text('L'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'falls back to a name/initial derived from the email when no display name is set',
+      (tester) async {
+        final fake = _FakeAccountAuthActions(
+          currentEmail: 'nobody@example.com',
+        );
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        expect(find.text('nobody'), findsOneWidget);
+        expect(find.text('N'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping "Thông báo" navigates to a placeholder distinct from "Bảo mật"/"Trợ giúp"',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Thông báo'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Thông báo'), findsOneWidget);
+        expect(find.text('Bảo mật'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'tapping "Bảo mật" navigates to a placeholder distinct from "Thông báo"/"Trợ giúp"',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Bảo mật'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bảo mật'), findsOneWidget);
+        expect(find.text('Thông báo'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'tapping "Trợ giúp" navigates to a placeholder distinct from "Thông báo"/"Bảo mật"',
+      (tester) async {
+        final fake = _FakeAccountAuthActions();
+        await tester.pumpWidget(_harness(fake));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Trợ giúp'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Trợ giúp'), findsOneWidget);
+        expect(find.text('Thông báo'), findsNothing);
+      },
+    );
+  });
 
   testWidgets('tapping sign out calls signOut with the local scope', (
     tester,
@@ -102,37 +294,4 @@ void main() {
 
     expect(fake.signOutScope, SignOutScope.local);
   });
-
-  testWidgets('no Google-linking section is present anywhere on the screen', (
-    tester,
-  ) async {
-    final fake = _FakeAccountAuthActions();
-    await tester.pumpWidget(_harness(fake));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('Google'), findsNothing);
-  });
-
-  testWidgets(
-    'the biometric toggle reflects and updates the stored preference (FR-010)',
-    (tester) async {
-      final fake = _FakeAccountAuthActions();
-      await tester.pumpWidget(_harness(fake));
-      await tester.pumpAndSettle();
-
-      final toggleBefore = tester.widget<SwitchListTile>(
-        find.byType(SwitchListTile),
-      );
-      expect(toggleBefore.value, isFalse);
-
-      await tester.tap(find.byType(SwitchListTile));
-      await tester.pumpAndSettle();
-
-      expect(fake.biometricEnabled, isTrue);
-      final toggleAfter = tester.widget<SwitchListTile>(
-        find.byType(SwitchListTile),
-      );
-      expect(toggleAfter.value, isTrue);
-    },
-  );
 }

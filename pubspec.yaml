@@ -67,6 +67,7 @@ dependencies:
 
   # Biometric (fingerprint/Face ID) quick login
   local_auth: ^3.0.2
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

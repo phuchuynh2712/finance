@@ -68,39 +68,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelAction => 'Cancel';
 
   @override
-  String get accountTitle => 'Account';
+  String get accountTitle => 'Profile';
 
   @override
-  String get accountAvatarUrlLabel => 'Avatar URL';
+  String get accountAppearanceLabel => 'Appearance';
 
   @override
-  String get accountAvatarSaveAction => 'Update avatar';
+  String get accountAppearanceLightOption => 'Light';
 
   @override
-  String get accountAvatarSavedMessage => 'Avatar updated.';
+  String get accountAppearanceDarkOption => 'Dark';
 
   @override
-  String accountAvatarErrorPrefix(String error) {
-    return 'Could not update the avatar: $error';
-  }
+  String get accountLanguageLabel => 'Language';
 
   @override
-  String get accountNewPasswordLabel => 'New password';
+  String get accountLanguageDialogTitle => 'Select language';
 
   @override
-  String get accountPasswordSaveAction => 'Change password';
+  String get accountLanguageVietnamese => 'Tiếng Việt';
 
   @override
-  String get accountPasswordSavedMessage =>
-      'Password changed. Other signed-in devices have been signed out.';
-
-  @override
-  String accountPasswordErrorPrefix(String error) {
-    return 'Could not change the password: $error';
-  }
-
-  @override
-  String get accountBiometricToggleLabel => 'Log in with fingerprint';
+  String get accountLanguageEnglish => 'English';
 
   @override
   String get accountSignOutAction => 'Sign out';
@@ -389,6 +378,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewPlaceholderTitle => 'Overview';
+
+  @override
+  String get accountNotificationsRowLabel => 'Notifications';
+
+  @override
+  String get accountSecurityRowLabel => 'Security';
+
+  @override
+  String get accountHelpRowLabel => 'Help';
 
   @override
   String get incomeScreenTitle => 'Income';
