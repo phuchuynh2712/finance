@@ -8,6 +8,7 @@ import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/not_available_placeholder_screen.dart';
 import '../../expense_control/presentation/expense_control_providers.dart';
+import 'expense_screen.dart';
 import 'income_screen.dart';
 import 'widgets/balance_group_card.dart';
 
@@ -79,11 +80,10 @@ class SpendingScreen extends ConsumerWidget {
                           background: semantic.dangerSoft,
                           border: theme.colorScheme.error,
                           foreground: semantic.dangerFg,
-                          onPressed: () => _openPlaceholder(
-                            context,
-                            icon: LucideIcons.arrowDownCircle,
-                            title: l10n.expensePlaceholderTitle,
-                            message: l10n.notAvailablePlaceholderMessage,
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ExpenseScreen(),
+                            ),
                           ),
                         ),
                       ),

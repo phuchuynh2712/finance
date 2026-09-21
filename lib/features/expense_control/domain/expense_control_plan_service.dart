@@ -190,8 +190,11 @@ class ExpenseControlPlanService {
   /// Flattens [tree] into every leaf, in the exact order the tree is
   /// already displayed: top-level nodes in their own order, with a group's
   /// children interleaved at that group's position in their own order —
-  /// never "all top-level leaves then all group children."
-  List<ExpenseControlItem> _flattenLeaves(List<ExpenseControlNode> tree) {
+  /// never "all top-level leaves then all group children." Public so the
+  /// "Chi tiêu" screen's presentation layer can reuse this exact ordering
+  /// for its own leaf-item picker (research.md Decision 8 of the
+  /// expense-transaction feature) rather than reimplementing it.
+  List<ExpenseControlItem> flattenLeaves(List<ExpenseControlNode> tree) {
     return [
       for (final node in tree)
         if (node.isGroup) ...node.children else node.item,
@@ -213,7 +216,7 @@ class ExpenseControlPlanService {
     List<ExpenseControlNode> tree,
     int totalIncome,
   ) {
-    final leaves = _flattenLeaves(tree);
+    final leaves = flattenLeaves(tree);
     final deltas = <String, int>{};
     var remaining = totalIncome;
 

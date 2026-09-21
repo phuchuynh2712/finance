@@ -209,6 +209,29 @@ void main() {
     );
   });
 
+  group('flattenLeaves (public entry point)', () {
+    test(
+      'top-level leaves and group children are interleaved in display order, not top-level-then-children',
+      () {
+        final items = [
+          _item(id: 'top1', sortOrder: 0),
+          _item(id: 'group', sortOrder: 1),
+          _item(id: 'child1', parentId: 'group', sortOrder: 0),
+          _item(id: 'child2', parentId: 'group', sortOrder: 1),
+          _item(id: 'top2', sortOrder: 2),
+        ];
+        final tree = service.buildTree(items);
+        final leaves = service.flattenLeaves(tree);
+        expect(leaves.map((i) => i.id), ['top1', 'child1', 'child2', 'top2']);
+      },
+    );
+
+    test('a tree with no items produces an empty leaf list', () {
+      final tree = service.buildTree(const []);
+      expect(service.flattenLeaves(tree), isEmpty);
+    });
+  });
+
   group('computeItemBalance (FR-001)', () {
     test('a leaf node returns its own stored balance', () {
       final items = [_item(id: 'leaf', balance: 150000)];

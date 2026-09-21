@@ -444,4 +444,56 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get savingsReceiverAutoClearWarning =>
       'Khoản này đang nhận phần dư thu nhập. Thêm khoản con sẽ tự động bỏ đánh dấu này.';
+
+  @override
+  String get expenseScreenTitle => 'Chi tiêu';
+
+  @override
+  String get expenseTabManual => 'Nhập tay';
+
+  @override
+  String get expenseTabScan => 'Quét hoá đơn';
+
+  @override
+  String get expenseAmountLabel => 'Số tiền';
+
+  @override
+  String get expensePickItemEyebrow => 'TRỪ VÀO KHOẢN NÀO';
+
+  @override
+  String get expenseSaveAction => 'Lưu giao dịch';
+
+  @override
+  String get expenseEmptyStateMessage =>
+      'Chưa có khoản nào. Hãy thiết lập ở Kiểm soát chi tiêu trước.';
+
+  @override
+  String get expenseErrorInvalidAmount => 'Vui lòng nhập số tiền lớn hơn 0.';
+
+  @override
+  String get expenseErrorMissingItem => 'Vui lòng chọn khoản để trừ tiền.';
+
+  @override
+  String expenseErrorWriteFailedPrefix(Object error) {
+    return 'Không thể lưu giao dịch chi tiêu: $error';
+  }
+
+  @override
+  String expenseItemPickedSemantic(Object name) {
+    return 'Trừ vào khoản $name';
+  }
+
+  @override
+  String get expenseScanFrameHint => 'Đưa hoá đơn vào khung hình';
+
+  @override
+  String get expenseScanCaptureAction => 'Chụp hoá đơn';
+
+  @override
+  String expenseScanRecognizedLabel(Object amount, Object merchant) {
+    return 'Đã nhận diện: $amount · $merchant';
+  }
+
+  @override
+  String get expenseScanConfirmAction => 'Xác nhận & lưu';
 }

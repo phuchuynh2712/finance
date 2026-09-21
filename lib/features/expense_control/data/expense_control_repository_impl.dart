@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/tables/expense_control_items_table.dart'
     as tables;
+import '../../../core/database/tables/financial_transactions_table.dart';
 import '../../../core/sync/sync_outbox_table.dart';
 import '../domain/expense_control_item.dart';
 import '../domain/expense_control_repository.dart';
@@ -53,14 +54,15 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
   Future<void> _appendOutbox(
     String rowId,
     SyncOperation operation,
-    Map<String, dynamic> payload,
-  ) async {
+    Map<String, dynamic> payload, {
+    String entityTable = 'expense_control_items',
+  }) async {
     await _db
         .into(_db.syncOutbox)
         .insert(
           SyncOutboxCompanion.insert(
             id: _uuid.v4(),
-            entityTable: 'expense_control_items',
+            entityTable: entityTable,
             rowId: rowId,
             operation: operation,
             payload: jsonEncode(payload),
@@ -80,6 +82,21 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
     'allocation_value': item.allocationValue,
     'balance': item.balance,
     'is_savings_receiver': item.isSavingsReceiver,
+  };
+
+  /// Snake_case payload for a `financial_transactions` outbox row, matching
+  /// the Supabase migration's column names exactly. Distinct from
+  /// [_payloadOf] — that method's shape is for `expense_control_items` rows
+  /// only and MUST NOT be reused here (research.md/tasks.md's explicit
+  /// warning against payload-shape confusion between the two tables).
+  Map<String, dynamic> _payloadOfTransaction(FinancialTransactionRow row) => {
+    'id': row.id,
+    'user_id': row.userId,
+    'expense_control_item_id': row.expenseControlItemId,
+    'direction': row.direction.name,
+    'amount': row.amount,
+    'occurred_at': row.occurredAt.millisecondsSinceEpoch ~/ 1000,
+    'created_at': row.createdAt.millisecondsSinceEpoch ~/ 1000,
   };
 
   @override
@@ -262,10 +279,16 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
   @override
   Future<void> applyIncomeAllocation(Map<String, int> balanceDeltas) async {
     await _db.transaction(() async {
+      // Captured once, before the loop, and reused for every history row
+      // this call produces — every row created by one "Lưu thu nhập"
+      // action represents the same user-facing event, not several events
+      // that happened to occur at slightly different microseconds
+      // (research.md Decision 4 of the expense-transaction feature).
       final now = DateTime.now();
       for (final entry in balanceDeltas.entries) {
         final itemId = entry.key;
         final delta = entry.value;
+        if (delta <= 0) continue;
         // A single atomic `balance = balance + delta` statement — not a
         // read-then-write pair — so a concurrent write to the same row
         // within this transaction window can never be silently lost
@@ -299,7 +322,97 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
           SyncOperation.update,
           _payloadOf(_toDomain(row)),
         );
+
+        // FR-013: one income Financial Transaction row per non-zero delta,
+        // atomic with the balance increment above — both are inside this
+        // same `_db.transaction()`, so a failure anywhere in this loop
+        // rolls back every balance change AND every history row from this
+        // call, never leaving one without the other. Do NOT move this
+        // insert out of this transaction in any future refactor — see
+        // research.md Decision 6's guardrail.
+        final transactionId = _uuid.v4();
+        await _db
+            .into(_db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: transactionId,
+                userId: _userId,
+                expenseControlItemId: itemId,
+                direction: TransactionDirection.income,
+                amount: delta,
+                occurredAt: now,
+              ),
+            );
+        final transactionRow = await (_db.select(
+          _db.financialTransactions,
+        )..where((r) => r.id.equals(transactionId))).getSingle();
+        await _appendOutbox(
+          transactionId,
+          SyncOperation.insert,
+          _payloadOfTransaction(transactionRow),
+          entityTable: 'financial_transactions',
+        );
       }
+    });
+  }
+
+  @override
+  Future<void> recordExpense({
+    required String itemId,
+    required int amount,
+  }) async {
+    await _db.transaction(() async {
+      final now = DateTime.now();
+      // Same atomic-decrement requirement as applyIncomeAllocation's
+      // increment: a single `balance = balance - amount` statement, and
+      // `customUpdate` (not `customStatement`) so Drift's `.watch()`
+      // streams are notified (research.md Decision 5).
+      await _db.customUpdate(
+        'UPDATE expense_control_items SET balance = balance - ?, '
+        'updated_at = ? WHERE id = ?',
+        variables: [
+          Variable(amount),
+          Variable(now.millisecondsSinceEpoch ~/ 1000),
+          Variable(itemId),
+        ],
+        updates: {_db.expenseControlItems},
+        updateKind: UpdateKind.update,
+      );
+      final row = await (_db.select(
+        _db.expenseControlItems,
+      )..where((r) => r.id.equals(itemId))).getSingle();
+      await _appendOutbox(
+        itemId,
+        SyncOperation.update,
+        _payloadOf(_toDomain(row)),
+      );
+
+      // FR-009: the expense Financial Transaction row is inside the same
+      // transaction as the balance decrement above — a failure here rolls
+      // back the decrement too, never leaving one without the other
+      // (SC-002).
+      final transactionId = _uuid.v4();
+      await _db
+          .into(_db.financialTransactions)
+          .insert(
+            FinancialTransactionsCompanion.insert(
+              id: transactionId,
+              userId: _userId,
+              expenseControlItemId: itemId,
+              direction: TransactionDirection.expense,
+              amount: amount,
+              occurredAt: now,
+            ),
+          );
+      final transactionRow = await (_db.select(
+        _db.financialTransactions,
+      )..where((r) => r.id.equals(transactionId))).getSingle();
+      await _appendOutbox(
+        transactionId,
+        SyncOperation.insert,
+        _payloadOfTransaction(transactionRow),
+        entityTable: 'financial_transactions',
+      );
     });
   }
 }
