@@ -1,14 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-/// Curated, fixed icon set for Expense Control items/groups (research.md
-/// §2) — the single string key (map key) is what's persisted, never the
-/// [IconData] itself, so it stays stable across `lucide_icons` upgrades.
-/// Lives in `domain/` (not `expense_control/presentation/`) because it
-/// resolves a value intrinsic to `ExpenseControlItem.iconKey` itself, and
-/// "Thu chi" (a different feature) needs the same resolution to render the
-/// same items' icons without importing another feature's presentation
-/// internals (Constitution Recommended Architecture).
+/// Stable presentation mapping for persisted expense-control icon keys.
+///
+/// The string key is persisted; IconData is resolved only when rendering.
 const Map<String, IconData> expenseControlIcons = {
   'home': LucideIcons.home,
   'family': LucideIcons.users,
@@ -28,8 +23,7 @@ const Map<String, IconData> expenseControlIcons = {
   'moreHorizontal': LucideIcons.moreHorizontal,
 };
 
-/// Returns the [IconData] for a stored icon key, falling back to a generic
-/// icon if the key is unrecognized (e.g. from a future icon set version).
+/// Resolves a persisted icon key with a stable fallback for unknown values.
 IconData resolveExpenseControlIcon(String key) {
   return expenseControlIcons[key] ?? LucideIcons.circle;
 }

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Dashed-border rounded rectangle — the mockup uses dashed borders for the
-/// child-row separator and the "Thêm khoản..." buttons, which Material3's
-/// stock widgets don't support. Implemented with `Path.computeMetrics()`
-/// rather than a third-party package (Constitution: dependencies must be
-/// reviewed before addition — not worth one for a single dash algorithm).
+/// Feature-neutral dashed rounded-rectangle border.
 class DashedRectBorder extends StatelessWidget {
   const DashedRectBorder({
     super.key,
@@ -87,8 +83,7 @@ class _DashedRRectPainter extends CustomPainter {
   }
 }
 
-/// A single dashed top border (child-row separator) — cheaper than a full
-/// dashed rect for a straight line.
+/// Feature-neutral dashed top border.
 class DashedTopBorder extends StatelessWidget {
   const DashedTopBorder({
     super.key,

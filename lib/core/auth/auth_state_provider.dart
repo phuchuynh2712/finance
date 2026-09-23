@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../network/supabase_client_provider.dart';
+import 'package:finance/core/network/supabase_client_provider.dart';
 import 'auth_repository.dart';
 import 'biometric_login_repository.dart';
 

@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/auth/auth_state_provider.dart';
-import '../../../core/error/error_mapper.dart';
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_semantic_colors.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/error/error_mapper.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'biometric_enable_prompt.dart';
 
 /// Login screen (FR-003) — also reused, unchanged, as the app's cold-start

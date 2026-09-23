@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../database/app_database.dart';
+import 'package:finance/core/database/app_database.dart';
 import 'sync_outbox_table.dart';
 
 /// Drains the local outbox to Supabase on a periodic timer.

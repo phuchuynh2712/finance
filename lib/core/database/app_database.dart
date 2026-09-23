@@ -3,7 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import 'tables/expense_control_items_table.dart';
 import 'tables/financial_transactions_table.dart';
-import '../sync/sync_outbox_table.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 
 part 'app_database.g.dart';
 

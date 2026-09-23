@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../domain/expense_control_plan_service.dart';
-import '../formatting.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 
 /// FR-011: running allocation summary — percent allocated, fixed-item
 /// count, percent free. Renders from [ExpenseControlTotals] computed by

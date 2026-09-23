@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 import 'package:finance/features/expense_control/presentation/widgets/expense_group_card.dart';
@@ -69,6 +70,7 @@ void main() {
       await tester.pumpWidget(_harness(node));
 
       expect(find.text('Groceries'), findsOneWidget);
+      expect(find.byType(DashedTopBorder), findsOneWidget);
 
       await tester.tap(find.text('Family'));
       await tester.pumpAndSettle();

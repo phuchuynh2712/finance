@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expenses/application/expense_control_gateway.dart';
+import 'package:finance/features/expenses/application/transaction_command_service.dart';
 
 /// One transient income source row on "Thu nhập" — never persisted on its
 /// own; only the summed total is used for allocation (spec.md Key
@@ -186,17 +187,12 @@ class IncomeFormController extends StateNotifier<IncomeFormState> {
     }
     state = state.copyWith(isSubmitting: true, clearError: true);
     try {
-      final planService = ref.read(expenseControlPlanServiceProvider);
-      final items =
-          ref.read(expenseControlItemsStreamProvider).valueOrNull ?? [];
-      final tree = planService.buildTree(items);
-      final result = planService.computeIncomeAllocation(
-        tree,
-        state.totalAmount,
-      );
-      await ref
-          .read(expenseControlRepositoryProvider)
-          .applyIncomeAllocation(result.deltas);
+      final gateway = ref.read(expenseControlGatewayProvider);
+      final commands = ref.read(transactionCommandServiceProvider);
+      final items = await gateway.getItems();
+      final tree = gateway.buildTree(items);
+      final result = commands.allocateIncome(tree, state.totalAmount);
+      await commands.applyIncomeAllocation(result.deltas);
       state = state.copyWith(saved: true, isSubmitting: false);
     } catch (e) {
       state = state.copyWith(

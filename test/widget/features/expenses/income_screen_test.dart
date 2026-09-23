@@ -8,6 +8,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
@@ -103,6 +104,7 @@ void main() {
       await tester.pumpWidget(_harness(repository));
       await tester.pumpAndSettle();
 
+      expect(find.byType(DashedRectBorder), findsOneWidget);
       await tester.enterText(
         find.byKey(const ValueKey('income-amount-0')),
         '10000000',

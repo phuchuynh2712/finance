@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/app_database.dart';
-import '../../../core/database/tables/expense_control_items_table.dart'
+import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/tables/expense_control_items_table.dart'
     as tables;
-import '../../../core/database/tables/financial_transactions_table.dart';
-import '../../../core/sync/sync_outbox_table.dart';
-import '../domain/expense_control_item.dart';
-import '../domain/expense_control_repository.dart';
+import 'package:finance/core/database/tables/financial_transactions_table.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 
 class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
   ExpenseControlRepositoryImpl(this._db, {required String userId})

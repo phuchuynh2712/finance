@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
-import '../../domain/expense_control_icons.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/widgets/expense_control_icons.dart';
 
 class IconPicker extends StatelessWidget {
   const IconPicker({

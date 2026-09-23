@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../storage/app_preferences_storage.dart';
+import 'package:finance/core/storage/app_preferences_storage.dart';
 
 /// Device-level Appearance preference (FR-001–FR-004). Applies the state
 /// change in memory before awaiting the storage write, so an app-wide
