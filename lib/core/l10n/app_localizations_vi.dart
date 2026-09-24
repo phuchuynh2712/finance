@@ -519,4 +519,49 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get errorMapperGeneric => 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+
+  @override
+  String get transactionHistoryTitle => 'Lịch sử giao dịch';
+
+  @override
+  String get transactionHistoryAllFilter => 'Tất cả';
+
+  @override
+  String get transactionHistoryIncomeFilter => 'Thu nhập';
+
+  @override
+  String transactionHistoryExpenseTotal(String amount) {
+    return 'Tổng chi tháng này: $amount';
+  }
+
+  @override
+  String get transactionHistoryEmpty => 'Không có giao dịch phù hợp.';
+
+  @override
+  String get transactionHistoryLoadError => 'Không thể tải lịch sử giao dịch.';
+
+  @override
+  String get transactionHistoryRetry => 'Thử lại';
+
+  @override
+  String get transactionHistoryBackSemantic => 'Quay lại Thu chi';
+
+  @override
+  String get transactionHistoryPreviousMonthSemantic => 'Tháng trước';
+
+  @override
+  String get transactionHistoryNextMonthSemantic => 'Tháng sau';
+
+  @override
+  String get transactionHistoryArchivedItem => 'Mục đã lưu trữ';
+
+  @override
+  String get transactionHistoryIncomeClassification => 'Thu nhập';
+
+  @override
+  String get startupConfigurationTitle => 'Cần cấu hình ứng dụng';
+
+  @override
+  String get startupConfigurationMessage =>
+      'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.';
 }

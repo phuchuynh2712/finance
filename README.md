@@ -73,10 +73,34 @@ test/
 flutter pub get
 ```
 
+### Configure public runtime values
+
+The app reads its public Supabase URL and publishable key through Dart build
+defines. Do not put database passwords or service-role keys in a Flutter app:
+web builds can be inspected by every browser user.
+
+Create `tool/env.json` from `tool/env.example.json`, then supply it when
+launching or building:
+
+```bash
+flutter run --dart-define-from-file=tool/env.json
+```
+
+For web development, use a fixed origin and add that origin and any deployed
+web origin to the Supabase project's allowed redirect/origin configuration:
+
+```bash
+flutter run -d chrome --web-port=5000 --dart-define-from-file=tool/env.json
+```
+
+The configuration file contains only `SUPABASE_URL` and
+`SUPABASE_PUBLISHABLE_KEY`. Keep database passwords, service-role keys, and QA
+account passwords outside Flutter build inputs.
+
 ### Run the app
 
 ```bash
-flutter run
+flutter run --dart-define-from-file=tool/env.json
 ```
 
 ### Generate localizations
@@ -95,7 +119,10 @@ flutter test
 
 ## Configuration
 
-The app depends on a local environment file such as `.env` for runtime configuration. Ensure your local setup matches the Supabase and app settings required by this project before starting the app.
+If either required build define is absent or invalid, the app displays a
+localized configuration screen instead of failing during Supabase startup.
+Biometric sign-in is automatically unavailable on web because browser targets
+do not provide the device biometric plugin.
 
 ## Notes
 

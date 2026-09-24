@@ -907,6 +907,39 @@ class $FinancialTransactionsTable extends FinancialTransactions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayGroupNameMeta = const VerificationMeta(
+    'displayGroupName',
+  );
+  @override
+  late final GeneratedColumn<String> displayGroupName = GeneratedColumn<String>(
+    'display_group_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayIconKeyMeta = const VerificationMeta(
+    'displayIconKey',
+  );
+  @override
+  late final GeneratedColumn<String> displayIconKey = GeneratedColumn<String>(
+    'display_icon_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -919,6 +952,29 @@ class $FinancialTransactionsTable extends FinancialTransactions
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -927,7 +983,12 @@ class $FinancialTransactionsTable extends FinancialTransactions
     direction,
     amount,
     occurredAt,
+    displayName,
+    displayGroupName,
+    displayIconKey,
     createdAt,
+    updatedAt,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -981,10 +1042,49 @@ class $FinancialTransactionsTable extends FinancialTransactions
     } else if (isInserting) {
       context.missing(_occurredAtMeta);
     }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_group_name')) {
+      context.handle(
+        _displayGroupNameMeta,
+        displayGroupName.isAcceptableOrUnknown(
+          data['display_group_name']!,
+          _displayGroupNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_icon_key')) {
+      context.handle(
+        _displayIconKeyMeta,
+        displayIconKey.isAcceptableOrUnknown(
+          data['display_icon_key']!,
+          _displayIconKeyMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
     return context;
@@ -1025,10 +1125,30 @@ class $FinancialTransactionsTable extends FinancialTransactions
         DriftSqlType.dateTime,
         data['${effectivePrefix}occurred_at'],
       )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
+      displayGroupName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_group_name'],
+      ),
+      displayIconKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_icon_key'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -1051,7 +1171,12 @@ class FinancialTransactionRow extends DataClass
   final TransactionDirection direction;
   final int amount;
   final DateTime occurredAt;
+  final String? displayName;
+  final String? displayGroupName;
+  final String? displayIconKey;
   final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
   const FinancialTransactionRow({
     required this.id,
     required this.userId,
@@ -1059,7 +1184,12 @@ class FinancialTransactionRow extends DataClass
     required this.direction,
     required this.amount,
     required this.occurredAt,
+    this.displayName,
+    this.displayGroupName,
+    this.displayIconKey,
     required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1074,7 +1204,20 @@ class FinancialTransactionRow extends DataClass
     }
     map['amount'] = Variable<int>(amount);
     map['occurred_at'] = Variable<DateTime>(occurredAt);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
+    if (!nullToAbsent || displayGroupName != null) {
+      map['display_group_name'] = Variable<String>(displayGroupName);
+    }
+    if (!nullToAbsent || displayIconKey != null) {
+      map['display_icon_key'] = Variable<String>(displayIconKey);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -1086,7 +1229,20 @@ class FinancialTransactionRow extends DataClass
       direction: Value(direction),
       amount: Value(amount),
       occurredAt: Value(occurredAt),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
+      displayGroupName: displayGroupName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayGroupName),
+      displayIconKey: displayIconKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayIconKey),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -1106,7 +1262,12 @@ class FinancialTransactionRow extends DataClass
       ),
       amount: serializer.fromJson<int>(json['amount']),
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
+      displayGroupName: serializer.fromJson<String?>(json['displayGroupName']),
+      displayIconKey: serializer.fromJson<String?>(json['displayIconKey']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -1121,7 +1282,12 @@ class FinancialTransactionRow extends DataClass
       ),
       'amount': serializer.toJson<int>(amount),
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'displayName': serializer.toJson<String?>(displayName),
+      'displayGroupName': serializer.toJson<String?>(displayGroupName),
+      'displayIconKey': serializer.toJson<String?>(displayIconKey),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -1132,7 +1298,12 @@ class FinancialTransactionRow extends DataClass
     TransactionDirection? direction,
     int? amount,
     DateTime? occurredAt,
+    Value<String?> displayName = const Value.absent(),
+    Value<String?> displayGroupName = const Value.absent(),
+    Value<String?> displayIconKey = const Value.absent(),
     DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => FinancialTransactionRow(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -1140,7 +1311,16 @@ class FinancialTransactionRow extends DataClass
     direction: direction ?? this.direction,
     amount: amount ?? this.amount,
     occurredAt: occurredAt ?? this.occurredAt,
+    displayName: displayName.present ? displayName.value : this.displayName,
+    displayGroupName: displayGroupName.present
+        ? displayGroupName.value
+        : this.displayGroupName,
+    displayIconKey: displayIconKey.present
+        ? displayIconKey.value
+        : this.displayIconKey,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   FinancialTransactionRow copyWithCompanion(
     FinancialTransactionsCompanion data,
@@ -1156,7 +1336,18 @@ class FinancialTransactionRow extends DataClass
       occurredAt: data.occurredAt.present
           ? data.occurredAt.value
           : this.occurredAt,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      displayGroupName: data.displayGroupName.present
+          ? data.displayGroupName.value
+          : this.displayGroupName,
+      displayIconKey: data.displayIconKey.present
+          ? data.displayIconKey.value
+          : this.displayIconKey,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1169,7 +1360,12 @@ class FinancialTransactionRow extends DataClass
           ..write('direction: $direction, ')
           ..write('amount: $amount, ')
           ..write('occurredAt: $occurredAt, ')
-          ..write('createdAt: $createdAt')
+          ..write('displayName: $displayName, ')
+          ..write('displayGroupName: $displayGroupName, ')
+          ..write('displayIconKey: $displayIconKey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -1182,7 +1378,12 @@ class FinancialTransactionRow extends DataClass
     direction,
     amount,
     occurredAt,
+    displayName,
+    displayGroupName,
+    displayIconKey,
     createdAt,
+    updatedAt,
+    deletedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1194,7 +1395,12 @@ class FinancialTransactionRow extends DataClass
           other.direction == this.direction &&
           other.amount == this.amount &&
           other.occurredAt == this.occurredAt &&
-          other.createdAt == this.createdAt);
+          other.displayName == this.displayName &&
+          other.displayGroupName == this.displayGroupName &&
+          other.displayIconKey == this.displayIconKey &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class FinancialTransactionsCompanion
@@ -1205,7 +1411,12 @@ class FinancialTransactionsCompanion
   final Value<TransactionDirection> direction;
   final Value<int> amount;
   final Value<DateTime> occurredAt;
+  final Value<String?> displayName;
+  final Value<String?> displayGroupName;
+  final Value<String?> displayIconKey;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const FinancialTransactionsCompanion({
     this.id = const Value.absent(),
@@ -1214,7 +1425,12 @@ class FinancialTransactionsCompanion
     this.direction = const Value.absent(),
     this.amount = const Value.absent(),
     this.occurredAt = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.displayGroupName = const Value.absent(),
+    this.displayIconKey = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FinancialTransactionsCompanion.insert({
@@ -1224,7 +1440,12 @@ class FinancialTransactionsCompanion
     required TransactionDirection direction,
     required int amount,
     required DateTime occurredAt,
+    this.displayName = const Value.absent(),
+    this.displayGroupName = const Value.absent(),
+    this.displayIconKey = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1239,7 +1460,12 @@ class FinancialTransactionsCompanion
     Expression<String>? direction,
     Expression<int>? amount,
     Expression<DateTime>? occurredAt,
+    Expression<String>? displayName,
+    Expression<String>? displayGroupName,
+    Expression<String>? displayIconKey,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1250,7 +1476,12 @@ class FinancialTransactionsCompanion
       if (direction != null) 'direction': direction,
       if (amount != null) 'amount': amount,
       if (occurredAt != null) 'occurred_at': occurredAt,
+      if (displayName != null) 'display_name': displayName,
+      if (displayGroupName != null) 'display_group_name': displayGroupName,
+      if (displayIconKey != null) 'display_icon_key': displayIconKey,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1262,7 +1493,12 @@ class FinancialTransactionsCompanion
     Value<TransactionDirection>? direction,
     Value<int>? amount,
     Value<DateTime>? occurredAt,
+    Value<String?>? displayName,
+    Value<String?>? displayGroupName,
+    Value<String?>? displayIconKey,
     Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return FinancialTransactionsCompanion(
@@ -1272,7 +1508,12 @@ class FinancialTransactionsCompanion
       direction: direction ?? this.direction,
       amount: amount ?? this.amount,
       occurredAt: occurredAt ?? this.occurredAt,
+      displayName: displayName ?? this.displayName,
+      displayGroupName: displayGroupName ?? this.displayGroupName,
+      displayIconKey: displayIconKey ?? this.displayIconKey,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1302,8 +1543,23 @@ class FinancialTransactionsCompanion
     if (occurredAt.present) {
       map['occurred_at'] = Variable<DateTime>(occurredAt.value);
     }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (displayGroupName.present) {
+      map['display_group_name'] = Variable<String>(displayGroupName.value);
+    }
+    if (displayIconKey.present) {
+      map['display_icon_key'] = Variable<String>(displayIconKey.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1320,7 +1576,12 @@ class FinancialTransactionsCompanion
           ..write('direction: $direction, ')
           ..write('amount: $amount, ')
           ..write('occurredAt: $occurredAt, ')
+          ..write('displayName: $displayName, ')
+          ..write('displayGroupName: $displayGroupName, ')
+          ..write('displayIconKey: $displayIconKey, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2245,7 +2506,12 @@ typedef $$FinancialTransactionsTableCreateCompanionBuilder =
       required TransactionDirection direction,
       required int amount,
       required DateTime occurredAt,
+      Value<String?> displayName,
+      Value<String?> displayGroupName,
+      Value<String?> displayIconKey,
       Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
@@ -2256,7 +2522,12 @@ typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
       Value<TransactionDirection> direction,
       Value<int> amount,
       Value<DateTime> occurredAt,
+      Value<String?> displayName,
+      Value<String?> displayGroupName,
+      Value<String?> displayIconKey,
       Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -2304,8 +2575,33 @@ class $$FinancialTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayGroupName => $composableBuilder(
+    column: $table.displayGroupName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayIconKey => $composableBuilder(
+    column: $table.displayIconKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2349,8 +2645,33 @@ class $$FinancialTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayGroupName => $composableBuilder(
+    column: $table.displayGroupName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayIconKey => $composableBuilder(
+    column: $table.displayIconKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2387,8 +2708,29 @@ class $$FinancialTransactionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayGroupName => $composableBuilder(
+    column: $table.displayGroupName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayIconKey => $composableBuilder(
+    column: $table.displayIconKey,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$FinancialTransactionsTableTableManager
@@ -2443,7 +2785,12 @@ class $$FinancialTransactionsTableTableManager
                 Value<TransactionDirection> direction = const Value.absent(),
                 Value<int> amount = const Value.absent(),
                 Value<DateTime> occurredAt = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
+                Value<String?> displayGroupName = const Value.absent(),
+                Value<String?> displayIconKey = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialTransactionsCompanion(
                 id: id,
@@ -2452,7 +2799,12 @@ class $$FinancialTransactionsTableTableManager
                 direction: direction,
                 amount: amount,
                 occurredAt: occurredAt,
+                displayName: displayName,
+                displayGroupName: displayGroupName,
+                displayIconKey: displayIconKey,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2463,7 +2815,12 @@ class $$FinancialTransactionsTableTableManager
                 required TransactionDirection direction,
                 required int amount,
                 required DateTime occurredAt,
+                Value<String?> displayName = const Value.absent(),
+                Value<String?> displayGroupName = const Value.absent(),
+                Value<String?> displayIconKey = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialTransactionsCompanion.insert(
                 id: id,
@@ -2472,7 +2829,12 @@ class $$FinancialTransactionsTableTableManager
                 direction: direction,
                 amount: amount,
                 occurredAt: occurredAt,
+                displayName: displayName,
+                displayGroupName: displayGroupName,
+                displayIconKey: displayIconKey,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

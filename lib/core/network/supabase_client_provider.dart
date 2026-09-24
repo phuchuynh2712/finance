@@ -1,28 +1,20 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:finance/core/config/app_environment.dart';
 import 'package:finance/core/storage/secure_local_storage.dart';
 
-/// Initializes the Supabase SDK using credentials from `.env`.
+/// Initializes the Supabase SDK using public build-time configuration.
 ///
-/// MUST be awaited in `main()` before `runApp`. Throws if the required
-/// environment variables are missing, so misconfiguration fails loudly
-/// at startup instead of surfacing as an unexplained network error later.
+/// `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` are passed through
+/// `--dart-define` or `--dart-define-from-file`; no `.env` file is bundled in
+/// web builds. MUST be awaited in `main()` before `runApp`.
 Future<void> initSupabase() async {
-  final url = dotenv.env['SUPABASE_URL'];
-  final publishableKey = dotenv.env['SUPABASE_PUBLISHABLE_KEY'];
-
-  if (url == null || url.isEmpty) {
-    throw StateError('SUPABASE_URL is missing from .env');
-  }
-  if (publishableKey == null || publishableKey.isEmpty) {
-    throw StateError('SUPABASE_PUBLISHABLE_KEY is missing from .env');
-  }
+  AppEnvironment.validate();
 
   await Supabase.initialize(
-    url: url,
-    publishableKey: publishableKey,
+    url: AppEnvironment.supabaseUrl,
+    publishableKey: AppEnvironment.supabasePublishableKey,
     authOptions: const FlutterAuthClientOptions(
       localStorage: SecureLocalStorage(),
     ),

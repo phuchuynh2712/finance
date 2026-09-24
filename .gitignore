@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+tool/env.json
 
 # Flutter / Dart
 .dart_tool/

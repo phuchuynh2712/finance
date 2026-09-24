@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -5,6 +6,7 @@ import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/features/expense_control/data/expense_control_repository_impl.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 
 const _userId = 'test-user';
 
@@ -412,6 +414,123 @@ void main() {
 
         final rows = await db.select(db.financialTransactions).get();
         expect(rows, isEmpty);
+      },
+    );
+  });
+
+  group('transaction history snapshots', () {
+    test(
+      'income and expense rows capture immutable display and sync fields',
+      () async {
+        await repository.create(_leaf('food'));
+
+        await repository.applyIncomeAllocation({'food': 100000});
+        await repository.recordExpense(itemId: 'food', amount: 25000);
+
+        final rows = await db.select(db.financialTransactions).get();
+        expect(rows, hasLength(2));
+        expect(rows.every((row) => row.displayName == 'food'), isTrue);
+        expect(rows.every((row) => row.displayIconKey == 'home'), isTrue);
+        expect(
+          rows.every((row) => row.updatedAt.isAtSameMomentAs(row.occurredAt)),
+          isTrue,
+        );
+        expect(rows.every((row) => row.deletedAt == null), isTrue);
+        final expense = rows.firstWhere(
+          (row) => row.direction == TransactionDirection.expense,
+        );
+        expect(expense.displayGroupName, 'food');
+
+        final transactionOutboxRows = (await db.select(db.syncOutbox).get())
+            .where((row) => row.entityTable == 'financial_transactions');
+        expect(transactionOutboxRows, hasLength(2));
+        expect(
+          transactionOutboxRows.every(
+            (row) => row.payload.contains('display_name'),
+          ),
+          isTrue,
+        );
+        expect(
+          transactionOutboxRows.every(
+            (row) => row.payload.contains('updated_at'),
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'history query is month-bounded, newest-first, and excludes tombstones',
+      () async {
+        final now = DateTime(2026, 6, 20);
+        await repository.create(_leaf('item'));
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: 'older',
+                userId: _userId,
+                expenseControlItemId: 'item',
+                direction: TransactionDirection.expense,
+                amount: 100,
+                occurredAt: DateTime(2026, 6, 1),
+                displayName: const Value('Older'),
+                updatedAt: Value(now),
+              ),
+            );
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: 'newer',
+                userId: _userId,
+                expenseControlItemId: 'item',
+                direction: TransactionDirection.income,
+                amount: 200,
+                occurredAt: DateTime(2026, 6, 18),
+                displayName: const Value('Newer'),
+                updatedAt: Value(now),
+              ),
+            );
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: 'deleted',
+                userId: _userId,
+                expenseControlItemId: 'item',
+                direction: TransactionDirection.expense,
+                amount: 300,
+                occurredAt: DateTime(2026, 6, 19),
+                displayName: const Value('Deleted'),
+                updatedAt: Value(now),
+                deletedAt: Value(now),
+              ),
+            );
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: 'other-month',
+                userId: _userId,
+                expenseControlItemId: 'item',
+                direction: TransactionDirection.expense,
+                amount: 400,
+                occurredAt: DateTime(2026, 7, 1),
+                displayName: const Value('Other'),
+                updatedAt: Value(now),
+              ),
+            );
+
+        final history = await repository
+            .watchTransactionHistory(
+              start: DateTime(2026, 6),
+              end: DateTime(2026, 7),
+            )
+            .first;
+
+        expect(history.map((record) => record.id), ['newer', 'older']);
+        expect(history.last.direction, TransactionHistoryDirection.expense);
       },
     );
   });

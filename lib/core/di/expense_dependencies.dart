@@ -6,6 +6,7 @@ import 'package:finance/features/expense_control/data/expense_control_repository
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 
 final expenseControlRepositoryProvider = Provider<ExpenseControlRepository>((
   ref,
@@ -15,6 +16,14 @@ final expenseControlRepositoryProvider = Provider<ExpenseControlRepository>((
     userId: ref.watch(currentUserIdProvider),
   );
 });
+
+final transactionHistoryRepositoryProvider =
+    Provider<TransactionHistoryRepository>((ref) {
+      return ExpenseControlRepositoryImpl(
+        ref.watch(appDatabaseProvider),
+        userId: ref.watch(currentUserIdProvider),
+      );
+    });
 
 final expenseControlPlanServiceProvider = Provider<ExpenseControlPlanService>(
   (ref) => const ExpenseControlPlanService(),

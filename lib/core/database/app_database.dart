@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +51,61 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from <= 4) {
         await m.createTable(financialTransactions);
+      }
+      // Versions up to v4 create financialTransactions above using the current
+      // table definition, which already includes these fields. Only a real v5
+      // database needs ALTER TABLE and legacy backfill.
+      if (from == 5) {
+        await m.addColumn(
+          financialTransactions,
+          financialTransactions.displayName,
+        );
+        await m.addColumn(
+          financialTransactions,
+          financialTransactions.displayGroupName,
+        );
+        await m.addColumn(
+          financialTransactions,
+          financialTransactions.displayIconKey,
+        );
+        // SQLite cannot add a column with Drift's non-constant
+        // currentDateAndTime default. Add the legacy column without a default,
+        // then populate it from created_at below; new databases retain the
+        // non-null schema declaration from FinancialTransactions.
+        await customStatement(
+          'ALTER TABLE financial_transactions ADD COLUMN updated_at INTEGER',
+        );
+        await m.addColumn(
+          financialTransactions,
+          financialTransactions.deletedAt,
+        );
+        await customStatement('''
+          UPDATE financial_transactions
+          SET
+            display_name = COALESCE(
+              (SELECT name FROM expense_control_items
+                WHERE expense_control_items.id = financial_transactions.expense_control_item_id),
+              'Archived Item'
+            ),
+            display_group_name = CASE
+              WHEN direction = 'income' THEN NULL
+              ELSE COALESCE(
+                (SELECT parent.name
+                  FROM expense_control_items AS item
+                  LEFT JOIN expense_control_items AS parent ON parent.id = item.parent_id
+                  WHERE item.id = financial_transactions.expense_control_item_id),
+                (SELECT name FROM expense_control_items
+                  WHERE expense_control_items.id = financial_transactions.expense_control_item_id),
+                'Archived Item'
+              )
+            END,
+            display_icon_key = (
+              SELECT icon_key FROM expense_control_items
+              WHERE expense_control_items.id = financial_transactions.expense_control_item_id
+            ),
+            updated_at = created_at
+          WHERE display_name IS NULL
+        ''');
       }
     },
     beforeOpen: (details) async {
