@@ -7,10 +7,10 @@ import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
-import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'package:finance/features/expenses/application/balance_view_service.dart';
 import 'expense_screen.dart';
 import 'income_screen.dart';
+import 'transaction_history_screen.dart';
 import 'widgets/balance_group_card.dart';
 
 /// Read-only balance hub (FR-001–FR-012): shows every Kiểm soát chi tiêu
@@ -19,23 +19,6 @@ import 'widgets/balance_group_card.dart';
 /// feature — each navigates to a placeholder, per FR-009).
 class SpendingScreen extends ConsumerWidget {
   const SpendingScreen({super.key});
-
-  void _openPlaceholder(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String message,
-  }) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => NotAvailablePlaceholderScreen(
-          icon: icon,
-          title: title,
-          message: message,
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,11 +76,10 @@ class SpendingScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   _HistoryRow(
                     label: l10n.spendingHistoryAction,
-                    onPressed: () => _openPlaceholder(
-                      context,
-                      icon: LucideIcons.history,
-                      title: l10n.transactionHistoryPlaceholderTitle,
-                      message: l10n.notAvailablePlaceholderMessage,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const TransactionHistoryScreen(),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 18),

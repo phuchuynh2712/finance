@@ -20,7 +20,12 @@ class FinancialTransactions extends Table {
   TextColumn get direction => textEnum<TransactionDirection>()();
   IntColumn get amount => integer()();
   DateTimeColumn get occurredAt => dateTime()();
+  TextColumn get displayName => text().nullable()();
+  TextColumn get displayGroupName => text().nullable()();
+  TextColumn get displayIconKey => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

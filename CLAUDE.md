@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260923-170533-architecture-widget-refactor/plan.md
+specs/20260924-071637-transaction-history/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

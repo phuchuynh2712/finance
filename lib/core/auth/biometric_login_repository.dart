@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 
 /// Wraps `local_auth` for device biometric (fingerprint/Face ID) quick login
@@ -18,6 +19,7 @@ class BiometricLoginRepository {
   /// fingerprint/face is enrolled at the OS level (FR-008's device-capable
   /// half of the AND condition).
   Future<bool> isDeviceCapable() async {
+    if (kIsWeb) return false;
     final canCheck = await _localAuth.canCheckBiometrics;
     final supported = await _localAuth.isDeviceSupported();
     return canCheck && supported;
@@ -28,6 +30,7 @@ class BiometricLoginRepository {
   /// caller to map per the error table in
   /// contracts/auth_repository_interface.md (FR-012/FR-014).
   Future<bool> authenticate({required String localizedReason}) {
+    if (kIsWeb) return Future.value(false);
     return _localAuth.authenticate(
       localizedReason: localizedReason,
       biometricOnly: true,

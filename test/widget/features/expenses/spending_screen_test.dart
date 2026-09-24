@@ -268,7 +268,7 @@ void main() {
   );
 
   testWidgets(
-    'the history row still navigates to a placeholder (FR-007, US3)',
+    'the history row navigates to the full transaction-history screen',
     (tester) async {
       final repository = _FakeExpenseControlRepository([_leaf('a')]);
       await tester.pumpWidget(_harness(repository));
@@ -282,10 +282,7 @@ void main() {
 
       await tester.tap(find.text(l10n.spendingHistoryAction));
       await tester.pumpAndSettle();
-      expect(
-        find.text(l10n.transactionHistoryPlaceholderTitle),
-        findsOneWidget,
-      );
+      expect(find.text(l10n.transactionHistoryTitle), findsOneWidget);
     },
   );
 

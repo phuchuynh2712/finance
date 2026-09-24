@@ -148,5 +148,24 @@
   "errorMapperWeakPassword": "This password isn't strong enough. Please choose another one.",
   "errorMapperRateLimited": "Too many attempts. Please wait a moment and try again.",
   "errorMapperNetworkFailure": "Couldn't reach the server. Please check your connection and try again.",
-  "errorMapperGeneric": "Something went wrong. Please try again."
+  "errorMapperGeneric": "Something went wrong. Please try again.",
+  "transactionHistoryTitle": "Transaction History",
+  "transactionHistoryAllFilter": "All",
+  "transactionHistoryIncomeFilter": "Income",
+  "transactionHistoryExpenseTotal": "Total expenses this month: {amount}",
+  "@transactionHistoryExpenseTotal": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "transactionHistoryEmpty": "No transactions match this selection.",
+  "transactionHistoryLoadError": "Couldn't load transaction history.",
+  "transactionHistoryRetry": "Try again",
+  "transactionHistoryBackSemantic": "Back to spending",
+  "transactionHistoryPreviousMonthSemantic": "Previous month",
+  "transactionHistoryNextMonthSemantic": "Next month",
+  "transactionHistoryArchivedItem": "Archived Item",
+  "transactionHistoryIncomeClassification": "Income",
+  "startupConfigurationTitle": "Configuration required",
+  "startupConfigurationMessage": "Set the public Supabase URL and publishable key before launching the app."
 }

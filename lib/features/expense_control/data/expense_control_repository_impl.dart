@@ -10,8 +10,11 @@ import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/core/sync/sync_outbox_table.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 
-class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
+class ExpenseControlRepositoryImpl
+    implements ExpenseControlRepository, TransactionHistoryRepository {
   ExpenseControlRepositoryImpl(this._db, {required String userId})
     : _userId = userId;
 
@@ -97,7 +100,30 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
     'amount': row.amount,
     'occurred_at': row.occurredAt.millisecondsSinceEpoch ~/ 1000,
     'created_at': row.createdAt.millisecondsSinceEpoch ~/ 1000,
+    'display_name': row.displayName,
+    'display_group_name': row.displayGroupName,
+    'display_icon_key': row.displayIconKey,
+    'updated_at': row.updatedAt.millisecondsSinceEpoch ~/ 1000,
+    'deleted_at': row.deletedAt == null
+        ? null
+        : row.deletedAt!.millisecondsSinceEpoch ~/ 1000,
   };
+
+  TransactionHistoryRecord _toHistoryRecord(FinancialTransactionRow row) {
+    return TransactionHistoryRecord(
+      id: row.id,
+      sourceItemId: row.expenseControlItemId,
+      direction: switch (row.direction) {
+        TransactionDirection.income => TransactionHistoryDirection.income,
+        TransactionDirection.expense => TransactionHistoryDirection.expense,
+      },
+      amount: row.amount,
+      occurredAt: row.occurredAt,
+      displayName: row.displayName ?? 'Archived Item',
+      displayGroupName: row.displayGroupName,
+      displayIconKey: row.displayIconKey,
+    );
+  }
 
   @override
   Stream<List<ExpenseControlItem>> watchAll() {
@@ -115,6 +141,27 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
             ))
             .get();
     return rows.map(_toDomain).toList();
+  }
+
+  @override
+  Stream<List<TransactionHistoryRecord>> watchTransactionHistory({
+    required DateTime start,
+    required DateTime end,
+  }) {
+    return (_db.select(_db.financialTransactions)
+          ..where(
+            (row) =>
+                row.userId.equals(_userId) &
+                row.occurredAt.isBiggerOrEqualValue(start) &
+                row.occurredAt.isSmallerThanValue(end) &
+                row.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (row) => OrderingTerm.desc(row.occurredAt),
+            (row) => OrderingTerm.desc(row.createdAt),
+          ]))
+        .watch()
+        .map((rows) => rows.map(_toHistoryRecord).toList());
   }
 
   Future<int> _childCount(String parentId) async {
@@ -341,6 +388,9 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
                 direction: TransactionDirection.income,
                 amount: delta,
                 occurredAt: now,
+                displayName: Value(row.name),
+                displayIconKey: Value(row.iconKey),
+                updatedAt: Value(now),
               ),
             );
         final transactionRow = await (_db.select(
@@ -402,6 +452,10 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
               direction: TransactionDirection.expense,
               amount: amount,
               occurredAt: now,
+              displayName: Value(row.name),
+              displayGroupName: Value(await _groupNameFor(row)),
+              displayIconKey: Value(row.iconKey),
+              updatedAt: Value(now),
             ),
           );
       final transactionRow = await (_db.select(
@@ -414,5 +468,14 @@ class ExpenseControlRepositoryImpl implements ExpenseControlRepository {
         entityTable: 'financial_transactions',
       );
     });
+  }
+
+  Future<String> _groupNameFor(ExpenseControlItemRow item) async {
+    final parentId = item.parentId;
+    if (parentId == null) return item.name;
+    final parent = await (_db.select(
+      _db.expenseControlItems,
+    )..where((row) => row.id.equals(parentId))).getSingleOrNull();
+    return parent?.name ?? item.name;
   }
 }

@@ -521,4 +521,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorMapperGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get transactionHistoryTitle => 'Transaction History';
+
+  @override
+  String get transactionHistoryAllFilter => 'All';
+
+  @override
+  String get transactionHistoryIncomeFilter => 'Income';
+
+  @override
+  String transactionHistoryExpenseTotal(String amount) {
+    return 'Total expenses this month: $amount';
+  }
+
+  @override
+  String get transactionHistoryEmpty => 'No transactions match this selection.';
+
+  @override
+  String get transactionHistoryLoadError =>
+      'Couldn\'t load transaction history.';
+
+  @override
+  String get transactionHistoryRetry => 'Try again';
+
+  @override
+  String get transactionHistoryBackSemantic => 'Back to spending';
+
+  @override
+  String get transactionHistoryPreviousMonthSemantic => 'Previous month';
+
+  @override
+  String get transactionHistoryNextMonthSemantic => 'Next month';
+
+  @override
+  String get transactionHistoryArchivedItem => 'Archived Item';
+
+  @override
+  String get transactionHistoryIncomeClassification => 'Income';
+
+  @override
+  String get startupConfigurationTitle => 'Configuration required';
+
+  @override
+  String get startupConfigurationMessage =>
+      'Set the public Supabase URL and publishable key before launching the app.';
 }

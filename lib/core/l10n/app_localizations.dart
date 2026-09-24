@@ -991,6 +991,90 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đã có lỗi xảy ra. Vui lòng thử lại.'**
   String get errorMapperGeneric;
+
+  /// No description provided for @transactionHistoryTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch sử giao dịch'**
+  String get transactionHistoryTitle;
+
+  /// No description provided for @transactionHistoryAllFilter.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả'**
+  String get transactionHistoryAllFilter;
+
+  /// No description provided for @transactionHistoryIncomeFilter.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập'**
+  String get transactionHistoryIncomeFilter;
+
+  /// No description provided for @transactionHistoryExpenseTotal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng chi tháng này: {amount}'**
+  String transactionHistoryExpenseTotal(String amount);
+
+  /// No description provided for @transactionHistoryEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không có giao dịch phù hợp.'**
+  String get transactionHistoryEmpty;
+
+  /// No description provided for @transactionHistoryLoadError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải lịch sử giao dịch.'**
+  String get transactionHistoryLoadError;
+
+  /// No description provided for @transactionHistoryRetry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get transactionHistoryRetry;
+
+  /// No description provided for @transactionHistoryBackSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại Thu chi'**
+  String get transactionHistoryBackSemantic;
+
+  /// No description provided for @transactionHistoryPreviousMonthSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng trước'**
+  String get transactionHistoryPreviousMonthSemantic;
+
+  /// No description provided for @transactionHistoryNextMonthSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng sau'**
+  String get transactionHistoryNextMonthSemantic;
+
+  /// No description provided for @transactionHistoryArchivedItem.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục đã lưu trữ'**
+  String get transactionHistoryArchivedItem;
+
+  /// No description provided for @transactionHistoryIncomeClassification.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập'**
+  String get transactionHistoryIncomeClassification;
+
+  /// No description provided for @startupConfigurationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cần cấu hình ứng dụng'**
+  String get startupConfigurationTitle;
+
+  /// No description provided for @startupConfigurationMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.'**
+  String get startupConfigurationMessage;
 }
 
 class _AppLocalizationsDelegate
