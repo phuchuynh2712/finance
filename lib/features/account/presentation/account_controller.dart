@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/auth/auth_repository.dart';
-import '../../../core/auth/auth_state_provider.dart';
+import 'package:finance/core/auth/auth_repository.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
 
 class AccountController extends StateNotifier<bool> {
   AccountController(this._repository) : super(false);

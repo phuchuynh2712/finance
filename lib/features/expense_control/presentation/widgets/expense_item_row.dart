@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../domain/expense_control_icons.dart';
-import '../../domain/expense_control_item.dart';
-import '../formatting.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/expense_control_icons.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/presentation/formatting.dart';
 
 /// One leaf item's row: icon/name/edit/delete header, plus its formula
 /// shown as a non-interactive static label (FR-001/FR-002 — editing moved

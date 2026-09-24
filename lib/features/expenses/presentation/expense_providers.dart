@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expenses/application/transaction_command_service.dart';
 
 /// Which validation problem blocked the last save attempt (FR-008).
 enum ExpenseSaveError { invalidAmount, missingItem, writeFailed }
@@ -104,7 +104,7 @@ class ExpenseFormController extends StateNotifier<ExpenseFormState> {
     state = state.copyWith(isSubmitting: true, clearError: true);
     try {
       await ref
-          .read(expenseControlRepositoryProvider)
+          .read(transactionCommandServiceProvider)
           .recordExpense(itemId: state.itemId!, amount: state.amount!);
       state = state.copyWith(saved: true, isSubmitting: false);
     } catch (e) {
@@ -204,7 +204,7 @@ class ScanFormController extends StateNotifier<ScanFormState> {
     state = state.copyWith(isSubmitting: true, clearError: true);
     try {
       await ref
-          .read(expenseControlRepositoryProvider)
+          .read(transactionCommandServiceProvider)
           .recordExpense(itemId: state.itemId!, amount: mockScanAmount);
       state = state.copyWith(saved: true, isSubmitting: false);
     } catch (e) {

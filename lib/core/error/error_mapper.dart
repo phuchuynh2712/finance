@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../l10n/app_localizations.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
 
 /// Turns a caught exception into a localized, human-friendly message —
 /// the single shared mechanism every write-failure call site in the app

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../domain/expense_control_item.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 
 /// Compact %/₫ pill toggle (mockup: pill bg, active chip blue-500/white,
 /// inactive transparent/fg2). Extracted out of the item list (which now

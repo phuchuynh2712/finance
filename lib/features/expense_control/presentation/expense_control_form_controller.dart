@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/auth/auth_state_provider.dart';
-import '../domain/expense_control_item.dart';
-import '../domain/expense_control_plan_service.dart';
-import '../domain/expense_control_repository.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
+import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'expense_control_providers.dart';
 
 class ExpenseControlFormState {

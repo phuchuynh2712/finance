@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/error/error_mapper.dart';
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_semantic_colors.dart';
-import '../../../core/widgets/empty_state_view.dart';
-import '../domain/expense_control_item.dart';
-import '../domain/expense_control_plan_service.dart';
+import 'package:finance/core/error/error_mapper.dart';
+import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 import 'expense_control_form_controller.dart';
 import 'expense_control_providers.dart';
-import 'formatting.dart';
 import 'widgets/allocation_mode_toggle.dart';
 import 'widgets/allocation_summary_banner.dart';
-import 'widgets/dashed_border.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
 import 'widgets/expense_group_card.dart';
 import 'widgets/icon_picker.dart';
 

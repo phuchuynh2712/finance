@@ -3,19 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../auth/auth_state_provider.dart';
-import '../l10n/app_localizations.dart';
-import '../theme/app_semantic_colors.dart';
-import '../../features/account/presentation/account_screen.dart';
-import '../../features/account/presentation/forgot_password_screen.dart';
-import '../../features/account/presentation/reset_password_screen.dart';
-import '../../features/account/presentation/sign_in_screen.dart';
-import '../../features/account/presentation/sign_up_screen.dart';
-import '../../features/expense_control/presentation/expense_control_providers.dart';
-import '../../features/expense_control/presentation/expense_control_screen.dart';
-import '../../features/expense_control/presentation/formatting.dart';
-import '../../features/expenses/presentation/spending_screen.dart';
-import '../widgets/not_available_placeholder_screen.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/di/expense_dependencies.dart';
+import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/features/account/account_routes.dart';
+import 'package:finance/features/expense_control/expense_control_routes.dart';
+import 'package:finance/features/expenses/expenses_routes.dart';
+import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 
 /// A bare [Listenable] that [GoRouter] watches to know when to re-evaluate
 /// its [GoRouterRedirect] — fired manually via [ping] rather than wrapping a
@@ -89,22 +85,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       matchedLocation: state.matchedLocation,
     ),
     routes: [
-      GoRoute(
-        path: '/sign-in',
-        builder: (context, state) => const SignInScreen(),
-      ),
-      GoRoute(
-        path: '/sign-up',
-        builder: (context, state) => const SignUpScreen(),
-      ),
-      GoRoute(
-        path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
-      ),
-      GoRoute(
-        path: '/reset-password',
-        builder: (context, state) => const ResetPasswordScreen(),
-      ),
+      GoRoute(path: '/sign-in', builder: signInRoute),
+      GoRoute(path: '/sign-up', builder: signUpRoute),
+      GoRoute(path: '/forgot-password', builder: forgotPasswordRoute),
+      GoRoute(path: '/reset-password', builder: resetPasswordRoute),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             _AppShell(navigationShell: navigationShell),
@@ -126,19 +110,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/expense-control',
-                builder: (context, state) => const ExpenseControlScreen(),
-              ),
+              GoRoute(path: '/expense-control', builder: expenseControlRoute),
             ],
           ),
           StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/spending',
-                builder: (context, state) => const SpendingScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: '/spending', builder: spendingRoute)],
           ),
           StatefulShellBranch(
             routes: [
@@ -156,12 +132,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/account',
-                builder: (context, state) => const AccountScreen(),
-              ),
-            ],
+            routes: [GoRoute(path: '/account', builder: accountScreenRoute)],
           ),
         ],
       ),

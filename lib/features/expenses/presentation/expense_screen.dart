@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/error/error_mapper.dart';
-import '../../../core/formatting/currency_formatter.dart';
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_semantic_colors.dart';
-import '../../../core/widgets/empty_state_view.dart';
-import '../../expense_control/domain/expense_control_item.dart';
-import '../../expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/core/di/expense_dependencies.dart';
+import 'package:finance/core/error/error_mapper.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expenses/application/expense_control_gateway.dart';
 import 'expense_providers.dart';
 
 const _keypadKeys = [
@@ -60,9 +61,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           previous?.saveError != ExpenseSaveError.writeFailed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              mapErrorToMessage(next.writeErrorDetail!, l10n),
-            ),
+            content: Text(mapErrorToMessage(next.writeErrorDetail!, l10n)),
           ),
         );
       }
@@ -75,9 +74,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           previous?.saveError != ExpenseSaveError.writeFailed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              mapErrorToMessage(next.writeErrorDetail!, l10n),
-            ),
+            content: Text(mapErrorToMessage(next.writeErrorDetail!, l10n)),
           ),
         );
       }
@@ -231,10 +228,10 @@ class _ManualEntryTab extends ConsumerWidget {
       Localizations.localeOf(context).toString(),
     );
     final treeAsync = ref.watch(expenseControlTreeProvider);
-    final planService = ref.watch(expenseControlPlanServiceProvider);
+    final gateway = ref.watch(expenseControlGatewayProvider);
     final leaves = treeAsync.valueOrNull == null
         ? const <ExpenseControlItem>[]
-        : planService.flattenLeaves(treeAsync.valueOrNull!);
+        : gateway.flattenLeaves(treeAsync.valueOrNull!);
     final pickedItem = state.itemId == null
         ? null
         : leaves.where((item) => item.id == state.itemId).firstOrNull;
@@ -537,10 +534,10 @@ class _ScanTab extends ConsumerWidget {
     final state = ref.watch(scanFormControllerProvider);
     final controller = ref.read(scanFormControllerProvider.notifier);
     final treeAsync = ref.watch(expenseControlTreeProvider);
-    final planService = ref.watch(expenseControlPlanServiceProvider);
+    final gateway = ref.watch(expenseControlGatewayProvider);
     final leaves = treeAsync.valueOrNull == null
         ? const <ExpenseControlItem>[]
-        : planService.flattenLeaves(treeAsync.valueOrNull!);
+        : gateway.flattenLeaves(treeAsync.valueOrNull!);
     final currency = CurrencyFormatter(
       Localizations.localeOf(context).toString(),
     );

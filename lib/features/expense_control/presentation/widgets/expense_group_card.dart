@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../domain/expense_control_icons.dart';
-import '../../domain/expense_control_item.dart';
-import '../../domain/expense_control_plan_service.dart';
-import '../formatting.dart';
-import 'dashed_border.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
+import 'package:finance/core/widgets/expense_control_icons.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 import 'expense_item_row.dart';
 
 /// One top-level card — a leaf (its own formula row) or a group (children

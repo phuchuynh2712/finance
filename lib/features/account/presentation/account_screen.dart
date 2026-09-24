@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/l10n/locale_notifier.dart';
-import '../../../core/theme/app_semantic_colors.dart';
-import '../../../core/theme/theme_mode_notifier.dart';
-import '../../../core/widgets/not_available_placeholder_screen.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/l10n/locale_notifier.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/theme/theme_mode_notifier.dart';
+import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'account_controller.dart';
 
 class AccountScreen extends ConsumerWidget {

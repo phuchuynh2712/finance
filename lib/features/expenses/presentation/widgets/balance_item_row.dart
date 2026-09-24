@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/formatting/currency_formatter.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../../expense_control/domain/expense_control_icons.dart';
-import '../../../expense_control/domain/expense_control_item.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/expense_control_icons.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 
 /// One child row inside an expanded [BalanceGroupCard] (FR-001, FR-002).
 /// Read-only — no edit/delete affordance, unlike Kiểm soát chi tiêu's

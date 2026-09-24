@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/formatting/currency_formatter.dart';
-import '../../../../core/theme/app_semantic_colors.dart';
-import '../../../expense_control/domain/expense_control_icons.dart';
-import '../../../expense_control/domain/expense_control_plan_service.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
+import 'package:finance/core/widgets/expense_control_icons.dart';
+import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
 import 'balance_item_row.dart';
-import 'dashed_top_border.dart';
 
 /// One top-level card on "Thu chi" — a leaf (its own balance) or a group
 /// (expandable children list, live-summed balance). Read-only throughout:

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/formatting/currency_formatter.dart';
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_semantic_colors.dart';
-import '../../../core/widgets/empty_state_view.dart';
-import '../../../core/widgets/not_available_placeholder_screen.dart';
-import '../../expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/core/di/expense_dependencies.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
+import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
+import 'package:finance/features/expenses/application/balance_view_service.dart';
 import 'expense_screen.dart';
 import 'income_screen.dart';
 import 'widgets/balance_group_card.dart';
@@ -45,7 +46,7 @@ class SpendingScreen extends ConsumerWidget {
       Localizations.localeOf(context).toString(),
     );
     final treeAsync = ref.watch(expenseControlTreeProvider);
-    final planService = ref.watch(expenseControlPlanServiceProvider);
+    final balanceViewService = ref.watch(balanceViewServiceProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tabSpending)),
@@ -134,10 +135,10 @@ class SpendingScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      for (final node in tree)
+                      for (final row in balanceViewService.prepare(tree))
                         BalanceGroupCard(
-                          node: node,
-                          balance: planService.computeItemBalance(node),
+                          node: row.node,
+                          balance: row.balance,
                           currency: currency,
                         ),
                     ],

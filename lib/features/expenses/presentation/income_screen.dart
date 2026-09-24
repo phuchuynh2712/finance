@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/error/error_mapper.dart';
-import '../../../core/formatting/currency_formatter.dart';
-import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_semantic_colors.dart';
-import '../../../core/widgets/empty_state_view.dart';
-import '../../expense_control/presentation/expense_control_providers.dart';
-import '../../expense_control/presentation/widgets/dashed_border.dart';
+import 'package:finance/core/di/expense_dependencies.dart';
+import 'package:finance/core/error/error_mapper.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/dashed_border.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
 import 'income_providers.dart';
 
 /// Income entry (FR-001–FR-019): lets the user record one or more named
@@ -49,9 +49,7 @@ class IncomeScreen extends ConsumerWidget {
           previous?.saveError != IncomeSaveError.writeFailed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              mapErrorToMessage(next.writeErrorDetail!, l10n),
-            ),
+            content: Text(mapErrorToMessage(next.writeErrorDetail!, l10n)),
           ),
         );
       }

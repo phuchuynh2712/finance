@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260922-003635-rename-app-error-mapper/plan.md
+specs/20260923-170533-architecture-widget-refactor/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention
