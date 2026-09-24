@@ -3,7 +3,7 @@
   "appTitle": "Finance Manager",
   "tabOverview": "Overview",
   "tabSpending": "My Wallet",
-  "tabExpenseControl": "Control",
+  "tabExpenseControl": "Plan",
   "tabHistory": "History",
   "tabAccount": "Profile",
   "signInAppName": "Budget Control",
@@ -167,5 +167,42 @@
   "transactionHistoryArchivedItem": "Archived Item",
   "transactionHistoryIncomeClassification": "Income",
   "startupConfigurationTitle": "Configuration required",
-  "startupConfigurationMessage": "Set the public Supabase URL and publishable key before launching the app."
+  "startupConfigurationMessage": "Set the public Supabase URL and publishable key before launching the app.",
+  "overviewTotalBalanceLabel": "Total remaining · all accounts",
+  "overviewNegativeBalanceWarning": "Account \"{name}\" is negative",
+  "@overviewNegativeBalanceWarning": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "overviewSeeDetailAction": "See detail →",
+  "overviewLoadError": "Couldn't load overview data.",
+  "overviewRetry": "Try again",
+  "overviewAccountsSectionTitle": "Accounts ({count})",
+  "@overviewAccountsSectionTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "overviewSeeAllAction": "See all",
+  "overviewSeeAllAccountsSemantic": "See all accounts",
+  "overviewAccountsEmpty": "No accounts yet.",
+  "overviewRecentTransactionsSectionTitle": "Recent transactions",
+  "overviewSeeAllTransactionsSemantic": "See all recent transactions",
+  "overviewTransactionsEmpty": "No transactions yet.",
+  "overviewToday": "Today",
+  "overviewYesterday": "Yesterday",
+  "overviewDaysAgo": "{days} days ago",
+  "@overviewDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "overviewGreeting": "Hi, {name}",
+  "@overviewGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "overviewNotificationSemantic": "Notifications"
 }

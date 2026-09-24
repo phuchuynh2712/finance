@@ -119,7 +119,7 @@ abstract class AppLocalizations {
   /// Bottom navigation tab label for the Expense Control screen (FR-020)
   ///
   /// In vi, this message translates to:
-  /// **'Kiểm soát'**
+  /// **'Kế hoạch'**
   String get tabExpenseControl;
 
   /// Bottom navigation tab label for the History/Report placeholder screen (FR-020, FR-017) — matches the design mockup exactly ("Báo cáo" alone, not "Lịch sử/Báo cáo"), which also happens to fix the label wrapping to two lines
@@ -1075,6 +1075,108 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.'**
   String get startupConfigurationMessage;
+
+  /// No description provided for @overviewTotalBalanceLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng còn lại · tất cả các khoản'**
+  String get overviewTotalBalanceLabel;
+
+  /// No description provided for @overviewNegativeBalanceWarning.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản \"{name}\" đã âm quỹ'**
+  String overviewNegativeBalanceWarning(String name);
+
+  /// No description provided for @overviewSeeDetailAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem chi tiết →'**
+  String get overviewSeeDetailAction;
+
+  /// No description provided for @overviewLoadError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải dữ liệu tổng quan.'**
+  String get overviewLoadError;
+
+  /// No description provided for @overviewRetry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get overviewRetry;
+
+  /// No description provided for @overviewAccountsSectionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Các khoản ({count})'**
+  String overviewAccountsSectionTitle(int count);
+
+  /// No description provided for @overviewSeeAllAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem tất cả'**
+  String get overviewSeeAllAction;
+
+  /// No description provided for @overviewSeeAllAccountsSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem tất cả các khoản'**
+  String get overviewSeeAllAccountsSemantic;
+
+  /// No description provided for @overviewAccountsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có khoản nào.'**
+  String get overviewAccountsEmpty;
+
+  /// No description provided for @overviewRecentTransactionsSectionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch gần đây'**
+  String get overviewRecentTransactionsSectionTitle;
+
+  /// No description provided for @overviewSeeAllTransactionsSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem tất cả giao dịch gần đây'**
+  String get overviewSeeAllTransactionsSemantic;
+
+  /// No description provided for @overviewTransactionsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có giao dịch nào.'**
+  String get overviewTransactionsEmpty;
+
+  /// No description provided for @overviewToday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay'**
+  String get overviewToday;
+
+  /// No description provided for @overviewYesterday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm qua'**
+  String get overviewYesterday;
+
+  /// No description provided for @overviewDaysAgo.
+  ///
+  /// In vi, this message translates to:
+  /// **'{days} ngày trước'**
+  String overviewDaysAgo(int days);
+
+  /// No description provided for @overviewGreeting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xin chào, {name}'**
+  String overviewGreeting(String name);
+
+  /// No description provided for @overviewNotificationSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông báo'**
+  String get overviewNotificationSemantic;
 }
 
 class _AppLocalizationsDelegate

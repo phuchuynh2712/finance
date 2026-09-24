@@ -60,4 +60,10 @@ class AppColors {
   static const darkSuccessFg = Color(0xFF8FD6B0);
   static const darkWarningFg = Color(0xFFECCB7E);
   static const darkDangerFg = Color(0xFFF0B3A8);
+
+  // Overview's total-balance "hero" card — fixed across both themes by
+  // design (theme-tokens.json only lists `heroPanel` under `dark`, but both
+  // the light and dark screen mockups render this one card identically).
+  static const heroPanel = Color(0xFF052555);
+  static const heroPanelGold = Color(0xFFE3C56B);
 }

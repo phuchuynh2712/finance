@@ -94,19 +94,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             _AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/overview',
-                builder: (context, state) {
-                  final l10n = AppLocalizations.of(context);
-                  return NotAvailablePlaceholderScreen(
-                    icon: LucideIcons.layoutDashboard,
-                    title: l10n.overviewPlaceholderTitle,
-                    message: l10n.notAvailablePlaceholderMessage,
-                  );
-                },
-              ),
-            ],
+            routes: [GoRoute(path: '/overview', builder: overviewRoute)],
           ),
           StatefulShellBranch(
             routes: [

@@ -129,4 +129,9 @@ class _HistoryRepository implements TransactionHistoryRepository {
           .toList(),
     );
   }
+
+  @override
+  Stream<List<TransactionHistoryRecord>> watchRecent({required int limit}) {
+    return Stream.value(records.take(limit).toList());
+  }
 }

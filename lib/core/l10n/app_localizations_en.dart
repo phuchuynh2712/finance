@@ -18,7 +18,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabSpending => 'My Wallet';
 
   @override
-  String get tabExpenseControl => 'Control';
+  String get tabExpenseControl => 'Plan';
 
   @override
   String get tabHistory => 'History';
@@ -567,4 +567,64 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get startupConfigurationMessage =>
       'Set the public Supabase URL and publishable key before launching the app.';
+
+  @override
+  String get overviewTotalBalanceLabel => 'Total remaining · all accounts';
+
+  @override
+  String overviewNegativeBalanceWarning(String name) {
+    return 'Account \"$name\" is negative';
+  }
+
+  @override
+  String get overviewSeeDetailAction => 'See detail →';
+
+  @override
+  String get overviewLoadError => 'Couldn\'t load overview data.';
+
+  @override
+  String get overviewRetry => 'Try again';
+
+  @override
+  String overviewAccountsSectionTitle(int count) {
+    return 'Accounts ($count)';
+  }
+
+  @override
+  String get overviewSeeAllAction => 'See all';
+
+  @override
+  String get overviewSeeAllAccountsSemantic => 'See all accounts';
+
+  @override
+  String get overviewAccountsEmpty => 'No accounts yet.';
+
+  @override
+  String get overviewRecentTransactionsSectionTitle => 'Recent transactions';
+
+  @override
+  String get overviewSeeAllTransactionsSemantic =>
+      'See all recent transactions';
+
+  @override
+  String get overviewTransactionsEmpty => 'No transactions yet.';
+
+  @override
+  String get overviewToday => 'Today';
+
+  @override
+  String get overviewYesterday => 'Yesterday';
+
+  @override
+  String overviewDaysAgo(int days) {
+    return '$days days ago';
+  }
+
+  @override
+  String overviewGreeting(String name) {
+    return 'Hi, $name';
+  }
+
+  @override
+  String get overviewNotificationSemantic => 'Notifications';
 }

@@ -17,7 +17,10 @@ import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expenses/presentation/overview_providers.dart';
 
 /// FR-009–FR-012, spec.md US3 — renders the *real* [_AppShell] (via
 /// [appRouterProvider], since `_AppShell` is private to app_router.dart and
@@ -44,6 +47,19 @@ class _FakeAccountAuthActions implements AccountAuthActions {
 
   @override
   Future<void> setBiometricLoginEnabled(bool enabled) async {}
+}
+
+class _FakeTransactionHistoryRepository
+    implements TransactionHistoryRepository {
+  @override
+  Stream<List<TransactionHistoryRecord>> watchTransactionHistory({
+    required DateTime start,
+    required DateTime end,
+  }) => Stream.value(const []);
+
+  @override
+  Stream<List<TransactionHistoryRecord>> watchRecent({required int limit}) =>
+      Stream.value(const []);
 }
 
 class _FakeAppPreferencesStorage implements AppPreferencesStorage {
@@ -169,6 +185,10 @@ ProviderContainer _containerFor(
       isPasswordRecoveryProvider.overrideWithValue(false),
       currentUserIdProvider.overrideWithValue('u1'),
       accountAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
+      overviewAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
+      transactionHistoryRepositoryProvider.overrideWithValue(
+        _FakeTransactionHistoryRepository(),
+      ),
       expenseControlRepositoryProvider.overrideWithValue(
         expenseControlRepository,
       ),
@@ -185,9 +205,9 @@ ProviderContainer _containerFor(
 }
 
 /// Pumps the shell (starting on Tổng quan, per `initialLocation`), navigates
-/// into Kiểm soát, then optionally seeds a pending edit — the shared
+/// into Kế hoạch, then optionally seeds a pending edit — the shared
 /// preamble every test below needs before it can exercise the tab-switch
-/// interception, since that only fires while *on* Kiểm soát.
+/// interception, since that only fires while *on* Kế hoạch.
 Future<void> _arriveOnExpenseControl(
   WidgetTester tester, {
   required _FakeExpenseControlRepository repository,
@@ -199,7 +219,7 @@ Future<void> _arriveOnExpenseControl(
   );
   await tester.pumpAndSettle();
 
-  await tester.tap(find.text('Kiểm soát').last);
+  await tester.tap(find.text('Kế hoạch').last);
   await tester.pumpAndSettle();
 
   if (seedPendingEdit) {
@@ -237,7 +257,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Lưu thay đổi?'), findsOneWidget);
-      // Still on Kiểm soát — navigation hasn't happened.
+      // Still on Kế hoạch — navigation hasn't happened.
       expect(find.text('Lưu công thức'), findsOneWidget);
     },
   );
@@ -263,10 +283,10 @@ void main() {
       expect(repository.savedFormulaBatches, hasLength(1));
       expect(container.read(pendingItemEditsProvider), isEmpty);
       // Navigation proceeded — the shell's selected index moved off
-      // Kiểm soát (index 1) to Tổng quan (index 0). `find.text('Lưu công
+      // Kế hoạch (index 1) to Tổng quan (index 0). `find.text('Lưu công
       // thức')` alone can't prove this: IndexedStack keeps every branch
       // mounted, so the button's absence could equally mean "still on
-      // Kiểm soát, but the (now-empty) map just hides the button."
+      // Kế hoạch, but the (now-empty) map just hides the button."
       expect(_selectedTabIndex(tester), 0);
     },
   );
@@ -314,7 +334,7 @@ void main() {
 
       expect(container.read(pendingItemEditsProvider), hasLength(1));
       expect(find.text('Lưu công thức'), findsOneWidget);
-      expect(_selectedTabIndex(tester), 1); // still on Kiểm soát
+      expect(_selectedTabIndex(tester), 1); // still on Kế hoạch
     },
   );
 
@@ -338,7 +358,7 @@ void main() {
       await tester.tap(find.text('Lưu'));
       await tester.pumpAndSettle();
 
-      // Prompt still showing, nothing committed, still on Kiểm soát.
+      // Prompt still showing, nothing committed, still on Kế hoạch.
       expect(find.text('Lưu thay đổi?'), findsOneWidget);
       expect(repository.savedFormulaBatches, isEmpty);
       expect(container.read(pendingItemEditsProvider), hasLength(1));

@@ -164,6 +164,19 @@ class ExpenseControlRepositoryImpl
         .map((rows) => rows.map(_toHistoryRecord).toList());
   }
 
+  @override
+  Stream<List<TransactionHistoryRecord>> watchRecent({required int limit}) {
+    return (_db.select(_db.financialTransactions)
+          ..where((row) => row.userId.equals(_userId) & row.deletedAt.isNull())
+          ..orderBy([
+            (row) => OrderingTerm.desc(row.occurredAt),
+            (row) => OrderingTerm.desc(row.createdAt),
+          ])
+          ..limit(limit))
+        .watch()
+        .map((rows) => rows.map(_toHistoryRecord).toList());
+  }
+
   Future<int> _childCount(String parentId) async {
     final rows =
         await (_db.select(_db.expenseControlItems)..where(

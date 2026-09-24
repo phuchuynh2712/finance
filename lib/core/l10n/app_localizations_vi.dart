@@ -18,7 +18,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabSpending => 'Thu chi';
 
   @override
-  String get tabExpenseControl => 'Kiểm soát';
+  String get tabExpenseControl => 'Kế hoạch';
 
   @override
   String get tabHistory => 'Báo cáo';
@@ -564,4 +564,64 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get startupConfigurationMessage =>
       'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.';
+
+  @override
+  String get overviewTotalBalanceLabel => 'Tổng còn lại · tất cả các khoản';
+
+  @override
+  String overviewNegativeBalanceWarning(String name) {
+    return 'Khoản \"$name\" đã âm quỹ';
+  }
+
+  @override
+  String get overviewSeeDetailAction => 'Xem chi tiết →';
+
+  @override
+  String get overviewLoadError => 'Không thể tải dữ liệu tổng quan.';
+
+  @override
+  String get overviewRetry => 'Thử lại';
+
+  @override
+  String overviewAccountsSectionTitle(int count) {
+    return 'Các khoản ($count)';
+  }
+
+  @override
+  String get overviewSeeAllAction => 'Xem tất cả';
+
+  @override
+  String get overviewSeeAllAccountsSemantic => 'Xem tất cả các khoản';
+
+  @override
+  String get overviewAccountsEmpty => 'Chưa có khoản nào.';
+
+  @override
+  String get overviewRecentTransactionsSectionTitle => 'Giao dịch gần đây';
+
+  @override
+  String get overviewSeeAllTransactionsSemantic =>
+      'Xem tất cả giao dịch gần đây';
+
+  @override
+  String get overviewTransactionsEmpty => 'Chưa có giao dịch nào.';
+
+  @override
+  String get overviewToday => 'Hôm nay';
+
+  @override
+  String get overviewYesterday => 'Hôm qua';
+
+  @override
+  String overviewDaysAgo(int days) {
+    return '$days ngày trước';
+  }
+
+  @override
+  String overviewGreeting(String name) {
+    return 'Xin chào, $name';
+  }
+
+  @override
+  String get overviewNotificationSemantic => 'Thông báo';
 }
