@@ -24,7 +24,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(l10n.tabExpenseControl, 'Control');
+    expect(l10n.tabExpenseControl, 'Plan');
     expect(l10n.tabHistory, 'History');
     expect(l10n.tabSpending, 'My Wallet');
     expect(l10n.tabAccount, 'Profile');

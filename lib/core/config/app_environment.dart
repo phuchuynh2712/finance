@@ -15,7 +15,9 @@ class AppEnvironment {
       throw const FormatException('Invalid Supabase URL configuration.');
     }
     if (supabasePublishableKey.isEmpty) {
-      throw const FormatException('Missing Supabase publishable key configuration.');
+      throw const FormatException(
+        'Missing Supabase publishable key configuration.',
+      );
     }
   }
 }

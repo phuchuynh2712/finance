@@ -5,4 +5,8 @@ abstract interface class TransactionHistoryRepository {
     required DateTime start,
     required DateTime end,
   });
+
+  /// Most recent [limit] non-deleted records for the current user across all
+  /// accounts, newest first, independent of any calendar-month boundary.
+  Stream<List<TransactionHistoryRecord>> watchRecent({required int limit});
 }

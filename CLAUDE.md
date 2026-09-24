@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260924-071637-transaction-history/plan.md
+specs/20260924-095043-home-overview/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

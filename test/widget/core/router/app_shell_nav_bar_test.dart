@@ -16,7 +16,10 @@ import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
+import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expenses/presentation/overview_providers.dart';
 
 /// FR-016–FR-018, SC-006 — visual correctness of the shared bottom
 /// [NavigationBar], verified via the real [_AppShell] (through
@@ -75,6 +78,19 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   Future<void> setBiometricLoginEnabled(bool enabled) async {}
 }
 
+class _FakeTransactionHistoryRepository
+    implements TransactionHistoryRepository {
+  @override
+  Stream<List<TransactionHistoryRecord>> watchTransactionHistory({
+    required DateTime start,
+    required DateTime end,
+  }) => Stream.value(const []);
+
+  @override
+  Stream<List<TransactionHistoryRecord>> watchRecent({required int limit}) =>
+      Stream.value(const []);
+}
+
 class _FakeAppPreferencesStorage implements AppPreferencesStorage {
   @override
   Future<ThemeMode?> getThemeMode() async => null;
@@ -113,6 +129,10 @@ ProviderContainer _container() {
         _FakeExpenseControlRepository(),
       ),
       accountAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
+      overviewAuthActionsProvider.overrideWithValue(_FakeAccountAuthActions()),
+      transactionHistoryRepositoryProvider.overrideWithValue(
+        _FakeTransactionHistoryRepository(),
+      ),
       themeModeProvider.overrideWith(
         (ref) =>
             ThemeModeNotifier(_FakeAppPreferencesStorage(), ThemeMode.system),
@@ -125,7 +145,7 @@ ProviderContainer _container() {
   );
 }
 
-const _tabLabels = ['Tổng quan', 'Kiểm soát', 'Thu chi', 'Báo cáo', 'Hồ sơ'];
+const _tabLabels = ['Tổng quan', 'Kế hoạch', 'Thu chi', 'Báo cáo', 'Hồ sơ'];
 
 // A wrapped label at Material 3's default labelMedium (12sp, ~1.3 line
 // height) renders roughly 16px tall on one line vs. ~32px wrapped — this

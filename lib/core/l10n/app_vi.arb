@@ -12,7 +12,7 @@
   "@tabSpending": {
     "description": "Bottom navigation tab label for the Spending screen (renamed from \"Chi tiêu\" to \"Thu chi\" per FR-020)"
   },
-  "tabExpenseControl": "Kiểm soát",
+  "tabExpenseControl": "Kế hoạch",
   "@tabExpenseControl": {
     "description": "Bottom navigation tab label for the Expense Control screen (FR-020)"
   },
@@ -639,5 +639,42 @@
   "transactionHistoryArchivedItem": "Mục đã lưu trữ",
   "transactionHistoryIncomeClassification": "Thu nhập",
   "startupConfigurationTitle": "Cần cấu hình ứng dụng",
-  "startupConfigurationMessage": "Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng."
+  "startupConfigurationMessage": "Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.",
+  "overviewTotalBalanceLabel": "Tổng còn lại · tất cả các khoản",
+  "overviewNegativeBalanceWarning": "Khoản \"{name}\" đã âm quỹ",
+  "@overviewNegativeBalanceWarning": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "overviewSeeDetailAction": "Xem chi tiết →",
+  "overviewLoadError": "Không thể tải dữ liệu tổng quan.",
+  "overviewRetry": "Thử lại",
+  "overviewAccountsSectionTitle": "Các khoản ({count})",
+  "@overviewAccountsSectionTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "overviewSeeAllAction": "Xem tất cả",
+  "overviewSeeAllAccountsSemantic": "Xem tất cả các khoản",
+  "overviewAccountsEmpty": "Chưa có khoản nào.",
+  "overviewRecentTransactionsSectionTitle": "Giao dịch gần đây",
+  "overviewSeeAllTransactionsSemantic": "Xem tất cả giao dịch gần đây",
+  "overviewTransactionsEmpty": "Chưa có giao dịch nào.",
+  "overviewToday": "Hôm nay",
+  "overviewYesterday": "Hôm qua",
+  "overviewDaysAgo": "{days} ngày trước",
+  "@overviewDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "overviewGreeting": "Xin chào, {name}",
+  "@overviewGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "overviewNotificationSemantic": "Thông báo"
 }

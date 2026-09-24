@@ -534,4 +534,74 @@ void main() {
       },
     );
   });
+
+  group('watchRecent', () {
+    Future<void> insertAt(
+      String id,
+      DateTime occurredAt, {
+      DateTime? deletedAt,
+    }) {
+      return db
+          .into(db.financialTransactions)
+          .insert(
+            FinancialTransactionsCompanion.insert(
+              id: id,
+              userId: _userId,
+              expenseControlItemId: 'item',
+              direction: TransactionDirection.expense,
+              amount: 100,
+              occurredAt: occurredAt,
+              displayName: Value(id),
+              updatedAt: Value(occurredAt),
+              deletedAt: Value(deletedAt),
+            ),
+          );
+    }
+
+    test(
+      'returns at most limit rows, newest-first, spanning multiple calendar months',
+      () async {
+        await repository.create(_leaf('item'));
+        await insertAt('jan', DateTime(2026, 1, 1));
+        await insertAt('mar', DateTime(2026, 3, 1));
+        await insertAt('feb', DateTime(2026, 2, 1));
+
+        final recent = await repository.watchRecent(limit: 2).first;
+
+        expect(
+          recent.map((r) => r.id),
+          ['mar', 'feb'],
+          reason:
+              'not bounded by any calendar month, and capped at limit even '
+              'though a 3rd, older row exists',
+        );
+      },
+    );
+
+    test('excludes soft-deleted rows', () async {
+      await repository.create(_leaf('item'));
+      await insertAt('visible', DateTime(2026, 6, 1));
+      await insertAt(
+        'tombstoned',
+        DateTime(2026, 6, 2),
+        deletedAt: DateTime(2026, 6, 3),
+      );
+
+      final recent = await repository.watchRecent(limit: 10).first;
+
+      expect(recent.map((r) => r.id), ['visible']);
+    });
+
+    test(
+      'returns fewer than limit rows when fewer exist, without error',
+      () async {
+        await repository.create(_leaf('item'));
+        await insertAt('only', DateTime(2026, 6, 1));
+
+        final recent = await repository.watchRecent(limit: 5).first;
+
+        expect(recent.map((r) => r.id), ['only']);
+      },
+    );
+  });
 }
