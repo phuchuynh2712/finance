@@ -147,9 +147,31 @@ guessed or hardcoded into source now.
 rejected per Clarification 1 (security: avoids trusting a browser-supplied
 origin for a sensitive auth redirect, and the project has no
 multi-environment hosting setup that would need it). A new dedicated
-`.env`-style file — rejected, `supabase_client_provider.dart:10`'s own
-comment already states "no `.env` file is bundled in web builds"; adding
-one now would introduce a second, inconsistent config mechanism.
+`.env`-style file — rejected; `README.md` and `supabase_client_provider.
+dart:10` already establish `--dart-define-from-file=tool/env.json`
+(`tool/env.json`, gitignored, created from the tracked `tool/
+env.example.json`) as this project's one configuration mechanism, holding
+today only `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` — `WEB_PASSWORD_
+RESET_REDIRECT_URL` is added to that same file/example, not a new one.
+
+**Addendum — localhost exemption**: `README.md:89-90` already documents a
+local Web dev workflow at a **fixed origin**
+(`flutter run -d chrome --web-port=5000 ...`) with an instruction to add
+that fixed origin to Supabase's allowed redirect list — confirming fixed-
+origin Web dev is already this team's practice, not a new idea introduced
+by this feature. That fixed local origin is `http://localhost:5000`, not
+`https://`. Strictly requiring `https` in `AppEnvironment.validate()`
+(as first drafted above) would therefore break local Web development the
+moment someone actually fills in `tool/env.json` from the new example key,
+which is a real usability defect, not a theoretical one. Fix: the
+validation accepts `https` unconditionally, **or** `http` when the host is
+exactly `localhost`/`127.0.0.1` — the same narrow, well-established
+loopback exemption OAuth redirect-URI validation commonly uses (e.g. RFC
+8252 §7.3 exempts loopback interface redirect URIs from requiring TLS).
+Production/any real deployed origin still MUST be `https`; only the
+literal loopback address is exempted. `tool/env.example.json`'s new key
+gets the `http://localhost:5000/...` value as its example default,
+matching `README.md`'s already-documented local port.
 
 ## Decision 6: Path-based URL strategy (P3 / FR-010, FR-011)
 
