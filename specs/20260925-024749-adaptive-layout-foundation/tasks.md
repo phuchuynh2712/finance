@@ -274,16 +274,16 @@ tests will still run under T003's pinned default once that phase is done).
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] In `lib/core/theme/app_theme.dart`, add `visualDensity:
+- [X] T019 [US3] In `lib/core/theme/app_theme.dart`, add `visualDensity:
   VisualDensity.standard` and `materialTapTargetSize:
   MaterialTapTargetSize.padded` to `AppTheme.light`'s `ThemeData` —
   overriding Flutter's own `TargetPlatform.linux/.macOS/.windows` defaults
   (`compact` density, `shrinkWrap` tap target size — confirmed in the
   installed SDK's `theme_data.dart`, research.md Decision 6), which is what
   a Web build running in a desktop browser would otherwise pick up.
-- [ ] T020 [US3] Make the identical addition to `AppTheme.dark` in the same
+- [X] T020 [US3] Make the identical addition to `AppTheme.dark` in the same
   file.
-- [ ] T021 [P] [US3] Add a tooltip (and, where one doesn't already exist, a
+- [X] T021 [P] [US3] Add a tooltip (and, where one doesn't already exist, a
   matching `Semantics(button: true, label: ...)` wrapper) to each of these
   8 icon-only controls that currently have neither, reusing an existing
   localized string in every case — no new ARB key is needed for any of
@@ -310,13 +310,13 @@ tests will still run under T003's pinned default once that phase is done).
     `sign_in_screen.dart:191` already uses:
     `_obscurePassword ? l10n.signInShowPasswordSemantic :
     l10n.signInHidePasswordSemantic`.
-- [ ] T022 [P] [US3] **(`/speckit-analyze` finding G1)** In
+- [X] T022 [P] [US3] **(`/speckit-analyze` finding G1)** In
   `lib/features/expenses/presentation/income_screen.dart:333`, change the
   delete-source `IconButton`'s `constraints: const BoxConstraints(minWidth:
   44, minHeight: 44)` to `minWidth: 48, minHeight: 48` — this is the one
   confirmed, undocumented sub-48dp control on this screen (its sibling
   edit/delete buttons elsewhere in the codebase already use 48×48).
-- [ ] T023 [P] [US3] **(`/speckit-analyze` finding G1)** In
+- [X] T023 [P] [US3] **(`/speckit-analyze` finding G1)** In
   `lib/features/account/presentation/account_screen.dart:513`, change the
   tab/segment control's `constraints: const BoxConstraints(minHeight: 28)`
   to `minHeight: 48` (add `minWidth: 48` too if the surrounding `Container`
@@ -324,12 +324,12 @@ tests will still run under T003's pinned default once that phase is done).
   rendered width at implementation time). Confirm the visual change (a
   slightly taller pill) doesn't clip or overlap adjacent elements in
   `account_screen.dart`'s layout.
-- [ ] T024 [US3] In `test/unit/core/theme/app_theme_test.dart`, add
+- [X] T024 [US3] In `test/unit/core/theme/app_theme_test.dart`, add
   assertions that both `AppTheme.light.materialTapTargetSize` and
   `AppTheme.dark.materialTapTargetSize` equal `MaterialTapTargetSize
   .padded`, and both themes' `visualDensity` equals `VisualDensity
   .standard`. Depends on T019, T020.
-- [ ] T025 [US3] Create `test/widget/core/theme/adaptive_input_test.dart`:
+- [X] T025 [US3] Create `test/widget/core/theme/adaptive_input_test.dart`:
   pump a representative screen containing one of T021's fixed controls
   with a mouse `TestGesture` and assert hovering it shows its tooltip
   text. Depends on T021. (Deliberately does not use a navigation-rail
@@ -337,7 +337,7 @@ tests will still run under T003's pinned default once that phase is done).
   Story 1's T007 ships, and this story has no dependency on User Story 1;
   a rail-specific tooltip check belongs in User Story 1's own
   `app_shell_nav_bar_test.dart` instead, if desired, not here.)
-- [ ] T026 [US3] In the same new file, add a keyboard-traversal test
+- [X] T026 [US3] In the same new file, add a keyboard-traversal test
   covering what spec.md's SC-004 actually claims: (a) against the app's
   **existing, unmodified `NavigationBar`** (already present before this
   feature — no dependency on User Story 1's rail work), simulate repeated

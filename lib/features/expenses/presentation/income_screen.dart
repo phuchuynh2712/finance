@@ -59,9 +59,14 @@ class IncomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: Semantics(
+          button: true,
+          label: l10n.signUpBackSemantic,
+          child: IconButton(
+            icon: const Icon(LucideIcons.chevronLeft),
+            tooltip: l10n.signUpBackSemantic,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         title: Row(
           children: [
@@ -329,8 +334,11 @@ class _IncomeSourceRowWidgetState extends State<_IncomeSourceRowWidget> {
               label: l10n.incomeSourceDeleteSemantic(widget.row.name),
               child: IconButton(
                 icon: Icon(LucideIcons.trash2, size: 16, color: semantic.fg3),
+                tooltip: l10n.incomeSourceDeleteSemantic(widget.row.name),
                 onPressed: widget.onDelete,
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                // /speckit-analyze finding G1: was 44x44, below the
+                // constitution's >=48x48dp minimum.
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               ),
             ),
         ],

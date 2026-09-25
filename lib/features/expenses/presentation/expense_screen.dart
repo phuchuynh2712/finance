@@ -82,9 +82,14 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: Semantics(
+          button: true,
+          label: l10n.signUpBackSemantic,
+          child: IconButton(
+            icon: const Icon(LucideIcons.chevronLeft),
+            tooltip: l10n.signUpBackSemantic,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         title: Row(
           children: [
