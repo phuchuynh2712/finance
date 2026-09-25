@@ -31,6 +31,12 @@ tiết theo yêu cầu để không bị quên khi bắt đầu spec kế tiếp
   chỉ icon? → A: Icon + nhãn chữ luôn hiển thị (giữ giống bottom bar hiện
   tại), ở mọi kích thước rail — không có mốc breakpoint thứ ba trong
   feature này.
+- Q: Khi cửa sổ đổi từ compact sang expanded (hoặc ngược lại), trạng thái
+  cục bộ của màn hình đang xem (vị trí cuộn, nội dung đang gõ dở chưa
+  submit...) có bắt buộc giữ nguyên không, hay chỉ bảo đảm trạng thái điều
+  hướng? → A: Toàn bộ trạng thái cục bộ của màn hình đang xem đều phải giữ
+  nguyên — màn hình hiện tại không được remount, chỉ phần khung điều hướng
+  bao quanh nó thay đổi.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -76,6 +82,12 @@ this is fully verifiable on its own, without any other story in this spec.
    foldable resize), **When** the width crosses the 600-pixel threshold in
    either direction, **Then** navigation switches presentation immediately
    without losing the current tab or any in-progress screen state.
+5. **Given** a user has scrolled partway down a list, or has typed text
+   into a field without submitting it, on any screen, **When** the window
+   is resized across the 600-pixel threshold, **Then** the scroll position
+   and the unsubmitted text remain exactly as they were before the resize
+   — the screen is not rebuilt from scratch, only the navigation chrome
+   around it changes.
 
 ---
 
@@ -173,6 +185,11 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
   The layout switch alone MUST NOT discard or reset the pending edit —
   only an explicit navigation action (per User Story 1's existing prompt)
   may do that.
+- What happens to a screen's own local state (scroll position, text typed
+  into a field but not yet submitted) when the window crosses a breakpoint
+  mid-use? It MUST be preserved exactly as if the window had not been
+  resized at all — the screen is not remounted, only the navigation chrome
+  around it changes.
 
 ## Requirements *(mandatory)*
 
@@ -189,7 +206,11 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
   operating system, or platform the app happens to be running on.
 - **FR-003**: Switching between the two navigation presentations MUST
   preserve the currently selected tab and MUST NOT reset any in-progress
-  screen state.
+  screen state — including scroll position, text typed into a field but
+  not yet submitted, and any other local state of the screen currently
+  being viewed. The currently viewed screen MUST NOT be torn down and
+  rebuilt purely because the window crossed a breakpoint; only the
+  surrounding navigation chrome changes.
 - **FR-004**: The existing confirmation prompt for unsaved Kiểm soát
   formula edits MUST behave identically regardless of which navigation
   presentation triggered the tab switch.
