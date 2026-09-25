@@ -75,7 +75,17 @@ Existing Flutter project layout (unchanged by this feature):
   runs against it., after `initSupabase()` succeeds and only when `kIsWeb`: create a `ProviderContainer`, `await` a trivial warm-up query (e.g. `container.read(appDatabaseProvider).customStatement('SELECT 1')`) inside its own `try`/`on Object` block; on failure, `runApp(const StartupErrorApp(reason: StartupFailureReason.webStorage))` and `return`, mirroring the existing Supabase-failure early return immediately above it. On success (Web) or when `!kIsWeb` (skip warm-up entirely, per FR-012), proceed to the existing preference-loading step; change the final `runApp(...)` to `runApp(UncontrolledProviderScope(container: container, child: const FinanceApp()))` on the Web success path (reusing the warmed-up container) and leave the existing plain `ProviderScope(...)` path for non-Web platforms exactly as it is today (contracts/web-platform-enablement.md Startup Contract; depends on T005, T006, T007).
 - [X] T009 [P] [US1] Add `test/widget/startup_error_app_test.dart` (named after the widget under test, matching this repo's existing convention — e.g. `app_shell_nav_bar_test.dart`) with a widget test confirming `StartupErrorApp(reason: .supabaseConfig)` renders `startupConfigurationTitle`/`Message` and `StartupErrorApp(reason: .webStorage)` renders `startupWebStorageTitle`/`Message` — two distinct, non-overlapping copy pairs (depends on T006, T007).
 - [X] T010 [US1] Verify `flutter build web` completes without error against the now-non-null `web:` parameter and the assets from T001–T003 (a static compile check only — per research.md Decision 10 this cannot execute/prove the runtime `WasmDatabase.open` behavior, only that the code compiles and the referenced assets exist on disk) (depends on T001, T002, T003, T005, T008).
-- [ ] T011 [US1] **Manual/best-effort** — attempt quickstart.md steps 1–3 and 8 (real data loads on a Web build against a real/local Supabase project; a write survives a full reload; the app still opens without cross-origin-isolation headers via the IndexedDB fallback; a simulated total-storage-failure browser shows the new `webStorage` startup-error screen). If this sandboxed session cannot reach a running browser/Supabase project to actually perform these checks, document that honestly (mirroring the previous feature's T030 precedent) rather than marking them verified.
+- [X] T011 [US1] **Manual/best-effort** — **blocked in this session**: no
+  real Supabase project credentials and no working in-browser test harness
+  are available here (this session's own prior T030-equivalent constraint
+  — research.md Decision 10), so steps 1–3 (real data loading, reload
+  persistence, storage fallback) cannot be performed end-to-end. Step 8
+  (total-storage-failure screen) *is* covered, at the code level, by
+  T009's widget test — it directly exercises `StartupErrorApp
+  (reason: .webStorage)`, the exact widget `main()`'s new warm-up catch
+  block shows on that failure. What remains unverified is only the
+  triggering condition itself (a real browser actually blocking all
+  storage), not the resulting UI.
 
 **Checkpoint**: User Story 1 is independently functional — Web data loading works, and a total storage failure degrades gracefully instead of hanging silently.
 
@@ -94,7 +104,7 @@ Existing Flutter project layout (unchanged by this feature):
 - [X] T014 [US2] In `lib/core/auth/auth_repository.dart`'s `resetPasswordForEmail`, replace the hardcoded `redirectTo: 'com.finance.finance://reset-callback'` with `redirectTo: resolvePasswordResetRedirectUrl(isWeb: kIsWeb, webRedirectUrl: AppEnvironment.webPasswordResetRedirectUrl, mobileRedirectUrl: 'com.finance.finance://reset-callback')` (depends on T012, T013).
 - [X] T015 [P] [US2] Add `test/unit/core/config/app_environment_test.dart`: `webPasswordResetRedirectUrl`/`validate()`'s new branch — a valid `https://...` value passes; `http://localhost:5000/...` passes (the exemption); `http://example.com/...` (non-localhost) fails; an empty value fails — each exercised via the Web-only validation path with an injected platform flag, not the real `kIsWeb` (research.md Decision 10; depends on T012).
 - [X] T016 [P] [US2] Add unit tests for `resolvePasswordResetRedirectUrl` (co-located with T013's file) covering both `isWeb: true` and `isWeb: false` (depends on T013).
-- [ ] T017 [P] [US2] Add `"WEB_PASSWORD_RESET_REDIRECT_URL": "http://localhost:5000/reset-callback"` to `tool/env.example.json`, matching `README.md`'s already-documented `--web-port=5000` local Web dev workflow (research.md Decision 5 addendum).
+- [X] T017 [P] [US2] Add `"WEB_PASSWORD_RESET_REDIRECT_URL": "http://localhost:5000/reset-callback"` to `tool/env.example.json`, matching `README.md`'s already-documented `--web-port=5000` local Web dev workflow (research.md Decision 5 addendum).
 - [X] T018 [US2] Update `README.md`'s "Configure public runtime values" section (around line 96) to note the config file now also carries `WEB_PASSWORD_RESET_REDIRECT_URL`, and add one line to its "Prerequisites" section (around line 67) mentioning a Chromium-based browser for Web development — closing the constitution's own tracked Sync Impact Report follow-up TODO ("README.md's tech-stack/setup section still reads mobile-first") now that a real Web-enabling feature has landed (depends on T017, same file region).
 - [X] T019 [US2] **Manual/best-effort** — **blocked in this session**: this
   sandboxed environment has no real Supabase project credentials (only
@@ -147,9 +157,9 @@ Existing Flutter project layout (unchanged by this feature):
 
 **Purpose**: Final, whole-repository verification after all three stories land.
 
-- [ ] T026 [P] Run `dart format --output=none --set-exit-if-changed lib test` and `flutter analyze` across the full repository — zero formatting diffs, zero analyzer errors/warnings (constitution Principle I, Development Workflow).
-- [ ] T027 Run the full `flutter test` suite and confirm it is still green, including every new test from T009, T015, T016, T024 (spec.md SC-006 — 413 tests at this feature's start, plus this feature's new coverage, all passing).
-- [ ] T028 Run a final consolidated `flutter build web` covering all three stories' combined `web/`/`lib/main.dart` state (depends on T005–T024 all being complete).
+- [X] T026 [P] Run `dart format --output=none --set-exit-if-changed lib test` and `flutter analyze` across the full repository — zero formatting diffs, zero analyzer errors/warnings (constitution Principle I, Development Workflow). Found and fixed 3 files needing formatting (lib/main.dart and two new test files) on the first pass; clean on re-check.
+- [X] T027 Run the full `flutter test` suite and confirm it is still green, including every new test from T009, T015, T016, T024 (spec.md SC-006 — 413 tests at this feature's start, plus this feature's new coverage, all passing). **Result: 428/428 passing** (413 baseline + 15 new: 2 from T009, 7 from T015, 2 from T016, 4 from T024) — exactly accounted for, no unexpected gain or loss.
+- [X] T028 Run a final consolidated `flutter build web` covering all three stories' combined `web/`/`lib/main.dart` state (depends on T005–T024 all being complete). **Result: `✓ Built build/web`** — already performed and verified as part of T025 (the same build, run after every code task in this feature was complete), including confirming the new title/manifest content in the actual `build/web/` output; not re-run a third time since nothing changed afterward that could affect it.
 
 ---
 
