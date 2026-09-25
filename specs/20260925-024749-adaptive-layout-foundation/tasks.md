@@ -359,22 +359,58 @@ account_screen.dart) are fixed.
 
 **Purpose**: Final validation across all three stories together.
 
-- [ ] T027 [P] Run `dart format --output=none --set-exit-if-changed lib
+- [X] T027 [P] Run `dart format --output=none --set-exit-if-changed lib
   test` across the whole repository; fix any formatting issues found.
-- [ ] T028 Run `flutter analyze`; confirm zero errors and zero warnings
+  **Result**: 0 files changed.
+- [X] T028 Run `flutter analyze`; confirm zero errors and zero warnings
   (constitution Principle I). Additionally (`/speckit-analyze` finding
   U1, FR-002): `grep -rnE 'Platform\.is|kIsWeb|defaultTargetPlatform'
   lib/core/router/app_router.dart lib/core/widgets/adaptive_body.dart
   lib/core/theme/app_layout.dart` and confirm it finds nothing — this
   feature's layout decisions must be driven only by `windowSizeClassFor`/
-  `MediaQuery`, never by a platform check.
-- [ ] T029 Run the full `flutter test` suite; confirm every pre-existing
+  `MediaQuery`, never by a platform check. **Result**: 0 issues; grep
+  found nothing.
+- [X] T029 Run the full `flutter test` suite; confirm every pre-existing
   test still passes (no regression from T001's baseline) and every new
   test from T004, T009–T012, T016–T018, T022–T026 passes (spec.md SC-005).
-- [ ] T030 Manually walk through [quickstart.md](./quickstart.md)'s 9
+  **Result**: 413/413 passing (386 baseline + 27 new).
+- [X] T030 Manually walk through [quickstart.md](./quickstart.md)'s 9
   verification steps (ideally including a real resizable desktop/web
   browser window for steps 4–5's live-resize and state-preservation
   checks, which a widget test can approximate but not fully replace).
+  **Result — partial, documented honestly rather than skipped silently**:
+  - `flutter build web` (with placeholder `--dart-define`s) **succeeds
+    cleanly** — a genuine, additional signal beyond `flutter analyze`/
+    `flutter test` (both VM-based), confirming this feature's code
+    compiles correctly for the Web target specifically. The build's own
+    warnings (a wasm-compat note about `flutter_secure_storage_web`'s
+    `dart:html` usage, a missing-CupertinoIcons-font note) are
+    pre-existing and unrelated to this feature.
+  - A live in-browser walkthrough (serving that build via a local HTTP
+    server, driving it with the pre-installed Chromium via Playwright)
+    was attempted for steps 1–2 (compact/expanded rendering) but could
+    not complete: Flutter Web's default CanvasKit renderer fetches its
+    runtime from `www.gstatic.com`, and this session's egress proxy
+    returns a `403` for that host with reason `connect_rejected
+    (organization policy)` — confirmed directly, not assumed. Per this
+    environment's own proxy guidance, an explicit organization-policy
+    403 is not something to retry or route around, so this was not
+    pursued further (e.g. via a locally-bundled-CanvasKit build
+    configuration) — that remains a genuine gap for whoever next has
+    a network policy allowing it, or a non-cloud environment.
+  - Steps 3, 6–9 (auth-gated interaction, hover, keyboard) have the same
+    live-browser limitation, compounded by no live Supabase test account
+    being available in this session either way.
+  - **Every interaction quickstart.md's 9 steps describe is still
+    covered by an automated test that exercises the real production
+    widget tree**, not a mock: step 1/2 → T009/T010; step 3 → T012;
+    step 4 → T009/T010 (the same resize mechanism, asserted
+    structurally); step 5 → T011 (`identical()` on the real
+    `OverviewScreen`'s `Element`); step 6 → T016–T018; step 7 → T025;
+    step 8 → T026; step 9 → T024. This is not a substitute for a human
+    actually dragging a browser window and confirming it *feels* right —
+    that remains open for the user (or a future session with network
+    access to `gstatic.com`, or a native mobile/desktop run) to do.
 
 ---
 
