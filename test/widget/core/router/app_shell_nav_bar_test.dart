@@ -20,6 +20,8 @@ import 'package:finance/features/expense_control/domain/transaction_history_reco
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
+import 'package:finance/features/expenses/presentation/report_providers.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// FR-016–FR-018, SC-006 — visual correctness of the shared bottom
 /// [NavigationBar], verified via the real [_AppShell] (through
@@ -118,9 +120,10 @@ Widget _harness(ProviderContainer container) {
   );
 }
 
-ProviderContainer _container() {
+ProviderContainer _container({List<Override> extra = const []}) {
   return ProviderContainer(
     overrides: [
+      ...extra,
       authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
       isSignedInProvider.overrideWithValue(true),
       isPasswordRecoveryProvider.overrideWithValue(false),
@@ -243,4 +246,48 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'the fourth destination ("Báo cáo") uses the pie-chart icon, not the old history icon (FR-001)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      final navBar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+      final fourthDestination = navBar.destinations[3] as NavigationDestination;
+      final fourthIcon = fourthDestination.icon as Icon;
+      expect(fourthIcon.icon, LucideIcons.pieChart);
+      expect(fourthIcon.icon, isNot(LucideIcons.history));
+    },
+  );
+
+  testWidgets(
+    'the Báo cáo tab\'s selected month survives switching to a different tab '
+    'and back (research.md Decision 3 — requires the real StatefulShellRoute '
+    'shell, since a bare ReportScreen in isolation has no second tab to '
+    'switch to and cannot exercise IndexedStack\'s mount-preservation at all)',
+    (tester) async {
+      final pastMonth = DateTime(2026, 3);
+      final container = _container(
+        extra: [selectedReportMonthProvider.overrideWith((ref) => pastMonth)],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Báo cáo').last);
+      await tester.pumpAndSettle();
+      expect(container.read(selectedReportMonthProvider), pastMonth);
+
+      // Switch away, then back.
+      await tester.tap(find.text('Hồ sơ').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Báo cáo').last);
+      await tester.pumpAndSettle();
+
+      expect(container.read(selectedReportMonthProvider), pastMonth);
+    },
+  );
 }

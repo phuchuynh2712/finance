@@ -259,4 +259,27 @@ void main() {
       expect(service.computeItemBalance(node), 0);
     });
   });
+
+  group('groupNameFor', () {
+    test('a nested leaf returns its parent group\'s name', () {
+      final items = [
+        _item(id: 'group', name: 'Ăn uống'),
+        _item(id: 'leaf', parentId: 'group', name: 'Ăn trưa'),
+      ];
+      final tree = service.buildTree(items);
+      expect(service.groupNameFor(tree, 'leaf'), 'Ăn uống');
+    });
+
+    test('a standalone top-level leaf returns null', () {
+      final items = [_item(id: 'a', name: 'Tiết kiệm')];
+      final tree = service.buildTree(items);
+      expect(service.groupNameFor(tree, 'a'), isNull);
+    });
+
+    test('an id not present in the tree returns null without throwing', () {
+      final items = [_item(id: 'a')];
+      final tree = service.buildTree(items);
+      expect(service.groupNameFor(tree, 'does-not-exist'), isNull);
+    });
+  });
 }

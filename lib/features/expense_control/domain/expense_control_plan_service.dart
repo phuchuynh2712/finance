@@ -201,6 +201,21 @@ class ExpenseControlPlanService {
     ];
   }
 
+  /// Returns the name of the top-level node in [tree] that contains
+  /// [leafId] as a child, or `null` when [leafId] is itself a standalone
+  /// top-level item with no parent group, or is not present in [tree] at
+  /// all (e.g. an item referenced by a past transaction that has since
+  /// been removed — Report feature's research.md Decision 9).
+  String? groupNameFor(List<ExpenseControlNode> tree, String leafId) {
+    for (final node in tree) {
+      if (node.item.id == leafId) return null;
+      for (final child in node.children) {
+        if (child.id == leafId) return node.item.name;
+      }
+    }
+    return null;
+  }
+
   /// Distributes [totalIncome] sequentially across every leaf in [tree], in
   /// display order, per each leaf's own formula (percentage of
   /// [totalIncome], or a fixed amount) — spec.md FR-005/FR-006/FR-007. If a
