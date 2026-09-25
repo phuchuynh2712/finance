@@ -157,8 +157,9 @@ no repository/domain change.
   registration, no feature importing another feature's `presentation/`.
 - **Offline-First Data & Sync: N/A.** No database, migration, sync, or
   repository change — this feature is presentation/theme layer only.
-- **Multi-Platform Support: PASS, with an explicit, already-approved scope
-  boundary.** This feature makes the shell and two screens lay out
+- **Multi-Platform Support: PASS for this feature's own changes, with an
+  explicitly-flagged, still-open constitution conflict it does not
+  resolve.** This feature makes the shell and two screens lay out
   correctly at any window size, including in a browser — a real, net
   improvement for Web. It does **not** fix the separately-tracked Web
   data-layer defect (Drift never opens on Web today because
@@ -166,12 +167,18 @@ no repository/domain change.
   "Out of Scope & Follow-Up Work" §A.1, pre-existing, not introduced or
   worsened by this feature). Web is no better and no worse off *for data*
   after this feature than before it; it is strictly better *for layout*.
-  The constitution's "Web is a fully supported target" mandate is a
-  repository-wide commitment being delivered incrementally across tracked
-  follow-up specs (§A's suggested `web-platform-enablement`), exactly the
-  same sequencing already accepted for Desktop's deferral — not a new
-  violation introduced here. Platform-capability differences this feature
-  does touch (none — it introduces no capability check) are N/A.
+  **`/speckit-analyze` correctly flagged this as CRITICAL** per this
+  command's own non-negotiable-constitution rule: the constitution's
+  "Web is a fully supported target, not a stretch goal... is a Principle I
+  defect, not an acceptable platform gap" wording is unconditional, and
+  that defect is live right now, independent of this feature. This PASS is
+  therefore scoped narrowly to "this feature's own diff does not violate
+  or worsen the constitution" — it is **not** a claim that the repository
+  as a whole is currently constitution-compliant on Web. That gap is
+  tracked in spec.md §A with a required (not optional) follow-up
+  (`web-platform-enablement`), which should start promptly. Platform-
+  capability differences this feature does touch (none — it introduces no
+  capability check) are N/A.
 - **Security: N/A.** No secret, token, auth flow, or logging change; the
   security-relevant Web gaps (no app-level lock, experimental secure
   storage) are explicitly deferred to §A, unchanged by this feature.
@@ -184,11 +191,13 @@ no repository/domain change.
   → Principle III; this is not a DI/database/sync change, so the
   Recommended Architecture/Offline-First cross-reference does not apply).
 
-**Post-design re-check**: PASS. Phase 1 design introduces no new package,
-external service, network call, or unapproved architecture exception; the
-one scope boundary identified (Multi-Platform Support's Web-data gap) is
-an already-approved, already-tracked deferral from spec.md, not an open
-violation discovered during design.
+**Post-design re-check**: PASS for this feature's own scope. Phase 1
+design introduces no new package, external service, network call, or
+unapproved architecture exception. The one item worth naming plainly: the
+Multi-Platform Support Web-data gap (above) **is** an open constitution
+violation today, at the repository level — this feature does not create
+or worsen it, and does not claim to resolve it; it is tracked, not hidden,
+in spec.md §A, with the urgency `/speckit-analyze` confirmed.
 
 ## Project Structure
 
@@ -244,22 +253,40 @@ test/
 │                                             # width (research.md Decision 4) —
 │                                             # first task, before any other change
 ├── unit/core/theme/
-│   └── app_layout_test.dart                 # NEW: windowSizeClassFor() boundary
-│                                             # tests (599/600/839/840/1199/1200/
-│                                             # 1599/1600)
+│   ├── app_layout_test.dart                 # NEW: windowSizeClassFor() boundary
+│   │                                         # tests (599/600/839/840/1199/1200/
+│   │                                         # 1599/1600)
+│   └── app_theme_test.dart                  # existing file — + assertions that
+│                                             # both themes' materialTapTargetSize/
+│                                             # visualDensity are explicitly
+│                                             # overridden (research.md Decision 6)
 ├── widget/core/router/
-│   └── app_shell_nav_bar_test.dart          # existing file — + expanded-width
-│                                             # (rail) assertions, + a resize
-│                                             # scenario proving GlobalKey
-│                                             # reparenting preserves a descendant
-│                                             # screen's local state (Clarification
-│                                             # Q2)
+│   ├── app_shell_nav_bar_test.dart          # existing file — + expanded-width
+│   │                                         # (rail) assertions, + a resize
+│   │                                         # scenario proving GlobalKey
+│   │                                         # reparenting preserves a descendant
+│   │                                         # screen's local state (Clarification
+│   │                                         # Q2)
+│   └── app_shell_discard_prompt_test.dart   # existing file — + the same
+│                                             # discard-prompt coverage triggered
+│                                             # from the rail instead of the bar
+├── widget/core/theme/
+│   └── adaptive_input_test.dart             # NEW: tooltip-on-hover and
+│                                             # keyboard-Tab/Enter coverage (User
+│                                             # Story 3)
 ├── widget/core/widgets/
 │   └── adaptive_body_test.dart              # NEW: below/at/above 840dp
 └── widget/features/expenses/
     ├── overview_screen_test.dart            # existing file — + capped-width
     │                                         # assertion at ≥840dp
     └── report_screen_test.dart              # existing file — + same
+
+# Also modified (User Story 3's tooltip audit — /speckit-analyze finding G1/G2):
+#   lib/features/expense_control/presentation/widgets/expense_item_row.dart
+#   lib/features/expense_control/presentation/widgets/expense_group_card.dart
+#   lib/features/expenses/presentation/income_screen.dart
+#   lib/features/expenses/presentation/expense_screen.dart
+#   lib/features/account/presentation/sign_up_screen.dart
 ```
 
 **Structure Decision**: No new feature directory and no new route. The
@@ -331,8 +358,10 @@ redefining them).
 
 ## Complexity Tracking
 
-No constitution violations or complexity exceptions are required. The one
-scope boundary surfaced during the Constitution Check (this feature
-improves Web layout but does not fix the separately-tracked Web data-layer
-defect) is an already-approved deferral recorded in spec.md itself, not an
-unplanned deviation — nothing here trades away a MUST rule for expedience.
+No constitution violations *caused by this feature's own design* require
+justification here — nothing in this feature's approach trades away a
+MUST rule for expedience. One pre-existing violation (the Multi-Platform
+Support Web-data gap, Constitution Check above) is not this feature's to
+justify away via Complexity Tracking, since this feature neither
+introduces nor worsens it; it is tracked as required follow-up work in
+spec.md §A instead, per `/speckit-analyze`'s C1 finding.

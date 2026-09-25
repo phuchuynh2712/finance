@@ -18,6 +18,14 @@ such.
 **Organization**: Tasks are grouped by user story (US1/US2/US3, matching
 spec.md's P1/P2/P3) to enable independent implementation and testing of each.
 
+**Revision note**: This file was updated after `/speckit-analyze` (see that
+report for finding IDs referenced below) — T022/T023 are new (finding G1);
+the tooltip-hover test (T025, was T023) drops a misleading example
+(finding I2); the keyboard test (T026, was T024) is scoped more precisely
+(finding G3); Polish gained an explicit platform-check verification step
+(finding U1); task IDs from the original T022 onward shifted by +2 to make
+room for T022/T023.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependency on an
@@ -44,7 +52,7 @@ touching anything.
   the repository root on the current, unmodified `HEAD`. Confirm all four
   pass clean and record the exact current test count (386 as of this
   feature's start per spec.md SC-005) — this is the baseline that later
-  Polish-phase tasks (T026–T027) must still match or exceed.
+  Polish-phase tasks (T029–T030) must still match or exceed.
 
 **Checkpoint**: Baseline confirmed green — safe to start Foundational work.
 
@@ -142,6 +150,9 @@ or 3.
     disposes it across a branch switch (research.md Decision 2).
   - `onDestinationSelected`/`onTap` on both widgets continue to call the
     existing `_handleDestinationSelected`, unchanged.
+  - Do not introduce any `Platform.is*`/`kIsWeb`/`defaultTargetPlatform`
+    check anywhere in this method — the branch above MUST be driven only
+    by `widthClass` (FR-002; verified again in T028).
 - [ ] T008 [US1] In `lib/core/router/app_router.dart`, verify (and adjust
   if needed) that `_handleDestinationSelected`'s existing unsaved-Kiểm-soát
   -edits `_DiscardPromptDialog` gate (FR-004) is reachable identically
@@ -231,15 +242,18 @@ testable — both screens respect the shared content max-width.
 ## Phase 5: User Story 3 - Every control works well with touch, mouse, and keyboard (Priority: P3)
 
 **Goal**: A uniform ≥48×48dp tap target everywhere (including desktop
-platforms, which Flutter would otherwise shrink by default), tooltips on
-every icon-only control, and full keyboard reachability — enforced once at
-the shared theme level.
+platforms, which Flutter would otherwise shrink by default, and including
+the two known undocumented sub-48dp controls `/speckit-analyze` found —
+finding G1), tooltips on every icon-only control, and full keyboard
+reachability — enforced once at the shared theme level, plus two direct
+fixes where the theme alone can't reach.
 
 **Independent Test**: Per spec.md — hover icon-only controls and see
 tooltips; Tab through a screen and see focus move with Enter/Space
 activation; measure any control's clickable area at a desktop window size
-and find it ≥48×48dp. Fully verifiable without User Story 1 or 2 (this
-story does not depend on the Foundational phase's `app_layout.dart`/
+and find it ≥48×48dp (except a control with its own documented exception —
+FR-007). Fully verifiable without User Story 1 or 2 (this story does not
+depend on the Foundational phase's `app_layout.dart`/
 `flutter_test_config.dart` for its *implementation*, though its own new
 tests will still run under T003's pinned default once that phase is done).
 
@@ -281,26 +295,48 @@ tests will still run under T003's pinned default once that phase is done).
     `sign_in_screen.dart:191` already uses:
     `_obscurePassword ? l10n.signInShowPasswordSemantic :
     l10n.signInHidePasswordSemantic`.
-- [ ] T022 [US3] In `test/unit/core/theme/app_theme_test.dart`, add
+- [ ] T022 [P] [US3] **(`/speckit-analyze` finding G1)** In
+  `lib/features/expenses/presentation/income_screen.dart:333`, change the
+  delete-source `IconButton`'s `constraints: const BoxConstraints(minWidth:
+  44, minHeight: 44)` to `minWidth: 48, minHeight: 48` — this is the one
+  confirmed, undocumented sub-48dp control on this screen (its sibling
+  edit/delete buttons elsewhere in the codebase already use 48×48).
+- [ ] T023 [P] [US3] **(`/speckit-analyze` finding G1)** In
+  `lib/features/account/presentation/account_screen.dart:513`, change the
+  tab/segment control's `constraints: const BoxConstraints(minHeight: 28)`
+  to `minHeight: 48` (add `minWidth: 48` too if the surrounding `Container`
+  doesn't already guarantee it via its `padding`/text content — verify the
+  rendered width at implementation time). Confirm the visual change (a
+  slightly taller pill) doesn't clip or overlap adjacent elements in
+  `account_screen.dart`'s layout.
+- [ ] T024 [US3] In `test/unit/core/theme/app_theme_test.dart`, add
   assertions that both `AppTheme.light.materialTapTargetSize` and
   `AppTheme.dark.materialTapTargetSize` equal `MaterialTapTargetSize
   .padded`, and both themes' `visualDensity` equals `VisualDensity
   .standard`. Depends on T019, T020.
-- [ ] T023 [US3] Create `test/widget/core/theme/adaptive_input_test.dart`:
-  pump the app shell (or a representative screen) with a mouse `TestGesture`
-  and assert hovering an icon-only control (e.g. a rail destination or one
-  of T021's fixed controls) shows its tooltip text. Depends on T021.
-- [ ] T024 [US3] In the same new file, add a keyboard-traversal test:
-  simulate repeated Tab key presses (`tester.sendKeyEvent
-  (LogicalKeyboardKey.tab)`) from the top of a representative screen and
-  assert focus visibly moves between controls in order, and that
-  `LogicalKeyboardKey.enter`/`.space` activates whichever control is
-  currently focused.
+- [ ] T025 [US3] Create `test/widget/core/theme/adaptive_input_test.dart`:
+  pump a representative screen containing one of T021's fixed controls
+  with a mouse `TestGesture` and assert hovering it shows its tooltip
+  text. Depends on T021. (Deliberately does not use a navigation-rail
+  destination as the test subject here — the rail doesn't exist until User
+  Story 1's T007 ships, and this story has no dependency on User Story 1;
+  a rail-specific tooltip check belongs in User Story 1's own
+  `app_shell_nav_bar_test.dart` instead, if desired, not here.)
+- [ ] T026 [US3] In the same new file, add a keyboard-traversal test
+  covering what spec.md's SC-004 actually claims: (a) against the app's
+  **existing, unmodified `NavigationBar`** (already present before this
+  feature — no dependency on User Story 1's rail work), simulate repeated
+  Tab key presses (`tester.sendKeyEvent(LogicalKeyboardKey.tab)`) and
+  assert focus reaches and `LogicalKeyboardKey.enter`/`.space` activates
+  each of the 5 navigation destinations in turn; and (b) on one screen
+  (e.g. Tổng quan), assert Tab reaches and activates at least one primary
+  in-screen action, with a visible focus indicator at each stop.
 
 **Checkpoint**: User Story 3 is fully functional and independently
 testable — the tap-target/tooltip/keyboard baseline applies project-wide
-from the shared theme, with the 8 previously-bare controls now covered
-too.
+from the shared theme, the 8 previously-bare controls are covered, and
+both confirmed undocumented sub-48dp controls (income_screen.dart,
+account_screen.dart) are fixed.
 
 ---
 
@@ -308,14 +344,19 @@ too.
 
 **Purpose**: Final validation across all three stories together.
 
-- [ ] T025 [P] Run `dart format --output=none --set-exit-if-changed lib
+- [ ] T027 [P] Run `dart format --output=none --set-exit-if-changed lib
   test` across the whole repository; fix any formatting issues found.
-- [ ] T026 Run `flutter analyze`; confirm zero errors and zero warnings
-  (constitution Principle I).
-- [ ] T027 Run the full `flutter test` suite; confirm every pre-existing
+- [ ] T028 Run `flutter analyze`; confirm zero errors and zero warnings
+  (constitution Principle I). Additionally (`/speckit-analyze` finding
+  U1, FR-002): `grep -rnE 'Platform\.is|kIsWeb|defaultTargetPlatform'
+  lib/core/router/app_router.dart lib/core/widgets/adaptive_body.dart
+  lib/core/theme/app_layout.dart` and confirm it finds nothing — this
+  feature's layout decisions must be driven only by `windowSizeClassFor`/
+  `MediaQuery`, never by a platform check.
+- [ ] T029 Run the full `flutter test` suite; confirm every pre-existing
   test still passes (no regression from T001's baseline) and every new
-  test from T004, T009–T012, T016–T018, T022–T024 passes (spec.md SC-005).
-- [ ] T028 Manually walk through [quickstart.md](./quickstart.md)'s 9
+  test from T004, T009–T012, T016–T018, T022–T026 passes (spec.md SC-005).
+- [ ] T030 Manually walk through [quickstart.md](./quickstart.md)'s 9
   verification steps (ideally including a real resizable desktop/web
   browser window for steps 4–5's live-resize and state-preservation
   checks, which a widget test can approximate but not fully replace).
@@ -336,7 +377,9 @@ too.
 - **User Story 2 (Phase 4)**: Depends on Foundational. No dependency on
   User Story 1 or 3.
 - **User Story 3 (Phase 5)**: No dependency on Foundational, User Story 1,
-  or User Story 2 — can start immediately after Setup.
+  or User Story 2 — can start immediately after Setup (see T025's note on
+  deliberately avoiding a hidden rail dependency, and T026's use of the
+  existing `NavigationBar` rather than the new rail).
 - **Polish (Phase 6)**: Depends on all three user stories being complete.
 
 ### Within Each Story
@@ -346,16 +389,18 @@ too.
   run any time after T008.
 - User Story 2: T013 first; T014, T015, T016 can all start once T013 is
   done (three different files); T017 after T014; T018 after T015.
-- User Story 3: T019 → T020 (same file); T021 independent of T019/T020;
-  T022 after T019+T020; T023 after T021; T024 after T023 (same new file).
+- User Story 3: T019 → T020 (same file); T021, T022, T023 are each
+  independent of T019/T020 and of each other (three different files);
+  T024 after T019+T020; T025 after T021; T026 after T025 (same new file).
 
 ### Parallel Opportunities
 
 - T002 and T003 (Foundational) — different files, no shared dependency.
 - T014, T015, and T016 (User Story 2) — three different files, all depend
   only on T013.
-- T021 (User Story 3's tooltip fixes) can run in parallel with T019/T020
-  (AppTheme changes) — unrelated files and concerns.
+- T021, T022, and T023 (User Story 3's three independent fixes) can all
+  run in parallel with each other and with T019/T020 — five different
+  files, no shared dependency.
 - User Story 3 (Phase 5) as a whole can run in parallel with Foundational/
   User Story 1/User Story 2, since it has no dependency on any of them.
 
@@ -369,6 +414,8 @@ Task: "Create lib/core/theme/app_layout.dart with WindowSizeClass etc. (T002)"
 Task: "Create test/flutter_test_config.dart pinning the default surface size (T003)"
 Task: "Add visualDensity/materialTapTargetSize override to AppTheme.light (T019)"
 Task: "Fix the 8 icon-only controls lacking a tooltip (T021)"
+Task: "Fix income_screen.dart's 44x44 delete button to 48x48 (T022)"
+Task: "Fix account_screen.dart's 28px-tall tab control to 48dp (T023)"
 ```
 
 ---
@@ -405,7 +452,15 @@ Task: "Fix the 8 icon-only controls lacking a tooltip (T021)"
 - [Story] labels map every Phase 3–5 task to US1/US2/US3 for traceability
   back to spec.md.
 - Every one of T021's 8 fixes reuses an already-existing localized string —
-  no ARB/`flutter gen-l10n` step is needed for this feature.
+  no ARB/`flutter gen-l10n` step is needed for this feature. T022/T023 are
+  pure `BoxConstraints` value changes — no ARB step either.
+- SC-001's full 320–2560 logical-pixel range is not walked point-by-point
+  by any single task — T004's boundary-value tests (at every breakpoint)
+  combined with T009/T010's representative compact/expanded renders
+  jointly establish correctness across the whole range, since
+  `windowSizeClassFor` is a simple monotonic threshold classifier (spec.md
+  Assumptions; `/speckit-analyze` finding G4). This is a deliberate
+  boundary+spot-check strategy, not a gap.
 - This feature introduces no new route, no new repository method, and no
   database change — nothing here should touch `lib/core/database/`,
   `lib/core/network/`, or any `*_repository*.dart` file. If a task seems to

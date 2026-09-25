@@ -222,7 +222,12 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
 - **FR-007**: Every interactive control in the app MUST have a
   clickable/tappable area of at least 48×48 logical pixels, regardless of
   window size or input method — including on platforms where the
-  underlying UI toolkit would otherwise default to a smaller size.
+  underlying UI toolkit would otherwise default to a smaller size — except
+  a control that already carries its own explicit, documented exception
+  (e.g. a code comment recording a deliberate design decision, as already
+  exists for one control predating this feature). This feature MUST NOT
+  introduce any new undocumented sub-48×48dp control, and MUST bring any
+  *undocumented* pre-existing one up to 48×48dp.
 - **FR-008**: Every icon-only control MUST expose a short descriptive
   tooltip, visible when a pointer device is present.
 - **FR-009**: Every primary interactive control MUST be reachable via
@@ -249,11 +254,13 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
   840 logical pixels or greater, the main content column measures no more
   than 960 logical pixels wide and is horizontally centered.
 - **SC-003**: 100% of a full sweep of interactive controls (buttons, icon
-  buttons, navigation destinations) across every screen measure at least
-  48×48 logical pixels in clickable area, verified at both a compact and
-  an expanded window size.
+  buttons, navigation destinations) across every screen — excluding any
+  control with its own documented sizing exception (FR-007) — measure at
+  least 48×48 logical pixels in clickable area, verified at both a compact
+  and an expanded window size.
 - **SC-004**: A user relying solely on a keyboard can reach and activate
-  every primary action on the 5 main tabs without using a pointer.
+  each of the 5 main tabs (the navigation action itself) and at least one
+  primary in-screen action, without using a pointer.
 - **SC-005**: The existing automated test suite (386 tests as of this
   feature's start) passes in full after this feature, with no test's
   outcome changed as an unintended side effect of the layout change.
@@ -284,6 +291,13 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
 - No new user-facing setting is introduced (e.g. no manual "desktop mode"
   toggle) — the adaptive behavior is automatic and driven only by window
   size.
+- SC-001's 320–2560 logical-pixel range is verified via boundary-value
+  testing at each breakpoint threshold plus representative renders on
+  either side (not an exhaustive pixel-by-pixel sweep) — sufficient
+  because the underlying width-to-layout mapping is a simple, monotonic
+  threshold classifier: if it is correct at every boundary and renders
+  correctly at one representative point per side, it is correct across
+  the whole range between those boundaries.
 
 ## Out of Scope & Follow-Up Work
 
@@ -307,6 +321,17 @@ the problem is in the data/auth layer, not the layout. Deliberately kept
 out of this feature (per the scope decision made with the user) because it
 is a different risk class — data integrity and auth security — that
 deserves its own focused review, not one bundled into a UI-layout PR.
+
+**This is a live, currently-unresolved constitution conflict, not merely a
+"nice to have" backlog item.** The constitution's Multi-Platform Support
+section states unconditionally that a Web data flow failing "is a
+Principle I defect, not an acceptable platform gap" — that defect exists
+right now and remains open after this feature ships. Deferring it here was
+a deliberate, informed scope decision (a different risk class, reviewed
+separately), not a reason to let it go unscheduled. The follow-up below is
+not optional busywork — it is required to bring the codebase back into
+constitution compliance on Web, and should be started promptly rather than
+left indefinitely "suggested."
 
 1. **Local database does not open on Web at all.**
    `lib/core/database/app_database.dart:12` calls
