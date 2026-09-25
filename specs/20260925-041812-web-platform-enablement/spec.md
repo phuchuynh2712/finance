@@ -366,6 +366,10 @@ against the constitution's existing Security-section requirement directly.
 
 ### 2. Risk-acceptance or hardening decision on Web secure storage
 
+**Resolved** — see `secure-storage-routing-cleanup/spec.md` User Story 1
+and the constitution's Security section (v1.6.0): the risk is accepted,
+conditional on HSTS at the eventual Web host.
+
 `lib/core/storage/secure_local_storage.dart` wraps `flutter_secure_storage`
 for the Supabase session. That package's own README (checked at the
 version pinned in `pubspec.lock`) states its Web implementation is

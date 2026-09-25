@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/auth/auth_repository.dart';
@@ -11,6 +12,8 @@ import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/storage/app_preferences_storage.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
+import 'package:finance/features/account/account_routes.dart'
+    show accountPlaceholderRoute;
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/account/presentation/account_screen.dart';
 
@@ -84,12 +87,30 @@ Widget _harness(
         (ref) => LocaleNotifier(_FakeAppPreferencesStorage(), initialLocale),
       ),
     ],
-    child: MaterialApp(
+    child: MaterialApp.router(
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: AppTheme.light,
-      home: const AccountScreen(),
+      // A real GoRouter, mirroring app_router.dart's actual nested-route
+      // shape under `/account` (secure-storage-routing-cleanup Tier B) —
+      // so the 3 menu rows' context.push(...) calls resolve exactly as
+      // they do in the real app.
+      routerConfig: GoRouter(
+        initialLocation: '/account',
+        routes: [
+          GoRoute(
+            path: '/account',
+            builder: (context, state) => const AccountScreen(),
+            routes: [
+              GoRoute(
+                path: 'placeholder/:feature',
+                builder: accountPlaceholderRoute,
+              ),
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }

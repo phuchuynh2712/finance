@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260925-041812-web-platform-enablement/plan.md
+specs/20260925-051953-secure-storage-routing-cleanup/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

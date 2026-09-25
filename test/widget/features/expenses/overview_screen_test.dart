@@ -20,6 +20,8 @@ import 'package:finance/features/expense_control/domain/expense_control_reposito
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
+import 'package:finance/features/expenses/expenses_routes.dart'
+    show overviewFilteredHistoryRoute, overviewNotificationsPlaceholderRoute;
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
@@ -149,6 +151,10 @@ ExpenseControlItem _leaf(String id, {int balance = 0, String name = 'Item'}) {
   );
 }
 
+// A real GoRouter, mirroring app_router.dart's actual nested-route shape
+// under `/overview` (secure-storage-routing-cleanup Tier A) — so
+// OverviewScreen's context.push(...) calls resolve exactly as they do in
+// the real app.
 Widget _harness(
   _FakeExpenseControlRepository repository, {
   _FakeHistoryRepository? historyRepository,
@@ -164,12 +170,36 @@ Widget _harness(
         authActions ?? _FakeAccountAuthActions(),
       ),
     ],
-    child: MaterialApp(
+    child: MaterialApp.router(
       theme: AppTheme.light,
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const OverviewScreen(),
+      routerConfig: GoRouter(
+        initialLocation: '/overview',
+        routes: [
+          GoRoute(
+            path: '/overview',
+            builder: (context, state) => const OverviewScreen(),
+            routes: [
+              GoRoute(
+                path: 'history',
+                builder: (context, state) => const TransactionHistoryScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'group/:accountName',
+                    builder: overviewFilteredHistoryRoute,
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: 'notifications',
+                builder: overviewNotificationsPlaceholderRoute,
+              ),
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }
