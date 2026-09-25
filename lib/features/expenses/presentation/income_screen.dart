@@ -367,11 +367,18 @@ class _AddSourceButton extends StatelessWidget {
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
+                // Flexible (not Expanded): keeps the icon+label centered
+                // as a compact pair when it fits (the common case,
+                // unchanged); only shrinks/wraps — never truncates — at a
+                // compact window width where it doesn't
+                // (adaptive-layout-foundation).
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

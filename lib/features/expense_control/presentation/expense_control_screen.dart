@@ -55,11 +55,18 @@ class ExpenseControlScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    l10n.expenseControlScreenTitle,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                  // Expanded, not a bare Text: at a compact window width
+                  // (adaptive-layout-foundation), the title can need more
+                  // than one line — it wraps instead of overflowing or
+                  // truncating (Constitution Principle III's Vietnamese
+                  // text-length rule).
+                  Expanded(
+                    child: Text(
+                      l10n.expenseControlScreenTitle,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ],

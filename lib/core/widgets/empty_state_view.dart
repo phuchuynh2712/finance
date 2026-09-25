@@ -26,28 +26,36 @@ class EmptyStateView extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 40, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
-            ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
-              Semantics(
-                button: true,
-                label: actionSemanticsLabel ?? actionLabel,
-                child: FilledButton(
-                  onPressed: onAction,
-                  child: Text(actionLabel!),
-                ),
+        // Scrollable rather than a bare Column: at a compact window width
+        // (adaptive-layout-foundation), the message can wrap onto more
+        // lines than fit some callers' tightly-bounded-height containers
+        // (e.g. report_screen.dart's totals-error section). Scrolling
+        // keeps every line visible without truncating — the common case,
+        // where there's already enough room, looks identical.
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 40, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
               ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 16),
+                Semantics(
+                  button: true,
+                  label: actionSemanticsLabel ?? actionLabel,
+                  child: FilledButton(
+                    onPressed: onAction,
+                    child: Text(actionLabel!),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -47,7 +47,7 @@ this feature (plan.md's Structure Decision).
 **Purpose**: Confirm the true baseline this feature builds on before
 touching anything.
 
-- [ ] T001 Run `flutter pub get`, `flutter analyze`, `dart format
+- [X] T001 Run `flutter pub get`, `flutter analyze`, `dart format
   --output=none --set-exit-if-changed lib test`, and `flutter test` from
   the repository root on the current, unmodified `HEAD`. Confirm all four
   pass clean and record the exact current test count (386 as of this
@@ -67,7 +67,7 @@ own tests depend on being correct.
 **⚠️ CRITICAL**: Complete this phase before starting User Story 1 or 2.
 (User Story 3 does not depend on this phase — see its own section.)
 
-- [ ] T002 [P] Create `lib/core/theme/app_layout.dart`: a `WindowSizeClass`
+- [X] T002 [P] Create `lib/core/theme/app_layout.dart`: a `WindowSizeClass`
   enum with five values — `compact` (0dp), `medium` (600dp), `expanded`
   (840dp), `large` (1200dp), `extraLarge` (1600dp) — a pure function
   `WindowSizeClass windowSizeClassFor(double width)` that returns the class
@@ -76,7 +76,7 @@ own tests depend on being correct.
   `contentMaxWidth = 960.0` (see [data-model.md](./data-model.md)'s
   `WindowSizeClass`/`windowSizeClassFor`/`AppLayoutTokens` sections). Pure
   Dart, no Flutter import.
-- [ ] T003 [P] Create `test/flutter_test_config.dart` that sets
+- [X] T003 [P] Create `test/flutter_test_config.dart` that sets
   `TestWidgetsFlutterBinding.ensureInitialized()`'s default test surface —
   via `WidgetTester.view` inside a `testExecutable(FutureOr<void> Function()
   testMain)` top-level function per `flutter_test`'s own auto-discovery
@@ -89,7 +89,7 @@ own tests depend on being correct.
   [research.md](./research.md) Decision 4 — this was empirically confirmed
   necessary this session: `flutter_test`'s own unpinned default is 800×600
   logical pixels, already past this feature's 600dp breakpoint.
-- [ ] T004 Add `test/unit/core/theme/app_layout_test.dart`: unit tests for
+- [X] T004 Add `test/unit/core/theme/app_layout_test.dart`: unit tests for
   `windowSizeClassFor` at each boundary pair — 599.0/600.0 (compact/medium),
   839.0/840.0 (medium/expanded), 1199.0/1200.0 (expanded/large),
   1599.0/1600.0 (large/extraLarge). Depends on T002.
@@ -97,6 +97,21 @@ own tests depend on being correct.
 **Checkpoint**: `app_layout.dart` exists and is unit-tested; every test in
 this suite now runs at a known, explicit, compact-by-default width. User
 Story 1 and User Story 2 can now both start.
+
+**Addendum (found during implementation, not in the original task list)**:
+T003's pinned default (410×864 — this app's own design-reference width,
+not an arbitrary pick; see the file's doc comment) surfaced 5 real,
+pre-existing test failures unrelated to any code this feature touches —
+4 `RenderFlex` overflow bugs and 1 requirement (FR-017/SC-006) that turned
+out to be unachievable at any real phone width. Both are fixed; full
+details and the evidence behind the FR-017/SC-006 product decision are in
+spec.md's new "Implementation Notes" section. Files touched beyond the
+original T002–T004 scope: `lib/core/widgets/empty_state_view.dart`,
+`lib/features/expense_control/presentation/expense_control_screen.dart`,
+`lib/features/expenses/presentation/expense_screen.dart`,
+`lib/features/expenses/presentation/income_screen.dart`, and
+`test/widget/core/router/app_shell_nav_bar_test.dart`. Full suite: 396/396
+passing (386 baseline + 10 new from T004).
 
 ---
 

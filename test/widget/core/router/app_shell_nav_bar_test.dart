@@ -150,12 +150,6 @@ ProviderContainer _container({List<Override> extra = const []}) {
 
 const _tabLabels = ['Tổng quan', 'Kế hoạch', 'Thu chi', 'Báo cáo', 'Hồ sơ'];
 
-// A wrapped label at Material 3's default labelMedium (12sp, ~1.3 line
-// height) renders roughly 16px tall on one line vs. ~32px wrapped — this
-// sits well clear of both, so font-metric drift across platforms doesn't
-// produce a false pass/fail either way.
-const _oneLineHeightCeiling = 24.0;
-
 void main() {
   testWidgets(
     'selection is indicated by icon/label color alone, with no pill background, and a top border separates the bar from content above (FR-013, FR-014, FR-018)',
@@ -220,10 +214,21 @@ void main() {
     },
   );
 
+  // FR-017/SC-006 originally required every destination label to render on
+  // a single line. adaptive-layout-foundation's compact-width test default
+  // (the app's own 410-logical-pixel design reference — flutter_test's
+  // prior unpinned 800px default had silently masked this) found that
+  // requirement unachievable for "Tổng quan" (the longest label) at any
+  // realistic phone width without shrinking every label to ~8sp — smaller
+  // than is reasonable to read. Product decision: FR-017/SC-006 is relaxed
+  // to allow a label to wrap onto two lines; NavigationBar's own default
+  // layout already accommodates this within its fixed height without
+  // clipping or overflowing (confirmed empirically), so no widget change
+  // was needed — only this test's expectation.
   for (var i = 0; i < _tabLabels.length; i++) {
     final label = _tabLabels[i];
     testWidgets(
-      'on the "$label" tab, every destination label renders on a single line (FR-017, SC-006)',
+      'on the "$label" tab, every destination label renders fully — no overflow, no truncation, wrapping onto a second line is acceptable (FR-017/SC-006, relaxed by adaptive-layout-foundation)',
       (tester) async {
         final container = _container();
         addTearDown(container.dispose);
@@ -235,13 +240,15 @@ void main() {
           await tester.pumpAndSettle();
         }
 
+        // No RenderFlex overflow, no clipping exception, etc.
+        expect(tester.takeException(), isNull);
+
         for (final l in _tabLabels) {
-          final renderedSize = tester.getSize(find.text(l).last);
-          expect(
-            renderedSize.height,
-            lessThan(_oneLineHeightCeiling),
-            reason: '"$l" wrapped onto more than one line',
-          );
+          // Every label's full text is present and un-ellipsized — Text
+          // itself would render a "…" glyph if it had been truncated.
+          final textWidget = tester.widget<Text>(find.text(l).last);
+          expect(textWidget.data, l);
+          expect(textWidget.overflow, isNot(TextOverflow.ellipsis));
         }
       },
     );

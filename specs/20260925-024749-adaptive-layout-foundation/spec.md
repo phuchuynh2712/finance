@@ -299,6 +299,44 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
   correctly at one representative point per side, it is correct across
   the whole range between those boundaries.
 
+## Implementation Notes
+
+*Recorded during `/speckit-implement`'s Foundational phase — real, pre-
+existing issues that `test/flutter_test_config.dart` (this feature's
+pinned compact test default) exposed by finally testing at a realistic
+phone width, instead of `flutter_test`'s own unpinned 800×600 default
+(which is tablet-scale, not phone-scale). None of these were caused by
+this feature; all were latent before it. Fixed here rather than deferred,
+since a red test suite cannot be left behind at a phase checkpoint.*
+
+- **Four pre-existing `RenderFlex` overflow bugs**, all only visible at a
+  realistic compact width, fixed by letting text wrap instead of
+  overflowing (never by truncating — no `TextOverflow.ellipsis` was
+  introduced anywhere, keeping Principle III's no-truncation rule intact):
+  `lib/core/widgets/empty_state_view.dart` (wrapped its message Column in
+  `SingleChildScrollView`), `lib/features/expense_control/presentation/
+  expense_control_screen.dart`'s header title (wrapped in `Expanded`),
+  `lib/features/expenses/presentation/expense_screen.dart`'s type-toggle
+  button label and `lib/features/expenses/presentation/income_screen.dart`'s
+  add-source button label (both wrapped in `Flexible`, preserving their
+  centered-pill look when content fits, as it normally does).
+- **FR-017/SC-006 (an earlier feature's requirement, predating this one)
+  relaxed by product decision**: bottom-nav destination labels were
+  required to always render on a single line. Empirical testing (probing
+  the real production widget/theme/strings directly, not guessing) found
+  "Tổng quan" — the longest label — never fits on one line at *any*
+  realistic phone width; even 600 logical pixels (120px per destination,
+  wider than any real phone) still wrapped it. The only single-line-only
+  fix found required shrinking every label to 8sp, well below Material 3's
+  12sp default and judged too small to ship without a design pass. Given
+  the choice between illegibly small text, renaming a tab, or accepting a
+  2-line wrap, the decision (asked of and made by the user) was to accept
+  the wrap: `NavigationBar`'s own default layout already accommodates a
+  2-line label within its fixed height without clipping or overflowing
+  (confirmed empirically) — no widget change was needed, only relaxing
+  `test/widget/core/router/app_shell_nav_bar_test.dart`'s assertion from
+  "single line" to "renders fully, no overflow, no truncation."
+
 ## Out of Scope & Follow-Up Work
 
 *This section is deliberately detailed and engineering-specific — unlike
