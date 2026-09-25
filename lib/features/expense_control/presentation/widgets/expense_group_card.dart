@@ -140,6 +140,7 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                   label: l10n.expenseControlEditSemantic(item.name),
                   child: IconButton(
                     onPressed: () => widget.onEditItem(item),
+                    tooltip: l10n.expenseControlEditSemantic(item.name),
                     icon: Icon(
                       LucideIcons.pencil,
                       size: 15,
@@ -158,6 +159,7 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                     onPressed: () => isGroup
                         ? widget.onDeleteGroup(item)
                         : widget.onDeleteLeaf(item),
+                    tooltip: l10n.expenseControlDeleteSemantic(item.name),
                     icon: Icon(
                       LucideIcons.trash2,
                       size: 16,

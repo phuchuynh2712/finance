@@ -510,7 +510,9 @@ class _AppearanceChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
         child: Container(
-          constraints: const BoxConstraints(minHeight: 28),
+          // /speckit-analyze finding G1: was minHeight: 28 only, below the
+          // constitution's >=48x48dp minimum.
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           alignment: Alignment.center,
           child: Text(

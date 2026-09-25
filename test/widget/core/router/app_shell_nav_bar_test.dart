@@ -20,6 +20,7 @@ import 'package:finance/features/expense_control/domain/transaction_history_reco
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
+import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/report_providers.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -150,12 +151,6 @@ ProviderContainer _container({List<Override> extra = const []}) {
 
 const _tabLabels = ['Tổng quan', 'Kế hoạch', 'Thu chi', 'Báo cáo', 'Hồ sơ'];
 
-// A wrapped label at Material 3's default labelMedium (12sp, ~1.3 line
-// height) renders roughly 16px tall on one line vs. ~32px wrapped — this
-// sits well clear of both, so font-metric drift across platforms doesn't
-// produce a false pass/fail either way.
-const _oneLineHeightCeiling = 24.0;
-
 void main() {
   testWidgets(
     'selection is indicated by icon/label color alone, with no pill background, and a top border separates the bar from content above (FR-013, FR-014, FR-018)',
@@ -220,10 +215,21 @@ void main() {
     },
   );
 
+  // FR-017/SC-006 originally required every destination label to render on
+  // a single line. adaptive-layout-foundation's compact-width test default
+  // (the app's own 410-logical-pixel design reference — flutter_test's
+  // prior unpinned 800px default had silently masked this) found that
+  // requirement unachievable for "Tổng quan" (the longest label) at any
+  // realistic phone width without shrinking every label to ~8sp — smaller
+  // than is reasonable to read. Product decision: FR-017/SC-006 is relaxed
+  // to allow a label to wrap onto two lines; NavigationBar's own default
+  // layout already accommodates this within its fixed height without
+  // clipping or overflowing (confirmed empirically), so no widget change
+  // was needed — only this test's expectation.
   for (var i = 0; i < _tabLabels.length; i++) {
     final label = _tabLabels[i];
     testWidgets(
-      'on the "$label" tab, every destination label renders on a single line (FR-017, SC-006)',
+      'on the "$label" tab, every destination label renders fully — no overflow, no truncation, wrapping onto a second line is acceptable (FR-017/SC-006, relaxed by adaptive-layout-foundation)',
       (tester) async {
         final container = _container();
         addTearDown(container.dispose);
@@ -235,13 +241,15 @@ void main() {
           await tester.pumpAndSettle();
         }
 
+        // No RenderFlex overflow, no clipping exception, etc.
+        expect(tester.takeException(), isNull);
+
         for (final l in _tabLabels) {
-          final renderedSize = tester.getSize(find.text(l).last);
-          expect(
-            renderedSize.height,
-            lessThan(_oneLineHeightCeiling),
-            reason: '"$l" wrapped onto more than one line',
-          );
+          // Every label's full text is present and un-ellipsized — Text
+          // itself would render a "…" glyph if it had been truncated.
+          final textWidget = tester.widget<Text>(find.text(l).last);
+          expect(textWidget.data, l);
+          expect(textWidget.overflow, isNot(TextOverflow.ellipsis));
         }
       },
     );
@@ -288,6 +296,104 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(selectedReportMonthProvider), pastMonth);
+    },
+  );
+
+  // --- adaptive-layout-foundation (User Story 1) ---
+
+  testWidgets(
+    'at a compact window width, navigation is still a bottom NavigationBar, not a rail (regression)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      // The pinned compact default from flutter_test_config.dart already
+      // applies; set it explicitly anyway so this test's intent reads
+      // clearly on its own.
+      tester.view.physicalSize = const Size(410, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(NavigationRail), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'at an expanded window width (>=600dp), navigation is a rail with every destination'
+    " icon+label always visible, at the correct selected index (Clarification Q1, FR-001)",
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(900, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationBar), findsNothing);
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(rail.selectedIndex, 0);
+      expect(rail.labelType, NavigationRailLabelType.all);
+      for (final label in _tabLabels) {
+        expect(find.text(label), findsOneWidget);
+      }
+
+      await tester.tap(find.text('Hồ sơ').last);
+      await tester.pumpAndSettle();
+      final railAfterTap = tester.widget<NavigationRail>(
+        find.byType(NavigationRail),
+      );
+      expect(railAfterTap.selectedIndex, _tabLabels.indexOf('Hồ sơ'));
+    },
+  );
+
+  testWidgets(
+    'the currently-viewed screen is reparented, not disposed and recreated,'
+    ' when the window crosses the compact/expanded breakpoint'
+    ' (Clarification Q2, research.md Decision 2)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(410, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      final elementBefore = tester.element(find.byType(OverviewScreen));
+
+      // Cross the 600dp threshold in the other direction.
+      tester.view.physicalSize = const Size(900, 864);
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationRail), findsOneWidget);
+
+      final elementAfter = tester.element(find.byType(OverviewScreen));
+      expect(
+        identical(elementBefore, elementAfter),
+        isTrue,
+        reason:
+            'OverviewScreen was disposed and recreated across the '
+            'breakpoint crossing instead of being reparented — this is '
+            'exactly what the GlobalKey on navigationShell exists to '
+            'prevent, since a fresh Element means any local widget state '
+            "(scroll position, an in-progress text field) would have "
+            'been lost too.',
+      );
     },
   );
 }

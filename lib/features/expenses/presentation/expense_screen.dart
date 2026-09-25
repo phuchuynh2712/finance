@@ -82,9 +82,14 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: Semantics(
+          button: true,
+          label: l10n.signUpBackSemantic,
+          child: IconButton(
+            icon: const Icon(LucideIcons.chevronLeft),
+            tooltip: l10n.signUpBackSemantic,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         title: Row(
           children: [
@@ -193,11 +198,19 @@ class _TabButton extends StatelessWidget {
                 color: selected ? theme.colorScheme.onPrimary : semantic.fg2,
               ),
               const SizedBox(width: 7),
-              Text(
-                label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: selected ? theme.colorScheme.onPrimary : semantic.fg2,
+              // Flexible (not Expanded): keeps the icon+label centered as
+              // a compact pair when it fits (the common case, unchanged);
+              // only shrinks/wraps — never truncates — at a compact
+              // window width where it doesn't (adaptive-layout-foundation).
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: selected
+                        ? theme.colorScheme.onPrimary
+                        : semantic.fg2,
+                  ),
                 ),
               ),
             ],

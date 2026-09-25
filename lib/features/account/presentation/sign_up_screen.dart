@@ -165,16 +165,25 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       obscureText: _obscurePassword,
                       errorText: _passwordFieldError,
                       semantic: semantic,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? LucideIcons.eye
-                              : LucideIcons.eyeOff,
-                          size: 17,
-                          color: semantic.fg3,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
+                      suffixIcon: Semantics(
+                        button: true,
+                        label: _obscurePassword
+                            ? l10n.signInShowPasswordSemantic
+                            : l10n.signInHidePasswordSemantic,
+                        child: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? LucideIcons.eye
+                                : LucideIcons.eyeOff,
+                            size: 17,
+                            color: semantic.fg3,
+                          ),
+                          tooltip: _obscurePassword
+                              ? l10n.signInShowPasswordSemantic
+                              : l10n.signInHidePasswordSemantic,
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                     ),

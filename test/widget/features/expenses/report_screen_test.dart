@@ -420,4 +420,43 @@ void main() {
       },
     );
   });
+
+  group('adaptive content width (adaptive-layout-foundation)', () {
+    testWidgets(
+      'below 840dp, content fills the available width unchanged (FR-006)',
+      (tester) async {
+        tester.view.physicalSize = const Size(410, 864);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(_harness());
+        await tester.pumpAndSettle();
+
+        expect(tester.getSize(find.byType(ListView)).width, 410);
+      },
+    );
+
+    testWidgets(
+      'at 1200dp, content is capped at 960dp and centered (FR-005, SC-002)',
+      (tester) async {
+        tester.view.physicalSize = const Size(1200, 864);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(_harness());
+        await tester.pumpAndSettle();
+
+        final size = tester.getSize(find.byType(ListView));
+        final topLeft = tester.getTopLeft(find.byType(ListView));
+        expect(size.width, 960);
+        expect(topLeft.dx, (1200 - 960) / 2);
+      },
+    );
+  });
 }

@@ -196,4 +196,30 @@ void main() {
       expect(semantic.dangerFg.toARGB32(), 0xFFF0B3A8);
     });
   });
+
+  group(
+    'tap target overridden for desktop platforms (adaptive-layout-foundation FR-007)',
+    () {
+      // Flutter's own ThemeData defaults to VisualDensity.compact and
+      // MaterialTapTargetSize.shrinkWrap on linux/macOS/windows (a desktop
+      // Web build's defaultTargetPlatform included) — both explicitly
+      // overridden here so every tap target stays >=48x48dp regardless of
+      // platform (research.md Decision 6).
+      test('AppTheme.light', () {
+        expect(AppTheme.light.visualDensity, VisualDensity.standard);
+        expect(
+          AppTheme.light.materialTapTargetSize,
+          MaterialTapTargetSize.padded,
+        );
+      });
+
+      test('AppTheme.dark', () {
+        expect(AppTheme.dark.visualDensity, VisualDensity.standard);
+        expect(
+          AppTheme.dark.materialTapTargetSize,
+          MaterialTapTargetSize.padded,
+        );
+      });
+    },
+  );
 }

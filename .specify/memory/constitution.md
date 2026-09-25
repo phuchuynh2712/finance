@@ -1,29 +1,49 @@
 <!--
 Sync Impact Report
-Version change: 1.3.0 → 1.4.0 (MINOR: added Security section — new section, no
-  principle redefined or removed)
-Modified principles: none
+Version change: 1.4.0 → 1.5.0 (MINOR: new "Multi-Platform Support" section +
+  materially expanded Principle III guidance; no principle redefined or removed)
+Modified principles:
+  - III. User Experience Consistency → III. User Experience Consistency &
+    Adaptive Design: added a window-size-driven adaptive layout mandate
+    (Material window size class breakpoints, bottom-bar→rail navigation switch,
+    content max-width on wide windows, ≥48×48dp touch target enforced even on
+    desktop's default compact density, hover/tooltip/keyboard support once a
+    screen is reachable off a touch-only platform); rationale extended to cover
+    cross-platform trust, not only cross-screen trust
+  - II. Testing Standards → added a pinned default test-viewport requirement and
+    compact/expanded breakpoint coverage for screens with adaptive layout
+  - IV. Performance Requirements → clarified that budgets apply per supported
+    platform (incl. Web/Desktop) against that platform's own realistic baseline,
+    not silently relaxed for a newly added platform
 Added sections:
-  - Security: Supabase RLS mandatory per table, secure storage for secrets/tokens,
-    TLS/pinning, logging discipline (no raw financial data/tokens in logs), local DB
-    encryption at rest + app-level lock, dependency hygiene review
+  - Multi-Platform Support: Web promoted to a fully supported target (not a
+    stretch goal); Desktop (Windows/macOS/Linux) declared optional/deferred but
+    architecturally unblocked; Drift-on-Web (`DriftWebOptions`) mandate;
+    capability-detection-over-platform-assumption rule; platform-isolation for
+    auth/storage integration points; Web app-identity (title/manifest/URL
+    strategy) requirement
 Modified sections:
-  - Recommended Architecture (Large Flutter Projects) → explicitly named the pattern
-    "Clean Architecture layering combined with feature-first modules" (was described
-    without a name); trimmed a duplicated closing rationale sentence
-  - Development Workflow → fixed a mis-attributed reference (breaking core/ utility
-    changes cited only Principle III; DI/database/sync changes now correctly point to
-    the Recommended Architecture / Offline-First sections instead)
+  - Recommended Architecture → `theme/` bullet now explicitly includes adaptive
+    layout/window-size tokens, not just color/typography/spacing
+  - Security → app-level lock bullet now explicitly requires the PIN fallback on
+    any platform lacking biometric hardware/APIs (e.g. Web), cross-referencing
+    Multi-Platform Support
+  - Development Workflow → breaking-change call-out bullet now also names
+    breakpoint changes and platform-capability-detection changes
 Removed sections: none
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ compatible (Constitution Check gate can
-    reference Security section per-feature; no edits needed)
+  - .specify/templates/plan-template.md: ✅ compatible (Target Platform and
+    Constitution Check are already filled per-feature from this file; no
+    template edit needed)
   - .specify/templates/spec-template.md: ✅ compatible (no constitution-specific
     references)
-  - .specify/templates/tasks-template.md: ✅ compatible (Security hardening already
-    listed as a Polish-phase task category)
+  - .specify/templates/tasks-template.md: ✅ compatible (Path Conventions already
+    platform-generic)
   - .specify/templates/commands/*.md: not present in this project
-Follow-up TODOs: none
+Follow-up TODOs:
+  - README.md's tech-stack/setup section still reads mobile-first (Android
+    Studio/Xcode only); worth a follow-up doc pass once the first Web-targeting
+    feature lands, not required to unblock this amendment
 -->
 
 # Finance App Constitution
@@ -63,14 +83,19 @@ behavior they cover — no "add tests later" follow-ups for financial logic.
 A failing test suite MUST block merge; flaky tests MUST be fixed or
 quarantined with a tracked issue, never silently ignored. Golden/screenshot
 tests SHOULD be used for widgets where pixel-level regressions matter
-(charts, balance summaries).
+(charts, balance summaries). The test suite MUST pin an explicit default
+test viewport (rather than relying on the test framework's default size) so
+existing tests do not silently change meaning as adaptive breakpoints are
+introduced; any screen with breakpoint-dependent layout MUST have widget or
+golden coverage at both a compact (<600dp) and an expanded (≥840dp) width,
+per Principle III.
 
 **Rationale**: Correctness of money math is non-negotiable — an unnoticed
 rounding or sign error erodes user trust immediately. High coverage in the
 domain layer is achievable precisely because Principle I keeps that logic
 separate from Flutter widgets.
 
-### III. User Experience Consistency
+### III. User Experience Consistency & Adaptive Design
 The app MUST implement a single, centralized design system (shared
 `ThemeData`, spacing/typography/color tokens, and a common widget library)
 that all screens consume — no screen may hardcode colors, font sizes, or
@@ -84,6 +109,35 @@ target size (≥48x48dp), and MUST be reachable via screen readers
 (Semantics labels on custom widgets). Financial figures MUST always be
 formatted consistently (locale-aware currency, sign, and decimal rules) via
 a single shared formatting utility — never ad hoc string interpolation.
+
+**Adaptive Layout**: Layout decisions MUST be driven by the available window
+size, never by device or platform type — `Platform.is*`, `kIsWeb`, and
+`defaultTargetPlatform` MUST NOT be used to choose a screen's layout (they
+MAY still be used for genuine platform-capability checks, e.g. whether
+biometric hardware exists — see Multi-Platform Support). The app MUST use
+Material's window size classes as its single reference breakpoint scale —
+compact (<600dp), medium (600–839dp), expanded (840–1199dp), large
+(1200–1599dp), extra-large (≥1600dp) — defined once as shared tokens in
+`core/theme/` and consumed via `MediaQuery.sizeOf`/`LayoutBuilder`, never
+re-derived ad hoc per screen. Primary navigation MUST switch from a bottom
+navigation bar below 600dp to a navigation rail at 600dp and above; a
+navigation drawer MUST NOT be used. Content MUST NOT stretch unbounded at
+wide window sizes — screens MUST cap content width at a shared max-width
+token and center it, rather than letting a single-column mobile layout
+stretch edge-to-edge on a tablet, desktop, or web window. The ≥48×48dp touch
+target minimum above applies on every platform and window size, including
+desktop and web; Flutter's default desktop `VisualDensity`/
+`MaterialTapTargetSize` (which shrink the effective target size) MUST be
+overridden in the shared theme rather than accepted. On any platform where a
+mouse and keyboard are available (web, desktop, or a touch platform with one
+attached), screens MUST also support hover feedback, tooltips on icon-only
+controls, a visible keyboard focus order, and keyboard activation of primary
+actions — touch MUST NOT be assumed as the only input method once a screen
+is reachable outside a touch-only platform. Third-party responsive-layout
+packages MUST NOT be added without a documented maintenance-status review
+per the Security section's dependency-hygiene rule; Flutter's own
+`MediaQuery`/`LayoutBuilder` and the shared breakpoint tokens above are the
+default and are normally sufficient on their own.
 
 **Localization**: Vietnamese (`vi`) is the primary language and MUST be the
 default locale; English (`en`) MUST be fully supported as a secondary
@@ -106,6 +160,11 @@ entire class of "why do these two screens show different totals" bugs.
 Vietnamese-first localization reflects the primary user base; treating `en`
 as a true second-class-supported (not merely present) language keeps the
 app usable for a broader audience without fragmenting the design system.
+The same trust argument extends across window sizes and platforms: a user
+who checks a balance on a phone and again in a browser tab must see the
+same numbers in a layout that reads as deliberately designed for that
+window, not a mobile screen stretched thin or a desktop screen cramped into
+a phone-shaped column.
 
 ### IV. Performance Requirements
 The app MUST sustain 60fps (16ms/frame budget) on supported mid-tier
@@ -122,6 +181,11 @@ MUST only rebuild in response to state they actually depend on (scoped
 selectors/`Consumer` boundaries), not whole-tree rebuilds on unrelated state
 changes. Persisted local data access (Drift/SQLite) MUST be indexed for the
 query patterns the app actually uses, and MUST NOT run on the UI thread.
+These budgets apply on every supported platform — including Web and Desktop
+once targeted — measured against that platform's own realistic baseline (a
+mid-tier mobile device, an evergreen desktop browser); a platform MUST NOT
+silently ship with a materially worse budget just because it was added
+later.
 
 **Rationale**: A finance app is opened frequently for quick balance checks;
 perceived slowness or jank directly damages the "is my money safe here"
@@ -155,7 +219,9 @@ rather than once globally across the whole app:
   two or more features; single-feature code stays inside that feature's own
   directory. `core/` MUST NOT contain feature-specific business logic —
   only shared infrastructure and framework-agnostic utilities:
-  - `theme/` — `ThemeData`, color tokens, typography, spacing constants
+  - `theme/` — `ThemeData`, color tokens, typography, spacing constants, and
+    adaptive layout tokens (window-size-class breakpoints, content
+    max-widths — Principle III)
   - `l10n/` — ARB source files (`app_vi.arb` primary, `app_en.arb`
     secondary) and generated `AppLocalizations`; features MUST consume
     strings only through the generated class, never feature-local string
@@ -275,6 +341,55 @@ is a visible row in a queue, not a silent failure) and keeps the UI
 responsive offline, which Principle IV requires regardless of network
 state.
 
+## Multi-Platform Support
+
+The app's supported platform set is **Android, iOS, and Web**; native
+**Desktop** (Windows/macOS/Linux) MAY be added later without an architecture
+change, per the window-size-driven adaptive design rules in Principle III:
+
+- **Web is a fully supported target, not a stretch goal**: a screen or data
+  flow that fails on Web (blank data, an unhandled exception, a broken auth
+  redirect) is a Principle I defect, not an acceptable platform gap. Every
+  new feature's plan MUST state whether it was verified on Web alongside
+  mobile.
+- **Local database on Web**: Drift MUST be opened with `DriftWebOptions`
+  supplying a same-origin `sqlite3.wasm` and `drift_worker.js` (served with
+  the `application/wasm` content type), per the Offline-First Data & Sync
+  section's local-database mandate — Web is not exempt from "local DB as
+  source of truth" just because it lacks a native filesystem.
+- **Capability detection over platform assumption**: where a platform
+  genuinely lacks a capability another platform has (e.g. no biometric
+  hardware/API on Web), the app MUST detect that capability at runtime and
+  fall back to another still-secure option already required elsewhere in
+  this constitution (e.g. the PIN fallback required by the Security
+  section's app-level-lock rule) — it MUST NOT silently drop the
+  requirement for that platform.
+- **Platform-specific integration points** (OAuth/password-reset redirect
+  URLs, deep-link schemes, secure-storage backends) MUST be resolved behind
+  the `core/auth/` and `core/storage/` abstractions per the Recommended
+  Architecture section's platform-isolation rule — never hardcoded to a
+  single platform's scheme or URL.
+- **Desktop native builds are opt-in, deferred scope**: adding a Windows/
+  macOS/Linux target (platform folders, packaging, code signing) is not
+  required until a feature plan explicitly scopes it; until then, the Web
+  build installed as a PWA is an acceptable desktop-usage path. When a
+  native desktop target is added, its window MUST enforce a minimum size
+  consistent with the compact breakpoint (Principle III) so the app never
+  renders below its smallest supported layout.
+- **App identity on Web** MUST reflect the shipped product, not framework
+  scaffolding defaults: page title, `manifest.json` name/icons/theme color,
+  and the URL strategy (path-based, no `#`) MUST match the app the user
+  actually sees on other platforms.
+
+**Rationale**: An audit behind this amendment found the local database
+silently failed to open on Web at all (`driftDatabase` was called without
+the `web:` parameter Drift requires there), which would make any "Web
+support" claim false until fixed — this section exists so a platform is
+never declared supported by intent alone, only by a verifiable checklist.
+Keeping layout decisions window-size-driven (Principle III) rather than
+platform-driven is what lets Desktop be added later as a packaging exercise
+rather than a rewrite.
+
 ## Security
 
 Financial and personal data require security to be a first-class,
@@ -299,7 +414,11 @@ non-optional concern, not an afterthought bolted on before release:
   at rest (e.g. via SQLCipher-backed Drift) on platforms where the OS does
   not already provide full-disk encryption guarantees equivalent to it, and
   the app MUST support an app-level lock (biometric/PIN) gating access to
-  financial data after launch or resume from background.
+  financial data after launch or resume from background. On a platform
+  where biometric hardware/APIs are unavailable (e.g. Web), the PIN path
+  MUST still be offered — the app MUST NOT leave that platform with no
+  app-level lock at all (Multi-Platform Support's capability-detection
+  rule).
 - **Dependency hygiene**: third-party packages MUST be reviewed before
   addition (maintenance status, license, permissions requested) and kept
   up to date; `flutter pub outdated` MUST be checked as part of routine
@@ -321,10 +440,12 @@ once features assume an insecure default.
 - Every PR touching financial calculation logic MUST include or update unit
   tests demonstrating the specific scenario changed, per Principle II.
 - Breaking changes to shared `core/` utilities REQUIRE explicit call-out in
-  the PR description, since they affect every feature: theming/formatting
-  changes per Principle III (User Experience Consistency), DI/database/sync
-  changes per the Recommended Architecture and Offline-First Data & Sync
-  sections.
+  the PR description, since they affect every feature: theming/formatting/
+  breakpoint changes per Principle III (User Experience Consistency &
+  Adaptive Design), DI/database/sync changes per the Recommended
+  Architecture and Offline-First Data & Sync sections, and any change to
+  platform-capability detection or integration points per Multi-Platform
+  Support.
 
 ## Governance
 
@@ -344,4 +465,4 @@ for backward-incompatible governance/principle removals or redefinitions,
 MINOR for new principles or materially expanded guidance, PATCH for wording
 clarifications and non-semantic refinements.
 
-**Version**: 1.4.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-07-24
+**Version**: 1.5.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-25

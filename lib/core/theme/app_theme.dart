@@ -36,6 +36,14 @@ class AppTheme {
   static final light = ThemeData(
     useMaterial3: true,
     fontFamily: 'Lexend',
+    // Explicit, not left to Flutter's per-platform default: on
+    // linux/macOS/windows (a desktop browser's Web build included),
+    // ThemeData would otherwise default to VisualDensity.compact and
+    // MaterialTapTargetSize.shrinkWrap, silently shrinking every tap
+    // target below the app's own >=48x48dp minimum
+    // (adaptive-layout-foundation FR-007, research.md Decision 6).
+    visualDensity: VisualDensity.standard,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
     // Unset, ColorScheme.light's ~30 other slots (scaffold background,
     // surfaceContainer*, etc.) fall back to Flutter's default Material You
     // purple-gray seed instead of the brand palette — visible as unwanted
@@ -67,6 +75,9 @@ class AppTheme {
   static final dark = ThemeData(
     useMaterial3: true,
     fontFamily: 'Lexend',
+    // See AppTheme.light's matching fields for why these are explicit.
+    visualDensity: VisualDensity.standard,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
     scaffoldBackgroundColor: AppColors.darkBgApp,
     colorScheme: _darkColorScheme,
     navigationBarTheme: NavigationBarThemeData(

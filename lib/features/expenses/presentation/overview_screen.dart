@@ -8,6 +8,7 @@ import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_colors.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
@@ -37,37 +38,39 @@ class OverviewScreen extends ConsumerWidget {
           children: [
             const _Header(),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                children: [
-                  summaryAsync.when(
-                    loading: () => const _SummaryLoading(),
-                    error: (error, stackTrace) => _SummaryError(
-                      message: l10n.overviewLoadError,
-                      retryLabel: l10n.overviewRetry,
-                      // Invalidates the root stream-wrapping provider, not
-                      // the derived overviewSummaryProvider — the failure
-                      // happened at the source (repository.watchAll()'s
-                      // stream), and only re-invoking that source triggers a
-                      // fresh attempt.
-                      onRetry: () =>
-                          ref.invalidate(expenseControlItemsStreamProvider),
+              child: AdaptiveBody(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                  children: [
+                    summaryAsync.when(
+                      loading: () => const _SummaryLoading(),
+                      error: (error, stackTrace) => _SummaryError(
+                        message: l10n.overviewLoadError,
+                        retryLabel: l10n.overviewRetry,
+                        // Invalidates the root stream-wrapping provider, not
+                        // the derived overviewSummaryProvider — the failure
+                        // happened at the source (repository.watchAll()'s
+                        // stream), and only re-invoking that source triggers
+                        // a fresh attempt.
+                        onRetry: () =>
+                            ref.invalidate(expenseControlItemsStreamProvider),
+                      ),
+                      data: (summary) => _SummaryBlock(summary: summary),
                     ),
-                    data: (summary) => _SummaryBlock(summary: summary),
-                  ),
-                  const SizedBox(height: 22),
-                  recentAsync.when(
-                    loading: () => const _SummaryLoading(),
-                    error: (error, stackTrace) => _SummaryError(
-                      message: l10n.overviewLoadError,
-                      retryLabel: l10n.overviewRetry,
-                      onRetry: () =>
-                          ref.invalidate(overviewRecentTransactionsProvider),
+                    const SizedBox(height: 22),
+                    recentAsync.when(
+                      loading: () => const _SummaryLoading(),
+                      error: (error, stackTrace) => _SummaryError(
+                        message: l10n.overviewLoadError,
+                        retryLabel: l10n.overviewRetry,
+                        onRetry: () =>
+                            ref.invalidate(overviewRecentTransactionsProvider),
+                      ),
+                      data: (records) =>
+                          _RecentTransactionsSection(records: records),
                     ),
-                    data: (records) =>
-                        _RecentTransactionsSection(records: records),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

@@ -415,4 +415,49 @@ void main() {
       }
     },
   );
+
+  // --- adaptive-layout-foundation (User Story 1, T008/T012) ---
+
+  testWidgets(
+    'at an expanded window width, the same discard prompt fires from the'
+    ' NavigationRail as from the bottom bar, and "Lưu" behaves identically'
+    ' (FR-004, Acceptance Scenario 3)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(900, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await _arriveOnExpenseControl(
+        tester,
+        repository: repository,
+        container: container,
+      );
+      // Confirm the trigger really is the rail, not the bar.
+      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+
+      await tester.tap(find.text('Tổng quan').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Lưu thay đổi?'), findsOneWidget);
+
+      await tester.tap(find.text('Lưu'));
+      await tester.pumpAndSettle();
+
+      expect(repository._items.single.allocationValue, 50);
+      expect(repository.savedFormulaBatches, hasLength(1));
+      expect(container.read(pendingItemEditsProvider), isEmpty);
+      expect(
+        tester
+            .widget<NavigationRail>(find.byType(NavigationRail))
+            .selectedIndex,
+        0,
+      );
+    },
+  );
 }

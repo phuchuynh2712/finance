@@ -82,6 +82,7 @@ class ExpenseItemRow extends StatelessWidget {
                   label: l10n.expenseControlEditSemantic(item.name),
                   child: IconButton(
                     onPressed: onEdit,
+                    tooltip: l10n.expenseControlEditSemantic(item.name),
                     icon: Icon(
                       LucideIcons.pencil,
                       size: 14,
@@ -99,6 +100,7 @@ class ExpenseItemRow extends StatelessWidget {
                   label: l10n.expenseControlDeleteSemantic(item.name),
                   child: IconButton(
                     onPressed: onDelete,
+                    tooltip: l10n.expenseControlDeleteSemantic(item.name),
                     icon: Icon(
                       LucideIcons.trash2,
                       size: 15,
