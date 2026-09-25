@@ -9,7 +9,20 @@ part 'app_database.g.dart';
 
 @DriftDatabase(tables: [ExpenseControlItems, FinancialTransactions, SyncOutbox])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(driftDatabase(name: 'finance'));
+  // `web:` is required on Web — drift_flutter throws ArgumentError without
+  // it there (Multi-Platform Support section). Both assets are same-origin
+  // under web/, per the constitution's local-database mandate; ignored on
+  // native platforms.
+  AppDatabase()
+    : super(
+        driftDatabase(
+          name: 'finance',
+          web: DriftWebOptions(
+            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+            driftWorker: Uri.parse('drift_worker.js'),
+          ),
+        ),
+      );
 
   /// For tests only — accepts an in-memory or otherwise custom executor
   /// instead of the real on-device file, e.g. `NativeDatabase.memory()`.

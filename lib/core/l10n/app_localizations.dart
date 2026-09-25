@@ -1076,6 +1076,18 @@ abstract class AppLocalizations {
   /// **'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.'**
   String get startupConfigurationMessage;
 
+  /// No description provided for @startupWebStorageTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở dữ liệu cục bộ'**
+  String get startupWebStorageTitle;
+
+  /// No description provided for @startupWebStorageMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình duyệt đang chặn lưu trữ cục bộ mà ứng dụng cần để chạy. Vui lòng kiểm tra cài đặt quyền riêng tư của trình duyệt rồi tải lại trang.'**
+  String get startupWebStorageMessage;
+
   /// No description provided for @overviewTotalBalanceLabel.
   ///
   /// In vi, this message translates to:
