@@ -41,9 +41,14 @@ always `false`) can exercise both branches directly (research.md Decision
 real constants (`AppEnvironment.webPasswordResetRedirectUrl` and the
 existing `'com.finance.finance://reset-callback'` literal).
 
-## `_StartupFailureReason` (new, private, `lib/main.dart`)
+## `StartupFailureReason` (new, `lib/main.dart`)
 
-A small enum distinguishing which localized copy `_StartupErrorApp` shows,
+*Implementation note: made public (no leading underscore), unlike the
+rest of `main.dart`'s widgets — a widget test needs to construct
+`StartupErrorApp` directly with each reason, which is impossible for a
+private identifier from a separate test-file library.*
+
+A small enum distinguishing which localized copy `StartupErrorApp` shows,
 so the widget's existing structure (icon + title + centered message) is
 reused without reusing its Supabase-specific wording for a different
 failure (research.md Decision 9):
@@ -53,7 +58,7 @@ failure (research.md Decision 9):
 | `supabaseConfig` (existing behavior, renamed from today's only case) | `startupConfigurationTitle` (existing, unchanged) | `startupConfigurationMessage` (existing, unchanged) | `initSupabase()` throwing |
 | `webStorage` (new) | `startupWebStorageTitle` (new ARB key, vi+en) | `startupWebStorageMessage` (new ARB key, vi+en) | The `kIsWeb`-only database warm-up query (FR-014) throwing |
 
-`_StartupErrorApp` takes a `required _StartupFailureReason reason`
+`StartupErrorApp` takes a `required StartupFailureReason reason`
 constructor parameter and switches on it inside its existing `Builder` (where
 `AppLocalizations.of(context)` is already resolved) to pick the right pair
 of getters — no other change to its structure.

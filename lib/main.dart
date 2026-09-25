@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/auth/app_lifecycle_observer.dart';
@@ -16,12 +17,13 @@ import 'core/theme/theme_mode_notifier.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // FR-010: path-based URLs (no `#`) instead of Flutter Web's default hash
+  // strategy. A documented no-op on non-Web platforms — safe unconditionally.
+  usePathUrlStrategy();
   try {
     await initSupabase();
   } on Object {
-    runApp(
-      const StartupErrorApp(reason: StartupFailureReason.supabaseConfig),
-    );
+    runApp(const StartupErrorApp(reason: StartupFailureReason.supabaseConfig));
     return;
   }
 
@@ -62,18 +64,13 @@ Future<void> main() async {
       await container.read(appDatabaseProvider).customStatement('SELECT 1');
     } on Object {
       container.dispose();
-      runApp(
-        const StartupErrorApp(reason: StartupFailureReason.webStorage),
-      );
+      runApp(const StartupErrorApp(reason: StartupFailureReason.webStorage));
       return;
     }
   }
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const FinanceApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const FinanceApp()),
   );
 }
 
@@ -86,7 +83,7 @@ class FinanceApp extends ConsumerWidget {
     // lifetime (FR-020's background-resume threshold).
     ref.watch(appLifecycleObserverProvider);
     return MaterialApp.router(
-      title: 'Finance',
+      title: 'Kiểm Soát',
       routerConfig: ref.watch(appRouterProvider),
       locale: ref.watch(localeProvider),
       supportedLocales: AppLocalizations.supportedLocales,

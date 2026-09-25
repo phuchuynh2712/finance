@@ -254,7 +254,7 @@ succeeds, and **only when `kIsWeb`**, construct an explicit
 a trivial warm-up query (e.g. `customStatement('SELECT 1')`) against the
 resulting `AppDatabase` inside a `try`/`on Object` guard — mirroring the
 existing `initSupabase()` try/catch immediately above it. On failure, show
-a parameterized version of the existing `_StartupErrorApp` (new
+a parameterized version of the existing `StartupErrorApp` (new
 title/message ARB keys, not the Supabase-specific ones) and return, exactly
 as the Supabase-init failure path already does. On success, pass the same
 `ProviderContainer` into `runApp(UncontrolledProviderScope(container:
@@ -279,7 +279,7 @@ behavior rather than "whichever screen happens to query first."
 exactly this "do async work with a container before `runApp`, then hand
 that same container to the widget tree" pattern (`flutter_riverpod` is
 already the project's chosen state-management package — no new
-dependency). The `_StartupErrorApp` widget's existing title/message are
+dependency). The `StartupErrorApp` widget's existing title/message are
 hardcoded to Supabase-specific copy ("Set the public Supabase URL and
 publishable key...", `startupConfigurationTitle`/`Message` in `app_vi.arb`/
 `app_en.arb`) — reusing them verbatim for a storage failure would show

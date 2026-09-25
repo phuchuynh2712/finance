@@ -59,7 +59,7 @@ Existing Flutter project layout (unchanged by this feature):
 - [X] T005 [US1] In `lib/core/database/app_database.dart:12`, change `AppDatabase() : super(driftDatabase(name: 'finance'));` to pass `web: DriftWebOptions(sqlite3Wasm: Uri.parse('sqlite3.wasm'), driftWorker: Uri.parse('drift_worker.js'))` (research.md Decision 1; native-platform behavior is unchanged — `DriftNativeOptions` stays unset, matching today).
 - [X] T006 [P] [US1] In `lib/main.dart`, add a `StartupFailureReason` enum (made public,
   not private — needed to construct `StartupErrorApp` directly from T009's widget test, which
-  lives in a separate library and cannot reach a private identifier) (`supabaseConfig`, `webStorage`) and give `_StartupErrorApp` a `required _StartupFailureReason reason` constructor parameter; inside its existing `Builder`, switch on `reason` to pick `l10n.startupConfigurationTitle`/`Message` for `supabaseConfig` (unchanged copy, unchanged behavior for the existing Supabase-init-failure call site) versus the new `l10n.startupWebStorageTitle`/`Message` getters for `webStorage` (data-model.md `_StartupFailureReason`). Update the existing `initSupabase()` catch block's call site to pass `reason: _StartupFailureReason.supabaseConfig`.
+  lives in a separate library and cannot reach a private identifier) (`supabaseConfig`, `webStorage`) and give `StartupErrorApp` a `required StartupFailureReason reason` constructor parameter; inside its existing `Builder`, switch on `reason` to pick `l10n.startupConfigurationTitle`/`Message` for `supabaseConfig` (unchanged copy, unchanged behavior for the existing Supabase-init-failure call site) versus the new `l10n.startupWebStorageTitle`/`Message` getters for `webStorage` (data-model.md `StartupFailureReason`). Update the existing `initSupabase()` catch block's call site to pass `reason: StartupFailureReason.supabaseConfig`.
 - [X] T007 [P] [US1] Add new ARB keys `startupWebStorageTitle`/`startupWebStorageMessage` to both `lib/core/l10n/app_vi.arb` and `lib/core/l10n/app_en.arb` (accurate storage-failure copy — do not reuse the Supabase-specific wording; e.g. vi: "Không thể mở dữ liệu cục bộ" / "Trình duyệt đang chặn lưu trữ cục bộ cần thiết để chạy ứng dụng. Vui lòng kiểm tra cài đặt quyền riêng tư của trình duyệt rồi thử lại."), then run `flutter gen-l10n` to regenerate `app_localizations*.dart` (constitution Localization principle — vi+en together, same PR).
 - [X] T008 [US1] In `lib/main.dart`'s `main()` — implemented with a
   simplification over research.md Decision 9's original description: the
@@ -72,8 +72,8 @@ Existing Flutter project layout (unchanged by this feature):
   wording glossed over: a `ProviderContainer`'s overrides cannot be
   changed after construction, so the container has to be built with its
   final overrides already in hand before the `kIsWeb`-gated warm-up query
-  runs against it., after `initSupabase()` succeeds and only when `kIsWeb`: create a `ProviderContainer`, `await` a trivial warm-up query (e.g. `container.read(appDatabaseProvider).customStatement('SELECT 1')`) inside its own `try`/`on Object` block; on failure, `runApp(const _StartupErrorApp(reason: _StartupFailureReason.webStorage))` and `return`, mirroring the existing Supabase-failure early return immediately above it. On success (Web) or when `!kIsWeb` (skip warm-up entirely, per FR-012), proceed to the existing preference-loading step; change the final `runApp(...)` to `runApp(UncontrolledProviderScope(container: container, child: const FinanceApp()))` on the Web success path (reusing the warmed-up container) and leave the existing plain `ProviderScope(...)` path for non-Web platforms exactly as it is today (contracts/web-platform-enablement.md Startup Contract; depends on T005, T006, T007).
-- [X] T009 [P] [US1] Add `test/widget/startup_error_app_test.dart` (named after the widget under test, matching this repo's existing convention — e.g. `app_shell_nav_bar_test.dart`) with a widget test confirming `_StartupErrorApp(reason: .supabaseConfig)` renders `startupConfigurationTitle`/`Message` and `_StartupErrorApp(reason: .webStorage)` renders `startupWebStorageTitle`/`Message` — two distinct, non-overlapping copy pairs (depends on T006, T007).
+  runs against it., after `initSupabase()` succeeds and only when `kIsWeb`: create a `ProviderContainer`, `await` a trivial warm-up query (e.g. `container.read(appDatabaseProvider).customStatement('SELECT 1')`) inside its own `try`/`on Object` block; on failure, `runApp(const StartupErrorApp(reason: StartupFailureReason.webStorage))` and `return`, mirroring the existing Supabase-failure early return immediately above it. On success (Web) or when `!kIsWeb` (skip warm-up entirely, per FR-012), proceed to the existing preference-loading step; change the final `runApp(...)` to `runApp(UncontrolledProviderScope(container: container, child: const FinanceApp()))` on the Web success path (reusing the warmed-up container) and leave the existing plain `ProviderScope(...)` path for non-Web platforms exactly as it is today (contracts/web-platform-enablement.md Startup Contract; depends on T005, T006, T007).
+- [X] T009 [P] [US1] Add `test/widget/startup_error_app_test.dart` (named after the widget under test, matching this repo's existing convention — e.g. `app_shell_nav_bar_test.dart`) with a widget test confirming `StartupErrorApp(reason: .supabaseConfig)` renders `startupConfigurationTitle`/`Message` and `StartupErrorApp(reason: .webStorage)` renders `startupWebStorageTitle`/`Message` — two distinct, non-overlapping copy pairs (depends on T006, T007).
 - [X] T010 [US1] Verify `flutter build web` completes without error against the now-non-null `web:` parameter and the assets from T001–T003 (a static compile check only — per research.md Decision 10 this cannot execute/prove the runtime `WasmDatabase.open` behavior, only that the code compiles and the referenced assets exist on disk) (depends on T001, T002, T003, T005, T008).
 - [ ] T011 [US1] **Manual/best-effort** — attempt quickstart.md steps 1–3 and 8 (real data loads on a Web build against a real/local Supabase project; a write survives a full reload; the app still opens without cross-origin-isolation headers via the IndexedDB fallback; a simulated total-storage-failure browser shows the new `webStorage` startup-error screen). If this sandboxed session cannot reach a running browser/Supabase project to actually perform these checks, document that honestly (mirroring the previous feature's T030 precedent) rather than marking them verified.
 
@@ -121,12 +121,23 @@ Existing Flutter project layout (unchanged by this feature):
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] In `lib/main.dart`, call `usePathUrlStrategy()` (from `package:flutter_web_plugins/url_strategy.dart`) once, unconditionally, at the top of `main()` before `initSupabase()` — no `kIsWeb` guard needed, confirmed a no-op on non-Web platforms (research.md Decision 6; depends on T001).
-- [ ] T021 [P] [US3] In `lib/main.dart`, change `MaterialApp.router`'s `title: 'Finance'` to `title: 'Kiểm Soát'`.
-- [ ] T022 [P] [US3] Update `web/manifest.json`: `name`/`short_name` → `"Kiểm Soát"`; `theme_color`/`background_color` → `"#1A72E0"` (the app's existing verified light-scheme primary, per `test/unit/core/theme/app_theme_test.dart`); `description` → a real one-line description; remove the `"orientation": "portrait-primary"` key entirely (research.md Decision 8).
-- [ ] T023 [P] [US3] Update `web/index.html`: `<title>finance</title>` → `<title>Kiểm Soát</title>`; the `description` meta content and `apple-mobile-web-app-title` content → `"Kiểm Soát"`-based values matching `manifest.json`.
-- [ ] T024 [P] [US3] Add a file-content test (e.g. `test/unit/web/web_identity_test.dart`) that reads `web/manifest.json` and `web/index.html` directly (JSON parse / plain text search — no browser needed) and asserts: `manifest.json`'s `name`/`short_name`/`description` contain no leftover "finance"/"A new Flutter project" text and no `orientation` key exists; `index.html`'s `<title>` is not `finance` (research.md Decision 10).
-- [ ] T025 [US3] **Manual/best-effort** — attempt quickstart.md steps 5–7 and 9 (browser tab/PWA identity inspection; a path-based URL loaded as a fresh/direct page load against hosting with an SPA-fallback rule — spec.md Assumptions; orientation unlocked on window resize; a full mobile regression pass confirming FR-012). Document status honestly, especially step 6's direct-deep-link check, which additionally requires a real chosen Web host this feature does not provide (research.md Decision 7).
+- [X] T020 [US3] In `lib/main.dart`, call `usePathUrlStrategy()` (from `package:flutter_web_plugins/url_strategy.dart`) once, unconditionally, at the top of `main()` before `initSupabase()` — no `kIsWeb` guard needed, confirmed a no-op on non-Web platforms (research.md Decision 6; depends on T001).
+- [X] T021 [P] [US3] In `lib/main.dart`, change `MaterialApp.router`'s `title: 'Finance'` to `title: 'Kiểm Soát'`.
+- [X] T022 [P] [US3] Update `web/manifest.json`: `name`/`short_name` → `"Kiểm Soát"`; `theme_color`/`background_color` → `"#1A72E0"` (the app's existing verified light-scheme primary, per `test/unit/core/theme/app_theme_test.dart`); `description` → a real one-line description; remove the `"orientation": "portrait-primary"` key entirely (research.md Decision 8).
+- [X] T023 [P] [US3] Update `web/index.html`: `<title>finance</title>` → `<title>Kiểm Soát</title>`; the `description` meta content and `apple-mobile-web-app-title` content → `"Kiểm Soát"`-based values matching `manifest.json`.
+- [X] T024 [P] [US3] Add a file-content test (e.g. `test/unit/web/web_identity_test.dart`) that reads `web/manifest.json` and `web/index.html` directly (JSON parse / plain text search — no browser needed) and asserts: `manifest.json`'s `name`/`short_name`/`description` contain no leftover "finance"/"A new Flutter project" text and no `orientation` key exists; `index.html`'s `<title>` is not `finance` (research.md Decision 10).
+- [X] T025 [US3] **Manual/best-effort** — **partially blocked in this
+  session**: a real browser/PWA-install inspection and a real direct
+  deep-link load against chosen hosting cannot be performed here (no
+  running browser harness, no chosen Web host — research.md Decision 7,
+  Decision 10). What *can* be, and was, confirmed: `flutter build web`
+  (re-run after T020–T023) still completes successfully
+  (`build/web/index.html`'s `<title>` and `build/web/manifest.json`'s
+  fields carry the new copy through into the actual build output, not
+  just the source `web/` files), and T024's file-content test passes.
+  The mobile-regression half of step 9 (FR-012) is instead proven by
+  T027's full-suite run below, plus T016's explicit `isWeb: false` test —
+  neither of which shows any change to non-Web behavior.
 
 **Checkpoint**: All three user stories are independently functional.
 
@@ -172,7 +183,7 @@ Existing Flutter project layout (unchanged by this feature):
 ```bash
 # T005, T006, T007 together (three different files, no shared state):
 Task: "Add web: DriftWebOptions(...) to driftDatabase() in lib/core/database/app_database.dart"
-Task: "Add _StartupFailureReason enum + parameterize _StartupErrorApp in lib/main.dart"
+Task: "Add StartupFailureReason enum + parameterize StartupErrorApp in lib/main.dart"
 Task: "Add startupWebStorageTitle/Message ARB keys (vi+en) and regenerate l10n"
 ```
 

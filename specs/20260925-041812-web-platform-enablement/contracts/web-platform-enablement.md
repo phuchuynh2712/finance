@@ -45,38 +45,47 @@ covers its one real external dependency (Supabase's redirect handling).
 
 ## Presentation Contracts
 
-### `_StartupErrorApp` (existing widget, parameterized)
+### `StartupErrorApp` (existing widget, parameterized, made public)
 
-- **Input** (new): `required _StartupFailureReason reason`
+- **Input** (new): `required StartupFailureReason reason`
   (data-model.md) — was previously a zero-parameter `const` widget with a
-  single, hardcoded Supabase-specific copy pair.
+  single, hardcoded Supabase-specific copy pair. Renamed from `_StartupErrorApp`
+  to public `StartupErrorApp` (and `_StartupFailureReason` to public
+  `StartupFailureReason`) so a widget test can construct it directly.
 - **Output**: identical visual structure to today (centered icon + title
   + message, `Theme.of(context).textTheme.titleLarge` for the title) —
   only the two localized strings shown vary by `reason`.
 - **Callers**: `initSupabase()`'s existing catch block now passes
-  `reason: _StartupFailureReason.supabaseConfig` (behavior-preserving —
+  `reason: StartupFailureReason.supabaseConfig` (behavior-preserving —
   same two ARB keys as today); the new Web-only database warm-up catch
-  block passes `reason: _StartupFailureReason.webStorage` (new ARB keys —
+  block passes `reason: StartupFailureReason.webStorage` (new ARB keys —
   data-model.md).
 
-### Startup Contract (`lib/main.dart`, `main()`, new Web-only step)
+### Startup Contract (`lib/main.dart`, `main()`, new steps)
 
-- **Sequence** (research.md Decision 9): `WidgetsFlutterBinding.
-  ensureInitialized()` → `usePathUrlStrategy()` (research.md Decision 6,
-  all platforms) → `initSupabase()` (existing, unchanged try/catch) →
-  **new**: if `kIsWeb`, create a `ProviderContainer`, `await` a warm-up
-  query against `container.read(appDatabaseProvider)` inside its own
-  try/catch → on failure, `runApp(_StartupErrorApp(reason: .webStorage))`
-  and return; on success (or on non-Web platforms, skipped entirely) →
-  existing preference-loading step, unchanged → `runApp(...)`, now via
-  `UncontrolledProviderScope(container: container, child: const
-  FinanceApp())` on Web (reusing the warmed-up container) or the existing
-  plain `ProviderScope(...)` on other platforms (no container to reuse,
-  since the warm-up step is skipped there — FR-012).
+- **Sequence** (as implemented — a small simplification over research.md
+  Decision 9's original description, discovered because a
+  `ProviderContainer`'s overrides cannot be changed after construction):
+  `WidgetsFlutterBinding.ensureInitialized()` → `usePathUrlStrategy()`
+  (research.md Decision 6, all platforms) → `initSupabase()` (existing,
+  unchanged try/catch) → existing preference-loading step, unchanged →
+  construct one `ProviderContainer` with the theme/locale overrides
+  (moved earlier than before, so the container's overrides are correct
+  from construction) → **new**: only if `kIsWeb`, `await` a warm-up query
+  against `container.read(appDatabaseProvider)` inside its own try/catch
+  → on failure, dispose the container and `runApp(StartupErrorApp(reason:
+  .webStorage))`, then return; on success (or on non-Web platforms,
+  skipped entirely) → `runApp(UncontrolledProviderScope(container:
+  container, child: const FinanceApp()))` **unconditionally, on every
+  platform** — not only Web. This is behaviorally identical to the
+  previous plain `ProviderScope(overrides: [...])` on non-Web platforms
+  (which internally does the same thing: construct a container with those
+  overrides), so FR-012 still holds; the only platform-gated step is the
+  warm-up query itself, not which scope widget wraps the app.
 - **Guarantee**: by the time `FinanceApp`'s first real screen builds on
   Web, `appDatabaseProvider`'s database has already been successfully
   opened and migrated at least once, or the user is already looking at
-  `_StartupErrorApp` instead — no screen can reach a state where its
+  `StartupErrorApp` instead — no screen can reach a state where its
   first database query is the *first* time the Web connection is
   attempted (FR-014, SC-001's "zero unhandled data-loading errors").
 

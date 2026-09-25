@@ -48,7 +48,7 @@ section in the same detailed, evidence-rich way the previous feature did."
 - Q: Nếu database cục bộ vẫn không mở được trên Web dù đã có fallback
   (mọi kiểu lưu trữ đều bị trình duyệt chặn), ứng dụng nên hiển thị gì
   cho người dùng? → A: Dùng lại màn hình lỗi khởi động sẵn có
-  (`_StartupErrorApp`, đã dùng khi Supabase init thất bại) thay vì thiết
+  (`StartupErrorApp`, đã dùng khi Supabase init thất bại) thay vì thiết
   kế thông báo lỗi riêng cho Web.
 
 ## User Scenarios & Testing *(mandatory)*

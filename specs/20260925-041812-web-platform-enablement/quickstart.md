@@ -93,8 +93,8 @@ environment.
   that no `orientation` key remains, plus `web/index.html`'s `<title>`
   text — parsed directly as JSON/text, no browser needed (research.md
   Decision 10).
-- A widget test for `_StartupErrorApp` confirming each
-  `_StartupFailureReason` renders its own distinct title/message pair
+- A widget test for `StartupErrorApp` confirming each
+  `StartupFailureReason` renders its own distinct title/message pair
   (data-model.md).
 - Full existing suite (413 tests as of this feature's start — mirrors
   spec.md SC-006) stays green: `flutter analyze`, `dart format

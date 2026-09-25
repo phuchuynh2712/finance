@@ -1,12 +1,11 @@
 {
-    "name": "finance",
-    "short_name": "finance",
+    "name": "Kiểm Soát",
+    "short_name": "Kiểm Soát",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#1A72E0",
+    "theme_color": "#1A72E0",
+    "description": "Kiểm Soát — quản lý chi tiêu và ngân sách cá nhân.",
     "prefer_related_applications": false,
     "icons": [
         {

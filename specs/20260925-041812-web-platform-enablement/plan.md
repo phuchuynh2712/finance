@@ -102,7 +102,7 @@ helper function (data-model.md); one existing config class gains one new
 validated field (`lib/core/config/app_environment.dart`); `lib/main.dart`
 gains one unconditional call (`usePathUrlStrategy()`) and one new
 `kIsWeb`-gated startup step; one existing private widget
-(`_StartupErrorApp`) gains a required parameter; two static config files
+(`StartupErrorApp`) gains a required parameter; two static config files
 edited (`web/manifest.json`, `web/index.html`); two new binary/script
 assets added under `web/` (`sqlite3.wasm`, `drift_worker.js`); four new
 ARB string keys (`vi`+`en` × title/message). No new feature directory, no
@@ -135,7 +135,7 @@ new screen, no new route.
   This feature changes no layout, breakpoint, or window-size decision —
   it is the data/auth/identity feature `adaptive-layout-foundation`'s own
   Constitution Check explicitly deferred (spec.md's inherited context).
-  The one visible-UI change (`_StartupErrorApp`'s parameterization) reuses
+  The one visible-UI change (`StartupErrorApp`'s parameterization) reuses
   its exact existing visual structure unchanged, only varying which two
   translated strings it reads.
 - **Principle IV — Performance: PASS.** See Technical Context's
@@ -254,7 +254,7 @@ lib/
 │                                             # ProviderContainer +
 │                                             # UncontrolledProviderScope
 │                                             # (research.md Decision 9);
-│                                             # _StartupErrorApp gains a
+│                                             # StartupErrorApp gains a
 │                                             # required reason parameter;
 │                                             # MaterialApp.title → 'Kiểm Soát'
 web/
@@ -288,7 +288,7 @@ test/
 │                                              # content assertions (file-based,
 │                                              # no browser — research.md Decision 10)
 └── widget/
-    └── startup_error_app_test.dart           # NEW: both _StartupFailureReason
+    └── startup_error_app_test.dart           # NEW: both StartupFailureReason
                                                # variants render distinct copy
 ```
 
@@ -327,7 +327,7 @@ is a documented no-op on non-web platforms, safe to call unconditionally
 explicit startup warm-up step (via Riverpod's own
 `ProviderContainer`/`UncontrolledProviderScope` pattern) rather than
 relying on whichever screen happens to query first, and why
-`_StartupErrorApp` needs parameterizing rather than reusing its
+`StartupErrorApp` needs parameterizing rather than reusing its
 Supabase-specific copy verbatim (Decision 9); and a frank assessment of
 what this sandboxed session's `flutter test` (Dart VM only) can and
 cannot verify, matching the previous feature's own honest T030 precedent
@@ -338,12 +338,12 @@ rather than claiming untested behavior as verified (Decision 10).
 - [data-model.md](./data-model.md) defines the new configuration/value
   surface this feature introduces (`AppEnvironment.
   webPasswordResetRedirectUrl`, `resolvePasswordResetRedirectUrl`,
-  `_StartupFailureReason`) — no persisted schema, no domain entity.
+  `StartupFailureReason`) — no persisted schema, no domain entity.
 - [contracts/web-platform-enablement.md](./contracts/web-platform-enablement.md)
   documents the one real external gateway contract this feature touches
   (Supabase's `resetPasswordForEmail`, new `redirectTo` value only), the
   changed `driftDatabase()` call contract, the parameterized
-  `_StartupErrorApp` presentation contract, the new startup sequence
+  `StartupErrorApp` presentation contract, the new startup sequence
   contract, and an explicit confirmation that no new route/path is
   introduced.
 - [quickstart.md](./quickstart.md) lists manual, post-deployment
