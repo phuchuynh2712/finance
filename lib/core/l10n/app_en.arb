@@ -168,6 +168,8 @@
   "transactionHistoryIncomeClassification": "Income",
   "startupConfigurationTitle": "Configuration required",
   "startupConfigurationMessage": "Set the public Supabase URL and publishable key before launching the app.",
+  "startupWebStorageTitle": "Couldn't open local storage",
+  "startupWebStorageMessage": "Your browser is blocking the local storage this app needs to run. Please check your browser's privacy settings, then reload the page.",
   "overviewTotalBalanceLabel": "Total remaining · all accounts",
   "overviewNegativeBalanceWarning": "Account \"{name}\" is negative",
   "@overviewNegativeBalanceWarning": {

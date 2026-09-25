@@ -566,6 +566,13 @@ class AppLocalizationsVi extends AppLocalizations {
       'Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.';
 
   @override
+  String get startupWebStorageTitle => 'Không thể mở dữ liệu cục bộ';
+
+  @override
+  String get startupWebStorageMessage =>
+      'Trình duyệt đang chặn lưu trữ cục bộ mà ứng dụng cần để chạy. Vui lòng kiểm tra cài đặt quyền riêng tư của trình duyệt rồi tải lại trang.';
+
+  @override
   String get overviewTotalBalanceLabel => 'Tổng còn lại · tất cả các khoản';
 
   @override

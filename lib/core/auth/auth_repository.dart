@@ -1,5 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:finance/core/config/app_environment.dart';
+
+/// FR-004/FR-005/FR-006: picks which password-reset redirect to use.
+/// A plain, side-effect-free function (no [BuildContext], no platform
+/// check inside it — the caller supplies [isWeb]) specifically so a
+/// VM-based `flutter test` run can exercise both branches directly; the
+/// real `kIsWeb` is only ever passed at the one real call site below.
+String resolvePasswordResetRedirectUrl({
+  required bool isWeb,
+  required String webRedirectUrl,
+  required String mobileRedirectUrl,
+}) {
+  return isWeb ? webRedirectUrl : mobileRedirectUrl;
+}
 
 /// The subset of auth operations and identity data the Profile screen
 /// needs. Depending on this interface, rather than the concrete
@@ -92,13 +108,19 @@ class AuthRepository implements AccountAuthActions {
     await _client.auth.signOut(scope: scope);
   }
 
-  /// FR-015: requests a password-reset email. [redirectTo] is fixed to this
-  /// app's registered deep link — there is exactly one correct value for a
-  /// given build, not caller-configurable.
+  /// FR-015: requests a password-reset email. [redirectTo] is fixed per
+  /// platform — a single, build-time-configured `https://` URL on Web
+  /// (FR-004, Clarification 1 — never derived from the browser's runtime
+  /// origin) or this app's registered mobile deep link — there is exactly
+  /// one correct value for a given build/platform, not caller-configurable.
   Future<void> resetPasswordForEmail(String email) async {
     await _client.auth.resetPasswordForEmail(
       email,
-      redirectTo: 'com.finance.finance://reset-callback',
+      redirectTo: resolvePasswordResetRedirectUrl(
+        isWeb: kIsWeb,
+        webRedirectUrl: AppEnvironment.webPasswordResetRedirectUrl,
+        mobileRedirectUrl: 'com.finance.finance://reset-callback',
+      ),
     );
   }
 

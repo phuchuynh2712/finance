@@ -640,6 +640,8 @@
   "transactionHistoryIncomeClassification": "Thu nhập",
   "startupConfigurationTitle": "Cần cấu hình ứng dụng",
   "startupConfigurationMessage": "Hãy thiết lập URL Supabase và publishable key trước khi khởi động ứng dụng.",
+  "startupWebStorageTitle": "Không thể mở dữ liệu cục bộ",
+  "startupWebStorageMessage": "Trình duyệt đang chặn lưu trữ cục bộ mà ứng dụng cần để chạy. Vui lòng kiểm tra cài đặt quyền riêng tư của trình duyệt rồi tải lại trang.",
   "overviewTotalBalanceLabel": "Tổng còn lại · tất cả các khoản",
   "overviewNegativeBalanceWarning": "Khoản \"{name}\" đã âm quỹ",
   "@overviewNegativeBalanceWarning": {

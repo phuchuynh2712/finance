@@ -569,6 +569,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Set the public Supabase URL and publishable key before launching the app.';
 
   @override
+  String get startupWebStorageTitle => 'Couldn\'t open local storage';
+
+  @override
+  String get startupWebStorageMessage =>
+      'Your browser is blocking the local storage this app needs to run. Please check your browser\'s privacy settings, then reload the page.';
+
+  @override
   String get overviewTotalBalanceLabel => 'Total remaining · all accounts';
 
   @override

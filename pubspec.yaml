@@ -54,6 +54,12 @@ dependencies:
   # Routing
   go_router: ^14.6.2
 
+  # Path-based (non-hash) Web URL strategy (FR-010) — SDK-bundled, already
+  # resolved transitively; declared directly since it's now imported
+  # directly in lib/main.dart.
+  flutter_web_plugins:
+    sdk: flutter
+
   # Locale-aware formatting (currency, date, number)
   intl: ^0.20.2
 

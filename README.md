@@ -65,6 +65,7 @@ test/
 
 - Flutter SDK 3.11+ (matches the project configuration)
 - Android Studio / Xcode for device emulation if needed
+- A Chromium-based browser for Web development (`flutter run -d chrome`)
 - A working Supabase project and local environment file for app configuration
 
 ### Install
@@ -93,9 +94,13 @@ web origin to the Supabase project's allowed redirect/origin configuration:
 flutter run -d chrome --web-port=5000 --dart-define-from-file=tool/env.json
 ```
 
-The configuration file contains only `SUPABASE_URL` and
-`SUPABASE_PUBLISHABLE_KEY`. Keep database passwords, service-role keys, and QA
-account passwords outside Flutter build inputs.
+The configuration file contains `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`,
+and `WEB_PASSWORD_RESET_REDIRECT_URL` (the fixed `https://` URL Web
+password-reset emails link to — see `tool/env.example.json` for the local
+value matching the `--web-port=5000` command above; a real deployed origin
+must also be added to Supabase's allowed redirect list). Keep database
+passwords, service-role keys, and QA account passwords outside Flutter
+build inputs.
 
 ### Run the app
 
