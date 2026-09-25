@@ -36,6 +36,21 @@ with the per-screen list-detail redesigns that will actually need them).
 These three deferred items are recorded in this spec's own Out-of-Scope
 section in the same detailed, evidence-rich way the previous feature did."
 
+## Clarifications
+
+### Session 2026-09-25
+
+- Q: Khi ứng dụng Web gửi yêu cầu đặt lại mật khẩu, URL redirect https://
+  nên được xác định thế nào — lấy động theo origin hiện tại của trình
+  duyệt, hay dùng một URL production cố định? → A: URL cố định, hard-code
+  một địa chỉ https:// production duy nhất, giống cách mobile hiện đang
+  dùng một deep link cố định — không lấy động theo origin lúc chạy.
+- Q: Nếu database cục bộ vẫn không mở được trên Web dù đã có fallback
+  (mọi kiểu lưu trữ đều bị trình duyệt chặn), ứng dụng nên hiển thị gì
+  cho người dùng? → A: Dùng lại màn hình lỗi khởi động sẵn có
+  (`_StartupErrorApp`, đã dùng khi Supabase init thất bại) thay vì thiết
+  kế thông báo lỗi riêng cho Web.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Signed-in data actually loads on Web (Priority: P1)
@@ -164,7 +179,9 @@ still opens the correct screen.
 - What happens to a browser that lacks WASM support entirely (very old
   browsers)? Out of scope to specifically support — the app's minimum
   supported browser baseline is whatever `drift_flutter`/Flutter Web
-  itself requires; no new lower bound is introduced by this feature.
+  itself requires; no new lower bound is introduced by this feature. Such
+  a browser still degrades gracefully rather than crashing, via the same
+  FR-014 startup-error screen used for any other total storage failure.
 - What happens to anyone who has bookmarked or shared one of today's
   hash-based URLs (e.g. `/#/overview`) once path-based routing ships? That
   bookmark stops resolving to the same screen. Accepted as a one-time
@@ -178,6 +195,12 @@ still opens the correct screen.
   changes the app to require that hosting capability; see Assumptions and
   "Out of Scope & Follow-Up Work" for why the exact hosting configuration
   itself is outside this codebase.
+- What happens if every available Web storage backend fails to open —
+  even after the FR-003 fallback — because the browser itself blocks all
+  local storage (e.g. strict privacy settings)? The app MUST show its
+  existing startup-error screen (the same one already shown today when
+  Supabase initialization fails) rather than crashing, hanging, or
+  showing a blank screen (FR-014).
 
 ## Requirements *(mandatory)*
 
@@ -193,8 +216,10 @@ still opens the correct screen.
   storage backend when the browser does not support the fastest available
   option, without crashing or losing functionality.
 - **FR-004**: Password-reset requests initiated from the Web app MUST
-  generate a redirect link using a real `https://` URL rather than the
-  mobile deep-link scheme.
+  generate a redirect link using a single, fixed `https://` URL — not
+  derived from the browser's current origin at runtime — rather than the
+  mobile deep-link scheme. This mirrors how the mobile app already uses
+  one fixed deep-link constant rather than computing it dynamically.
 - **FR-005**: Password-reset requests initiated from the mobile app MUST
   continue to use the existing mobile deep-link scheme, unchanged.
 - **FR-006**: The redirect URL used for a password-reset request MUST be
@@ -224,6 +249,11 @@ still opens the correct screen.
   remain exactly as they are today.
 - **FR-013**: The full existing automated test suite MUST continue to pass
   after this feature.
+- **FR-014**: If every available Web storage backend fails to open even
+  after the FR-003 fallback (e.g. the browser blocks local storage
+  entirely), the app MUST show its existing startup-error screen — the
+  same one already shown today when Supabase initialization fails —
+  rather than crashing, hanging, or showing a blank screen.
 
 ## Success Criteria *(mandatory)*
 
@@ -259,11 +289,11 @@ still opens the correct screen.
   configuring an actual host's rewrite rule is the user's own action item
   outside this codebase — the same kind of external dependency as the
   Supabase Dashboard redirect-URL configuration below.
-- The matching Supabase Dashboard change — adding the new `https://`
-  Web redirect URL to the project's allowed redirect list — is the user's
-  own action item outside this codebase; this feature cannot configure
-  Supabase's server-side settings itself, only make the app request the
-  correct URL.
+- The matching Supabase Dashboard change — adding the new single, fixed
+  `https://` Web redirect URL (FR-004) to the project's allowed redirect
+  list — is the user's own action item outside this codebase; this
+  feature cannot configure Supabase's server-side settings itself, only
+  make the app request the correct URL.
 - "Kiểm Soát" is treated as the app's canonical display name for Web
   identity surfaces (manifest name, page title), matching how the app is
   already referred to elsewhere in this codebase's specs and UI strings;
