@@ -94,7 +94,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             _AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/overview', builder: overviewRoute)],
+            routes: [
+              GoRoute(
+                path: '/overview',
+                builder: overviewRoute,
+                routes: [
+                  GoRoute(
+                    path: 'history',
+                    builder: transactionHistoryRoute,
+                    routes: [
+                      GoRoute(
+                        path: 'group/:accountName',
+                        builder: overviewFilteredHistoryRoute,
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'notifications',
+                    builder: overviewNotificationsPlaceholderRoute,
+                  ),
+                ],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [
@@ -102,13 +123,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/spending', builder: spendingRoute)],
+            routes: [
+              GoRoute(
+                path: '/spending',
+                builder: spendingRoute,
+                routes: [
+                  GoRoute(path: 'income', builder: incomeRoute),
+                  GoRoute(path: 'expense', builder: expenseRoute),
+                  GoRoute(path: 'history', builder: transactionHistoryRoute),
+                ],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: '/history', builder: reportRoute)],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/account', builder: accountScreenRoute)],
+            routes: [
+              GoRoute(
+                path: '/account',
+                builder: accountScreenRoute,
+                routes: [
+                  GoRoute(
+                    path: 'placeholder/:feature',
+                    builder: accountPlaceholderRoute,
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

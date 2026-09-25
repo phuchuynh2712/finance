@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/di/expense_dependencies.dart';
@@ -8,9 +9,6 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expenses/application/balance_view_service.dart';
-import 'expense_screen.dart';
-import 'income_screen.dart';
-import 'transaction_history_screen.dart';
 import 'widgets/balance_group_card.dart';
 
 /// Read-only balance hub (FR-001–FR-012): shows every Kiểm soát chi tiêu
@@ -49,11 +47,7 @@ class SpendingScreen extends ConsumerWidget {
                           background: semantic.successSoft,
                           border: semantic.success,
                           foreground: semantic.successFg,
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const IncomeScreen(),
-                            ),
-                          ),
+                          onPressed: () => context.push('/spending/income'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -64,11 +58,7 @@ class SpendingScreen extends ConsumerWidget {
                           background: semantic.dangerSoft,
                           border: theme.colorScheme.error,
                           foreground: semantic.dangerFg,
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ExpenseScreen(),
-                            ),
-                          ),
+                          onPressed: () => context.push('/spending/expense'),
                         ),
                       ),
                     ],
@@ -76,11 +66,7 @@ class SpendingScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   _HistoryRow(
                     label: l10n.spendingHistoryAction,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const TransactionHistoryScreen(),
-                      ),
-                    ),
+                    onPressed: () => context.push('/spending/history'),
                   ),
                   const SizedBox(height: 18),
                 ],

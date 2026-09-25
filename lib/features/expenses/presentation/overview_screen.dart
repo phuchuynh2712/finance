@@ -10,14 +10,10 @@ import 'package:finance/core/theme/app_colors.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
-import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expenses/application/overview_recent_transactions.dart';
 import 'package:finance/features/expenses/application/overview_summary_service.dart';
-import 'package:finance/features/expenses/application/transaction_history.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
-import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
-import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 
 /// Home dashboard shown on the "Tổng quan" tab (FR-001). Read-only (FR-013);
 /// composes two independent data sources — the shared balance+accounts
@@ -126,15 +122,7 @@ class _Header extends ConsumerWidget {
             ),
           ),
           IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => NotAvailablePlaceholderScreen(
-                  icon: LucideIcons.bell,
-                  title: l10n.overviewNotificationSemantic,
-                  message: l10n.notAvailablePlaceholderMessage,
-                ),
-              ),
-            ),
+            onPressed: () => context.push('/overview/notifications'),
             icon: const Icon(LucideIcons.bell),
             tooltip: l10n.overviewNotificationSemantic,
           ),
@@ -389,9 +377,7 @@ class _RecentTransactionsSection extends StatelessWidget {
         _SectionHeader(
           title: l10n.overviewRecentTransactionsSectionTitle,
           seeAllSemanticLabel: l10n.overviewSeeAllTransactionsSemantic,
-          onSeeAll: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const TransactionHistoryScreen()),
-          ),
+          onSeeAll: () => context.push('/overview/history'),
         ),
         const SizedBox(height: 4),
         if (items.isEmpty)
@@ -582,8 +568,19 @@ class _NegativeBalanceBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
+                // research.md Decision 9 (secure-storage-routing-cleanup
+                // Tier C): a negative balance is explained by recorded
+                // spending, not by the allocation plan, so this opens the
+                // existing transaction-history screen filtered to this
+                // account's group — not the Kế hoạch tab — via a nested
+                // ProviderScope override reconstructed inside
+                // overviewFilteredHistoryRoute's own builder, reusing
+                // TransactionHistoryFilter.group without any change to the
+                // history screen or its providers.
                 InkWell(
-                  onTap: () => _openFilteredHistory(context, accountName),
+                  onTap: () => context.push(
+                    '/overview/history/group/${Uri.encodeComponent(accountName)}',
+                  ),
                   child: Text(
                     l10n.overviewSeeDetailAction,
                     style: TextStyle(color: semantic.dangerFg, fontSize: 12),
@@ -593,27 +590,6 @@ class _NegativeBalanceBanner extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// research.md Decision 9: a negative balance is explained by recorded
-  /// spending, not by the allocation plan, so this opens the existing
-  /// transaction-history screen filtered to this account's group — not the
-  /// Kế hoạch tab — via a nested [ProviderScope] override, reusing
-  /// `TransactionHistoryFilter.group` without any change to the history
-  /// screen or its providers.
-  void _openFilteredHistory(BuildContext context, String accountName) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ProviderScope(
-          overrides: [
-            selectedTransactionHistoryFilterProvider.overrideWith(
-              (ref) => TransactionHistoryFilter.group(accountName),
-            ),
-          ],
-          child: const TransactionHistoryScreen(),
-        ),
       ),
     );
   }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
-import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'account_controller.dart';
+import '../account_routes.dart' show AccountPlaceholderFeature;
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -149,11 +150,9 @@ class _MenuCard extends StatelessWidget {
             label: l10n.accountNotificationsRowLabel,
             semantic: semantic,
             showDivider: true,
-            onTap: () => _openPlaceholder(
-              context,
-              icon: LucideIcons.bell,
-              title: l10n.accountNotificationsRowLabel,
-              message: l10n.notAvailablePlaceholderMessage,
+            onTap: () => context.push(
+              '/account/placeholder/'
+              '${AccountPlaceholderFeature.notifications.name}',
             ),
           ),
           _MenuRow(
@@ -161,11 +160,9 @@ class _MenuCard extends StatelessWidget {
             label: l10n.accountSecurityRowLabel,
             semantic: semantic,
             showDivider: true,
-            onTap: () => _openPlaceholder(
-              context,
-              icon: LucideIcons.shieldCheck,
-              title: l10n.accountSecurityRowLabel,
-              message: l10n.notAvailablePlaceholderMessage,
+            onTap: () => context.push(
+              '/account/placeholder/'
+              '${AccountPlaceholderFeature.security.name}',
             ),
           ),
           _MenuRow(
@@ -173,34 +170,15 @@ class _MenuCard extends StatelessWidget {
             label: l10n.accountHelpRowLabel,
             semantic: semantic,
             showDivider: false,
-            onTap: () => _openPlaceholder(
-              context,
-              icon: LucideIcons.helpCircle,
-              title: l10n.accountHelpRowLabel,
-              message: l10n.notAvailablePlaceholderMessage,
+            onTap: () => context.push(
+              '/account/placeholder/'
+              '${AccountPlaceholderFeature.help.name}',
             ),
           ),
         ],
       ),
     );
   }
-}
-
-void _openPlaceholder(
-  BuildContext context, {
-  required IconData icon,
-  required String title,
-  required String message,
-}) {
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) => NotAvailablePlaceholderScreen(
-        icon: icon,
-        title: title,
-        message: message,
-      ),
-    ),
-  );
 }
 
 class _MenuRow extends StatelessWidget {

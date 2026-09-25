@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
@@ -12,7 +13,9 @@ import 'package:finance/features/expense_control/domain/expense_control_item.dar
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expenses/presentation/expense_screen.dart';
+import 'package:finance/features/expenses/presentation/income_screen.dart';
 import 'package:finance/features/expenses/presentation/spending_screen.dart';
+import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 import 'package:finance/features/expenses/presentation/widgets/balance_group_card.dart';
 
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
@@ -87,15 +90,42 @@ ExpenseControlItem _leaf(
   );
 }
 
+// A real GoRouter, mirroring app_router.dart's actual nested-route shape
+// under `/spending` (secure-storage-routing-cleanup Tier A) — so
+// SpendingScreen's context.push(...) calls resolve exactly as they do in
+// the real app, and tests asserting the real destination screen appears
+// (not a placeholder) keep working unchanged.
 Widget _harness(_FakeExpenseControlRepository repository) {
   return ProviderScope(
     overrides: [expenseControlRepositoryProvider.overrideWithValue(repository)],
-    child: MaterialApp(
+    child: MaterialApp.router(
       theme: AppTheme.light,
       locale: const Locale('vi'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const SpendingScreen(),
+      routerConfig: GoRouter(
+        initialLocation: '/spending',
+        routes: [
+          GoRoute(
+            path: '/spending',
+            builder: (context, state) => const SpendingScreen(),
+            routes: [
+              GoRoute(
+                path: 'income',
+                builder: (context, state) => const IncomeScreen(),
+              ),
+              GoRoute(
+                path: 'expense',
+                builder: (context, state) => const ExpenseScreen(),
+              ),
+              GoRoute(
+                path: 'history',
+                builder: (context, state) => const TransactionHistoryScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }

@@ -1,5 +1,14 @@
 <!--
 Sync Impact Report
+Version change: 1.5.0 → 1.6.0 (MINOR: new Security bullet closing a
+  previously-silent gap — an explicit, reasoned accept-the-risk decision
+  for flutter_secure_storage's experimental Web backend, conditional on
+  HSTS at the eventual Web host; no principle redefined or removed)
+Modified sections (this amendment):
+  - Security → new bullet immediately after "Secrets and tokens" recording
+    the Web session-token storage risk decision (secure-storage-routing-
+    cleanup feature, User Story 1)
+Previous amendment (1.4.0 → 1.5.0) Sync Impact Report below, kept for history:
 Version change: 1.4.0 → 1.5.0 (MINOR: new "Multi-Platform Support" section +
   materially expanded Principle III guidance; no principle redefined or removed)
 Modified principles:
@@ -402,6 +411,25 @@ non-optional concern, not an afterthought bolted on before release:
   platform secure storage (`core/storage/`, e.g. Keychain/Keystore-backed
   packages) — never in `SharedPreferences`, plain files, or Hive without
   encryption.
+- **Web session-token storage risk (accepted, conditional)**:
+  `flutter_secure_storage`'s Web backend is experimental (WebCrypto +
+  `localStorage`, per the package's own documentation) and is explicitly
+  accepted for this app's threat model — it holds only the Supabase
+  session (access/refresh token pair) via `core/storage/
+  secure_local_storage.dart`, never raw financial data, and a compromised
+  session is time-limited and revocable through the app's existing
+  sign-out flows, not a permanent data leak. This acceptance is
+  conditional on the eventual Web hosting target enabling HSTS (Multi-
+  Platform Support's own open Web-hosting dependency) — the specific risk
+  the package's docs flag (a JS-injection hijack over an unencrypted
+  transport) is exactly what HSTS closes. If the eventual Web hosting
+  target does not enable HSTS, this acceptance MUST NOT be treated as
+  still valid by default — it MUST be explicitly re-reviewed (and
+  hardened, or Web session storage reconsidered) before Web is promoted
+  as a primary way to use the app with real user sessions. This decision
+  does not extend to the local Drift database's own at-rest posture
+  (unencrypted on every platform today, tracked separately) or preempt a
+  future decision to harden this further if the threat model changes.
 - **Transport security**: all network calls (Supabase REST/Realtime) MUST
   use TLS; certificate/domain pinning SHOULD be evaluated for the Supabase
   endpoint given the sensitivity of financial data.
@@ -465,4 +493,4 @@ for backward-incompatible governance/principle removals or redefinitions,
 MINOR for new principles or materially expanded guidance, PATCH for wording
 clarifications and non-semantic refinements.
 
-**Version**: 1.5.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-25
+**Version**: 1.6.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-25
