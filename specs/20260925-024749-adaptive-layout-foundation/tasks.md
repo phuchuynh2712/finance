@@ -217,7 +217,7 @@ narrow, confirm no change from today. Fully verifiable without User Story
 
 ### Implementation for User Story 2
 
-- [ ] T013 [P] [US2] Create `lib/core/widgets/adaptive_body.dart`: an
+- [X] T013 [P] [US2] Create `lib/core/widgets/adaptive_body.dart`: an
   `AdaptiveBody` widget taking a required `child` and an optional
   `maxWidth` (defaults to `AppLayoutTokens.contentMaxWidth` from T002) that
   renders `child` unchanged when `windowSizeClassFor(MediaQuery.sizeOf
@@ -226,27 +226,27 @@ narrow, confirm no change from today. Fully verifiable without User Story
   maxWidth), child: child))` otherwise (FR-005) — see
   [contracts/adaptive-shell-ui.md](./contracts/adaptive-shell-ui.md)'s
   `AdaptiveBody` contract. Depends on T002.
-- [ ] T014 [P] [US2] In
+- [X] T014 [P] [US2] In
   `lib/features/expenses/presentation/overview_screen.dart`, wrap the main
   scrollable content (inside the existing `Expanded(child: ListView(...))`
   — do not touch the `_Header` above it) in `AdaptiveBody`. Depends on
   T013.
-- [ ] T015 [P] [US2] In
+- [X] T015 [P] [US2] In
   `lib/features/expenses/presentation/report_screen.dart`, make the
   equivalent change (same pattern as T014 — wrap the content `ListView`,
   leave `_Header`/`_MonthSelector` positioning as-is). Depends on T013.
-- [ ] T016 [P] [US2] Create
+- [X] T016 [P] [US2] Create
   `test/widget/core/widgets/adaptive_body_test.dart`: assert `child`
   renders at full available width below 840dp, and at a capped, centered
   width at and above 840dp (including a very wide test width, per
   Acceptance Scenario 3 — content must not keep growing). Depends on T013.
-- [ ] T017 [US2] In
+- [X] T017 [US2] In
   `test/widget/features/expenses/overview_screen_test.dart`, add a test at
   ≥840dp width asserting the main content column's rendered width does not
   exceed `AppLayoutTokens.contentMaxWidth` and is horizontally centered;
   confirm existing compact-width tests in this file are unaffected. Depends
   on T014.
-- [ ] T018 [US2] Make the equivalent addition to
+- [X] T018 [US2] Make the equivalent addition to
   `test/widget/features/expenses/report_screen_test.dart`. Depends on T015.
 
 **Checkpoint**: User Story 2 is fully functional and independently

@@ -7,6 +7,7 @@ import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expenses/application/report_summary.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
@@ -34,34 +35,36 @@ class ReportScreen extends ConsumerWidget {
           children: [
             const _Header(),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                children: [
-                  const _MonthSelector(),
-                  const SizedBox(height: 16),
-                  totalsAsync.when(
-                    loading: () => const _SectionLoading(),
-                    error: (error, stackTrace) => _SectionError(
-                      message: l10n.reportLoadError,
-                      retryLabel: l10n.reportRetry,
-                      onRetry: () =>
-                          ref.invalidate(reportTotalsProvider(selectedMonth)),
-                    ),
-                    data: (totals) => _TotalsCards(totals: totals),
-                  ),
-                  const SizedBox(height: 20),
-                  breakdownAsync.when(
-                    loading: () => const _SectionLoading(),
-                    error: (error, stackTrace) => _SectionError(
-                      message: l10n.reportLoadError,
-                      retryLabel: l10n.reportRetry,
-                      onRetry: () => ref.invalidate(
-                        reportBreakdownProvider(selectedMonth),
+              child: AdaptiveBody(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                  children: [
+                    const _MonthSelector(),
+                    const SizedBox(height: 16),
+                    totalsAsync.when(
+                      loading: () => const _SectionLoading(),
+                      error: (error, stackTrace) => _SectionError(
+                        message: l10n.reportLoadError,
+                        retryLabel: l10n.reportRetry,
+                        onRetry: () =>
+                            ref.invalidate(reportTotalsProvider(selectedMonth)),
                       ),
+                      data: (totals) => _TotalsCards(totals: totals),
                     ),
-                    data: (entries) => _BreakdownSection(entries: entries),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    breakdownAsync.when(
+                      loading: () => const _SectionLoading(),
+                      error: (error, stackTrace) => _SectionError(
+                        message: l10n.reportLoadError,
+                        retryLabel: l10n.reportRetry,
+                        onRetry: () => ref.invalidate(
+                          reportBreakdownProvider(selectedMonth),
+                        ),
+                      ),
+                      data: (entries) => _BreakdownSection(entries: entries),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
