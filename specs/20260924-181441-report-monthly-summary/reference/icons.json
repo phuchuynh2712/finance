@@ -1,0 +1,13 @@
+{
+  "iconLibrary": "Lucide — line icons, 2px stroke, round caps/joins",
+  "flutterPackage": "lucide_icons (pub.dev) — flutter pub add lucide_icons",
+  "icons": [
+    { "lucideName": "pie-chart", "flutterConstant": "LucideIcons.pieChart", "usedIn": "Header icon badge + bottom nav tab 'Báo cáo'", "sizePx": "17 (header) / 22 (nav)", "colorLight": "blue-600 #1A72E0 on blue-50 chip (header)", "colorDark": "#6AADFF on rgba(59,141,248,.16) chip" },
+    { "lucideName": "chevron-left", "flutterConstant": "LucideIcons.chevronLeft", "usedIn": "Nút chuyển tháng trước (tròn)", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696", "tapTargetPx": 44 },
+    { "lucideName": "chevron-right", "flutterConstant": "LucideIcons.chevronRight", "usedIn": "Nút chuyển tháng sau (tròn)", "sizePx": 18, "colorLight": "fg-2 #4A443B", "colorDark": "#B0A696", "tapTargetPx": 44 },
+    { "lucideName": "layout-dashboard", "flutterConstant": "LucideIcons.layoutDashboard", "usedIn": "Bottom nav — Tổng quan", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "sliders-horizontal", "flutterConstant": "LucideIcons.slidersHorizontal", "usedIn": "Bottom nav — Kiểm soát", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "arrow-left-right", "flutterConstant": "LucideIcons.arrowLeftRight", "usedIn": "Bottom nav — Thu chi", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" },
+    { "lucideName": "user-round", "flutterConstant": "LucideIcons.userRound", "usedIn": "Bottom nav — Hồ sơ", "sizePx": 22, "colorLight": "fg-3 (inactive) / blue-600 (active)", "colorDark": "#B0A696 (inactive) / #6AADFF (active)" }
+  ]
+}

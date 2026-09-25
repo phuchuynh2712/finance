@@ -204,5 +204,21 @@
       "name": { "type": "String" }
     }
   },
-  "overviewNotificationSemantic": "Notifications"
+  "overviewNotificationSemantic": "Notifications",
+  "reportIncomeLabel": "INCOME",
+  "reportExpenseLabel": "EXPENSE",
+  "reportLoadError": "Couldn't load the report.",
+  "reportRetry": "Retry",
+  "reportPreviousMonthSemantic": "Previous month",
+  "reportNextMonthSemantic": "Next month",
+  "reportBreakdownSectionTitle": "SPENDING BY ITEM",
+  "reportNotAllocatedLabel": "Not allocated this month",
+  "reportBreakdownEmpty": "No income or expense activity this month.",
+  "reportUsagePercentValue": "{percent}%",
+  "@reportUsagePercentValue": {
+    "description": "Usage-bar percentage text for an item's breakdown row (FR-013)",
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  }
 }

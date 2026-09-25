@@ -1177,6 +1177,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Thông báo'**
   String get overviewNotificationSemantic;
+
+  /// No description provided for @reportIncomeLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'THU NHẬP'**
+  String get reportIncomeLabel;
+
+  /// No description provided for @reportExpenseLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'CHI TIÊU'**
+  String get reportExpenseLabel;
+
+  /// No description provided for @reportLoadError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải dữ liệu báo cáo.'**
+  String get reportLoadError;
+
+  /// No description provided for @reportRetry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get reportRetry;
+
+  /// No description provided for @reportPreviousMonthSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng trước'**
+  String get reportPreviousMonthSemantic;
+
+  /// No description provided for @reportNextMonthSemantic.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng sau'**
+  String get reportNextMonthSemantic;
+
+  /// No description provided for @reportBreakdownSectionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'CHI TIÊU THEO KHOẢN'**
+  String get reportBreakdownSectionTitle;
+
+  /// No description provided for @reportNotAllocatedLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa phân bổ tháng này'**
+  String get reportNotAllocatedLabel;
+
+  /// No description provided for @reportBreakdownEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có hoạt động thu chi nào trong tháng này.'**
+  String get reportBreakdownEmpty;
+
+  /// Usage-bar percentage text for an item's breakdown row (FR-013)
+  ///
+  /// In vi, this message translates to:
+  /// **'{percent}%'**
+  String reportUsagePercentValue(String percent);
 }
 
 class _AppLocalizationsDelegate

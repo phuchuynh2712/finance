@@ -11,7 +11,6 @@ import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/features/account/account_routes.dart';
 import 'package:finance/features/expense_control/expense_control_routes.dart';
 import 'package:finance/features/expenses/expenses_routes.dart';
-import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 
 /// A bare [Listenable] that [GoRouter] watches to know when to re-evaluate
 /// its [GoRouterRedirect] — fired manually via [ping] rather than wrapping a
@@ -105,19 +104,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [GoRoute(path: '/spending', builder: spendingRoute)],
           ),
           StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/history',
-                builder: (context, state) {
-                  final l10n = AppLocalizations.of(context);
-                  return NotAvailablePlaceholderScreen(
-                    icon: LucideIcons.history,
-                    title: l10n.tabHistory,
-                    message: l10n.historyPlaceholderMessage,
-                  );
-                },
-              ),
-            ],
+            routes: [GoRoute(path: '/history', builder: reportRoute)],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: '/account', builder: accountScreenRoute)],
@@ -225,7 +212,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
               label: l10n.tabSpending,
             ),
             NavigationDestination(
-              icon: const Icon(LucideIcons.history),
+              icon: const Icon(LucideIcons.pieChart),
               label: l10n.tabHistory,
             ),
             NavigationDestination(

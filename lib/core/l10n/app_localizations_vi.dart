@@ -624,4 +624,37 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overviewNotificationSemantic => 'Thông báo';
+
+  @override
+  String get reportIncomeLabel => 'THU NHẬP';
+
+  @override
+  String get reportExpenseLabel => 'CHI TIÊU';
+
+  @override
+  String get reportLoadError => 'Không thể tải dữ liệu báo cáo.';
+
+  @override
+  String get reportRetry => 'Thử lại';
+
+  @override
+  String get reportPreviousMonthSemantic => 'Tháng trước';
+
+  @override
+  String get reportNextMonthSemantic => 'Tháng sau';
+
+  @override
+  String get reportBreakdownSectionTitle => 'CHI TIÊU THEO KHOẢN';
+
+  @override
+  String get reportNotAllocatedLabel => 'Chưa phân bổ tháng này';
+
+  @override
+  String get reportBreakdownEmpty =>
+      'Chưa có hoạt động thu chi nào trong tháng này.';
+
+  @override
+  String reportUsagePercentValue(String percent) {
+    return '$percent%';
+  }
 }

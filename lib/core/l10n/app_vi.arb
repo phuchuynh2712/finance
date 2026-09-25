@@ -676,5 +676,21 @@
       "name": { "type": "String" }
     }
   },
-  "overviewNotificationSemantic": "Thông báo"
+  "overviewNotificationSemantic": "Thông báo",
+  "reportIncomeLabel": "THU NHẬP",
+  "reportExpenseLabel": "CHI TIÊU",
+  "reportLoadError": "Không thể tải dữ liệu báo cáo.",
+  "reportRetry": "Thử lại",
+  "reportPreviousMonthSemantic": "Tháng trước",
+  "reportNextMonthSemantic": "Tháng sau",
+  "reportBreakdownSectionTitle": "CHI TIÊU THEO KHOẢN",
+  "reportNotAllocatedLabel": "Chưa phân bổ tháng này",
+  "reportBreakdownEmpty": "Chưa có hoạt động thu chi nào trong tháng này.",
+  "reportUsagePercentValue": "{percent}%",
+  "@reportUsagePercentValue": {
+    "description": "Usage-bar percentage text for an item's breakdown row (FR-013)",
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  }
 }

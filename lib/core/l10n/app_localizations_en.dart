@@ -627,4 +627,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewNotificationSemantic => 'Notifications';
+
+  @override
+  String get reportIncomeLabel => 'INCOME';
+
+  @override
+  String get reportExpenseLabel => 'EXPENSE';
+
+  @override
+  String get reportLoadError => 'Couldn\'t load the report.';
+
+  @override
+  String get reportRetry => 'Retry';
+
+  @override
+  String get reportPreviousMonthSemantic => 'Previous month';
+
+  @override
+  String get reportNextMonthSemantic => 'Next month';
+
+  @override
+  String get reportBreakdownSectionTitle => 'SPENDING BY ITEM';
+
+  @override
+  String get reportNotAllocatedLabel => 'Not allocated this month';
+
+  @override
+  String get reportBreakdownEmpty =>
+      'No income or expense activity this month.';
+
+  @override
+  String reportUsagePercentValue(String percent) {
+    return '$percent%';
+  }
 }
