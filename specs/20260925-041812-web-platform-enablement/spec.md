@@ -209,9 +209,11 @@ still opens the correct screen.
 - **FR-001**: The app MUST successfully open its local database on Web, so
   that every screen depending on locally-stored data functions on Web the
   same as it does on mobile.
-- **FR-002**: Every existing local-database read and write operation (Kiểm
-  soát items, transactions, sync outbox) MUST work identically on Web and
-  on mobile, with no Web-specific behavior gap.
+- **FR-002**: Beyond merely opening, every existing local-database read
+  and write operation (Kiểm soát items, transactions, sync outbox) MUST
+  complete successfully on Web — no operation that works on mobile may
+  silently fail, hang, or return incomplete data once the database
+  connection itself is open.
 - **FR-003**: The Web database configuration MUST fall back to a working
   storage backend when the browser does not support the fastest available
   option, without crashing or losing functionality.
@@ -309,6 +311,22 @@ still opens the correct screen.
   performance audit of the Web platform beyond what those defects cover
   (see "Out of Scope & Follow-Up Work" for the specific security-adjacent
   items deliberately deferred, and why).
+- This feature is the first time Web can hold real financial data at rest
+  at all (previously the database never opened there, so there was
+  nothing to protect); the constitution's local-device-security guidance
+  ("SHOULD be encrypted at rest... on platforms where the OS does not
+  already provide full-disk encryption guarantees equivalent to it") is
+  satisfied the same way it already is on mobile today — by relying on
+  the host OS's own disk-level protection, since this codebase does not
+  use SQLCipher/at-rest database encryption on any platform. A browser's
+  IndexedDB/OPFS storage is backed by files under the OS's own disk, so
+  it inherits whatever disk-level guarantee the host OS provides, the
+  same as a native SQLite file does on mobile — this is a carried-forward
+  posture, not a new gap this feature introduces. This is distinct from,
+  and does not change, the separately-tracked *session-token* storage
+  question (Out of Scope item 2 below), which is specifically about
+  `flutter_secure_storage`'s experimental Web backend, not the Drift
+  database.
 
 ## Out of Scope & Follow-Up Work
 

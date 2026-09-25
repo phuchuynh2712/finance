@@ -186,7 +186,12 @@ new screen, no new route.
   Scope item 2, unchanged, still open) — Web sessions are exactly as
   secured (or not) after this feature as before it; this feature only
   makes the *data* and *auth-redirect* paths function, it does not change
-  what protects the session token at rest.
+  what protects the session token at rest. Separately, this is the first
+  feature to let Web hold real financial data at rest at all — spec.md's
+  Assumptions section (added per `/speckit-analyze` finding E1) records
+  why the constitution's at-rest-encryption SHOULD is satisfied the same
+  way it already is on mobile (reliance on OS-level disk protection, no
+  SQLCipher on any platform), not a new gap this feature introduces.
 - **Development Workflow: PASS (procedural).** Feature branch discipline
   followed per the session's own branch requirement (see Project
   Structure note below); this PR's description will call out the
