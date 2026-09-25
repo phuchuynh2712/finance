@@ -23,6 +23,15 @@ theme dùng chung — không bao gồm redesign từng màn hình còn lại hay
 nền tảng Web (xem 'Out of Scope & Follow-Up Work' bên dưới, được ghi chi
 tiết theo yêu cầu để không bị quên khi bắt đầu spec kế tiếp)."
 
+## Clarifications
+
+### Session 2026-09-25
+
+- Q: Ở dải rail (cửa sổ ≥600dp), mỗi điểm đến hiển thị icon+nhãn chữ, hay
+  chỉ icon? → A: Icon + nhãn chữ luôn hiển thị (giữ giống bottom bar hiện
+  tại), ở mọi kích thước rail — không có mốc breakpoint thứ ba trong
+  feature này.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Navigation adapts to window size (Priority: P1)
@@ -54,8 +63,9 @@ this is fully verifiable on its own, without any other story in this spec.
    destinations, exactly as today.
 2. **Given** the app window is 600 logical pixels wide or wider, **When**
    the app is shown, **Then** navigation appears as a side rail with the
-   same 5 destinations, and whichever tab was already selected stays
-   selected.
+   same 5 destinations, each showing its icon and text label together
+   (matching the bottom bar's existing presentation, not icon-only), and
+   whichever tab was already selected stays selected.
 3. **Given** the app is open at a narrow width on the Kiểm soát tab with
    unsaved formula edits, **When** the window is resized past 600 logical
    pixels and the user selects a different rail destination, **Then** the
@@ -171,7 +181,9 @@ at a desktop window size and confirm it is at least 48×48 logical pixels.
 - **FR-001**: The app MUST present its primary navigation as a bottom bar
   when the window is narrower than 600 logical pixels, and as a side rail
   with the same destinations when the window is 600 logical pixels wide or
-  wider.
+  wider. The rail MUST show each destination's icon together with its text
+  label at every rail width — never icon-only — matching the bottom bar's
+  existing presentation.
 - **FR-002**: The app MUST base this and every other layout decision in
   this feature purely on the current window size, never on which device,
   operating system, or platform the app happens to be running on.
