@@ -132,19 +132,19 @@ or 3.
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] In `lib/core/router/app_router.dart`, replace the five
+- [X] T005 [US1] In `lib/core/router/app_router.dart`, replace the five
   hand-written `NavigationDestination` widgets inside `_AppShellState
   .build()` with a single private, ordered list of 5 plain-data entries
   (icon, a `String Function(AppLocalizations)` label getter, and the
   existing branch index 0–4, in today's order: Tổng quan, Kiểm soát, Thu
   chi, Báo cáo, Hồ sơ) — see [data-model.md](./data-model.md)'s
   `_NavDestinationSpec`. Do not change destination order, icons, or labels.
-- [ ] T006 [US1] In `lib/core/router/app_router.dart`, add a `GlobalKey`
+- [X] T006 [US1] In `lib/core/router/app_router.dart`, add a `GlobalKey`
   field to `_AppShellState`, instantiated once (e.g. `final _shellKey =
   GlobalKey();` as a field initializer or in `initState` — never inside
   `build()`, per the Flutter framework's own `GlobalKey` "Pitfalls"
   guidance cited in research.md Decision 2).
-- [ ] T007 [US1] In `lib/core/router/app_router.dart`, rework
+- [X] T007 [US1] In `lib/core/router/app_router.dart`, rework
   `_AppShellState.build()` to read `final widthClass = windowSizeClassFor
   (MediaQuery.sizeOf(context).width);` (from T002) and branch:
   - `widthClass == WindowSizeClass.compact` → today's existing shape:
@@ -168,31 +168,31 @@ or 3.
   - Do not introduce any `Platform.is*`/`kIsWeb`/`defaultTargetPlatform`
     check anywhere in this method — the branch above MUST be driven only
     by `widthClass` (FR-002; verified again in T028).
-- [ ] T008 [US1] In `lib/core/router/app_router.dart`, verify (and adjust
+- [X] T008 [US1] In `lib/core/router/app_router.dart`, verify (and adjust
   if needed) that `_handleDestinationSelected`'s existing unsaved-Kiểm-soát
   -edits `_DiscardPromptDialog` gate (FR-004) is reachable identically
   whether it was triggered from `NavigationBar.onDestinationSelected` (T007
   compact branch) or `NavigationRail.onDestinationSelected` (T007 expanded
   branch) — no new branching logic should be needed since both call the
   same handler, but confirm this explicitly rather than assuming it.
-- [ ] T009 [US1] In `test/widget/core/router/app_shell_nav_bar_test.dart`,
+- [X] T009 [US1] In `test/widget/core/router/app_shell_nav_bar_test.dart`,
   add/confirm a test at a compact width (<600dp, e.g. pump at the
   `flutter_test_config.dart` default from T003) asserting a
   `NavigationBar` is rendered with all 5 destinations, exactly matching the
   suite's existing pre-feature assertions (regression coverage).
-- [ ] T010 [US1] In the same file, add a test at an expanded width (≥600dp
+- [X] T010 [US1] In the same file, add a test at an expanded width (≥600dp
   — explicitly set `tester.view.physicalSize` for this test) asserting a
   `NavigationRail` is rendered instead, with all 5 destinations each
   showing both icon and visible text label (Clarification Q1,
   `NavigationRailLabelType.all`), and the correct `selectedIndex`.
-- [ ] T011 [US1] In the same file, add a resize scenario: pump the shell at
+- [X] T011 [US1] In the same file, add a resize scenario: pump the shell at
   a compact width with a descendant test screen that has scrollable
   content or a `TextField`; scroll/type into it; then change
   `tester.view.physicalSize` to an expanded width and pump again; assert
   the scroll position / typed text is unchanged (Clarification Q2,
   Acceptance Scenario 5) — this is the test that actually exercises T006's
   `GlobalKey` reparenting, not just the visual bar-vs-rail switch.
-- [ ] T012 [P] [US1] In
+- [X] T012 [P] [US1] In
   `test/widget/core/router/app_shell_discard_prompt_test.dart`, add a test
   mirroring the file's existing bottom-bar discard-prompt coverage, but at
   an expanded width so the trigger comes from `NavigationRail

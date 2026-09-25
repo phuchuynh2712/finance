@@ -7,6 +7,7 @@ import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/features/account/account_routes.dart';
 import 'package:finance/features/expense_control/expense_control_routes.dart';
@@ -120,6 +121,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// formula edits when the user navigates away (research.md §9).
 const _expenseControlBranchIndex = 1;
 
+/// One entry per navigation destination — the single source of truth
+/// mapped to both `NavigationDestination` (compact/bottom-bar) and
+/// `NavigationRailDestination` (medium-and-above/rail), so the two
+/// presentations' icon/label/order can't drift apart from each other
+/// (adaptive-layout-foundation research.md Decision 9, data-model.md
+/// `_NavDestinationSpec`). `label` defers the `AppLocalizations` lookup to
+/// build time, matching how each destination's label was already read
+/// inline before this change.
+typedef _NavDestinationSpec = ({
+  IconData icon,
+  String Function(AppLocalizations) label,
+  int branchIndex,
+});
+
+String _overviewLabel(AppLocalizations l10n) => l10n.tabOverview;
+String _expenseControlLabel(AppLocalizations l10n) => l10n.tabExpenseControl;
+String _spendingLabel(AppLocalizations l10n) => l10n.tabSpending;
+String _historyLabel(AppLocalizations l10n) => l10n.tabHistory;
+String _accountLabel(AppLocalizations l10n) => l10n.tabAccount;
+
+const _navDestinations = <_NavDestinationSpec>[
+  (icon: LucideIcons.layoutDashboard, label: _overviewLabel, branchIndex: 0),
+  (
+    icon: LucideIcons.slidersHorizontal,
+    label: _expenseControlLabel,
+    branchIndex: 1,
+  ),
+  (icon: LucideIcons.receipt, label: _spendingLabel, branchIndex: 2),
+  (icon: LucideIcons.pieChart, label: _historyLabel, branchIndex: 3),
+  (icon: LucideIcons.user, label: _accountLabel, branchIndex: 4),
+];
+
 class _AppShell extends ConsumerStatefulWidget {
   const _AppShell({required this.navigationShell});
 
@@ -135,6 +168,15 @@ class _AppShellState extends ConsumerState<_AppShell> {
   // — `onDestinationSelected` is `void Function(int)`, so Flutter itself
   // doesn't await or debounce it.
   bool _prompting = false;
+
+  // Owned by State, created once — never inside build() — so Flutter
+  // reparents (State.deactivate, not dispose) rather than tearing down and
+  // rebuilding widget.navigationShell when the branch below switches
+  // between the bottom-bar and rail shapes at a breakpoint crossing
+  // (adaptive-layout-foundation research.md Decision 2, Clarification Q2:
+  // the currently-viewed screen's own local state — scroll position,
+  // unsubmitted form input — must survive the switch).
+  final _shellKey = GlobalKey();
 
   Future<void> _handleDestinationSelected(int index) async {
     final currentIndex = widget.navigationShell.currentIndex;
@@ -185,42 +227,70 @@ class _AppShellState extends ConsumerState<_AppShell> {
     final currentIndex = widget.navigationShell.currentIndex;
     final semantic = Theme.of(context).extension<AppSemanticColors>()!;
 
+    // FR-001/FR-002 (adaptive-layout-foundation): the navigation
+    // presentation is decided purely by the available window width — never
+    // by device/platform — using the shared breakpoint scale so no screen
+    // re-derives its own threshold.
+    final widthClass = windowSizeClassFor(MediaQuery.sizeOf(context).width);
+
+    // Same GlobalKey-wrapped instance placed into either shape below, so
+    // Flutter reparents rather than disposes it across a widthClass switch
+    // (see _shellKey's own doc comment).
+    final shellContent = KeyedSubtree(
+      key: _shellKey,
+      child: widget.navigationShell,
+    );
+
+    if (widthClass == WindowSizeClass.compact) {
+      return Scaffold(
+        body: shellContent,
+        // FR-018: a thin top border separating the bar from content above,
+        // matching the app's other fixed headers (e.g.
+        // expense_control_screen.dart's own header Container).
+        bottomNavigationBar: DecoratedBox(
+          key: const Key('bottomNavTopBorder'),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: semantic.border1)),
+          ),
+          child: NavigationBar(
+            selectedIndex: currentIndex,
+            onDestinationSelected: _handleDestinationSelected,
+            destinations: [
+              for (final d in _navDestinations)
+                NavigationDestination(icon: Icon(d.icon), label: d.label(l10n)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // widthClass is medium/expanded/large/extraLarge (>=600dp): a side
+    // rail replaces the bottom bar, each destination's icon+label always
+    // visible (Clarification Q1, NavigationRailLabelType.all) — no
+    // navigation drawer, per the constitution.
     return Scaffold(
-      body: widget.navigationShell,
-      // FR-018: a thin top border separating the bar from content above,
-      // matching the app's other fixed headers (e.g.
-      // expense_control_screen.dart's own header Container).
-      bottomNavigationBar: DecoratedBox(
-        key: const Key('bottomNavTopBorder'),
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: semantic.border1)),
-        ),
-        child: NavigationBar(
-          selectedIndex: currentIndex,
-          onDestinationSelected: _handleDestinationSelected,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(LucideIcons.layoutDashboard),
-              label: l10n.tabOverview,
+      body: Row(
+        children: [
+          DecoratedBox(
+            key: const Key('navRailTrailingBorder'),
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: semantic.border1)),
             ),
-            NavigationDestination(
-              icon: const Icon(LucideIcons.slidersHorizontal),
-              label: l10n.tabExpenseControl,
+            child: NavigationRail(
+              selectedIndex: currentIndex,
+              onDestinationSelected: _handleDestinationSelected,
+              labelType: NavigationRailLabelType.all,
+              destinations: [
+                for (final d in _navDestinations)
+                  NavigationRailDestination(
+                    icon: Icon(d.icon),
+                    label: Text(d.label(l10n)),
+                  ),
+              ],
             ),
-            NavigationDestination(
-              icon: const Icon(LucideIcons.receipt),
-              label: l10n.tabSpending,
-            ),
-            NavigationDestination(
-              icon: const Icon(LucideIcons.pieChart),
-              label: l10n.tabHistory,
-            ),
-            NavigationDestination(
-              icon: const Icon(LucideIcons.user),
-              label: l10n.tabAccount,
-            ),
-          ],
-        ),
+          ),
+          Expanded(child: shellContent),
+        ],
       ),
     );
   }

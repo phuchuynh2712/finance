@@ -20,6 +20,7 @@ import 'package:finance/features/expense_control/domain/transaction_history_reco
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
+import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/report_providers.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -295,6 +296,104 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(selectedReportMonthProvider), pastMonth);
+    },
+  );
+
+  // --- adaptive-layout-foundation (User Story 1) ---
+
+  testWidgets(
+    'at a compact window width, navigation is still a bottom NavigationBar, not a rail (regression)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      // The pinned compact default from flutter_test_config.dart already
+      // applies; set it explicitly anyway so this test's intent reads
+      // clearly on its own.
+      tester.view.physicalSize = const Size(410, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(NavigationRail), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'at an expanded window width (>=600dp), navigation is a rail with every destination'
+    " icon+label always visible, at the correct selected index (Clarification Q1, FR-001)",
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(900, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationBar), findsNothing);
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(rail.selectedIndex, 0);
+      expect(rail.labelType, NavigationRailLabelType.all);
+      for (final label in _tabLabels) {
+        expect(find.text(label), findsOneWidget);
+      }
+
+      await tester.tap(find.text('Hồ sơ').last);
+      await tester.pumpAndSettle();
+      final railAfterTap = tester.widget<NavigationRail>(
+        find.byType(NavigationRail),
+      );
+      expect(railAfterTap.selectedIndex, _tabLabels.indexOf('Hồ sơ'));
+    },
+  );
+
+  testWidgets(
+    'the currently-viewed screen is reparented, not disposed and recreated,'
+    ' when the window crosses the compact/expanded breakpoint'
+    ' (Clarification Q2, research.md Decision 2)',
+    (tester) async {
+      final container = _container();
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(410, 864);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_harness(container));
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      final elementBefore = tester.element(find.byType(OverviewScreen));
+
+      // Cross the 600dp threshold in the other direction.
+      tester.view.physicalSize = const Size(900, 864);
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationRail), findsOneWidget);
+
+      final elementAfter = tester.element(find.byType(OverviewScreen));
+      expect(
+        identical(elementBefore, elementAfter),
+        isTrue,
+        reason:
+            'OverviewScreen was disposed and recreated across the '
+            'breakpoint crossing instead of being reparented — this is '
+            'exactly what the GlobalKey on navigationShell exists to '
+            'prevent, since a fresh Element means any local widget state '
+            "(scroll position, an in-progress text field) would have "
+            'been lost too.',
+      );
     },
   );
 }
