@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
@@ -42,103 +43,115 @@ class TransactionHistoryScreen extends ConsumerWidget {
               iconColor: semantic.fg2,
             ),
             Expanded(
-              child: recordsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stackTrace) => EmptyStateView(
-                  icon: LucideIcons.history,
-                  message: l10n.transactionHistoryLoadError,
-                  actionLabel: l10n.transactionHistoryRetry,
-                  onAction: () =>
-                      ref.invalidate(transactionHistoryRecordsProvider(month)),
-                ),
-                data: (records) {
-                  final view = buildTransactionHistoryView(
-                    records: records,
-                    filter: filter,
-                  );
-                  return CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-                          child: _HistoryControls(
-                            month: month,
-                            now: DateTime.now(),
-                            locale: locale,
-                            totalLabel: l10n.transactionHistoryExpenseTotal(
-                              currency.format(view.expenseTotal),
+              child: AdaptiveBody(
+                child: recordsAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) => EmptyStateView(
+                    icon: LucideIcons.history,
+                    message: l10n.transactionHistoryLoadError,
+                    actionLabel: l10n.transactionHistoryRetry,
+                    onAction: () => ref.invalidate(
+                      transactionHistoryRecordsProvider(month),
+                    ),
+                  ),
+                  data: (records) {
+                    final view = buildTransactionHistoryView(
+                      records: records,
+                      filter: filter,
+                    );
+                    return CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
+                            child: _HistoryControls(
+                              month: month,
+                              now: DateTime.now(),
+                              locale: locale,
+                              totalLabel: l10n.transactionHistoryExpenseTotal(
+                                currency.format(view.expenseTotal),
+                              ),
+                              previousLabel:
+                                  l10n.transactionHistoryPreviousMonthSemantic,
+                              nextLabel:
+                                  l10n.transactionHistoryNextMonthSemantic,
+                              onPrevious: () =>
+                                  _changeMonth(ref, previousMonth(month)),
+                              onNext: canAdvanceMonth(month, DateTime.now())
+                                  ? () => _changeMonth(ref, nextMonth(month))
+                                  : null,
+                              filter: filter,
+                              groupFilters: view.groupFilters,
+                              allLabel: l10n.transactionHistoryAllFilter,
+                              incomeLabel: l10n.transactionHistoryIncomeFilter,
+                              onFilterChanged: (value) {
+                                ref
+                                        .read(
+                                          selectedTransactionHistoryFilterProvider
+                                              .notifier,
+                                        )
+                                        .state =
+                                    value;
+                              },
+                              borderColor: semantic.border2,
+                              primaryColor: theme.colorScheme.primary,
                             ),
-                            previousLabel:
-                                l10n.transactionHistoryPreviousMonthSemantic,
-                            nextLabel: l10n.transactionHistoryNextMonthSemantic,
-                            onPrevious: () =>
-                                _changeMonth(ref, previousMonth(month)),
-                            onNext: canAdvanceMonth(month, DateTime.now())
-                                ? () => _changeMonth(ref, nextMonth(month))
-                                : null,
-                            filter: filter,
-                            groupFilters: view.groupFilters,
-                            allLabel: l10n.transactionHistoryAllFilter,
-                            incomeLabel: l10n.transactionHistoryIncomeFilter,
-                            onFilterChanged: (value) {
-                              ref
-                                      .read(
-                                        selectedTransactionHistoryFilterProvider
-                                            .notifier,
-                                      )
-                                      .state =
-                                  value;
-                            },
-                            borderColor: semantic.border2,
-                            primaryColor: theme.colorScheme.primary,
                           ),
                         ),
-                      ),
-                      if (view.groups.isEmpty)
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: EmptyStateView(
-                            icon: LucideIcons.history,
-                            message: l10n.transactionHistoryEmpty,
-                          ),
-                        )
-                      else
-                        for (final group in view.groups) ...[
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
-                              child: Text(
-                                DateFormat(
-                                  'd MMMM',
-                                  locale,
-                                ).format(group.date).toUpperCase(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.7,
-                                  color: semantic.fg2,
+                        if (view.groups.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyStateView(
+                              icon: LucideIcons.history,
+                              message: l10n.transactionHistoryEmpty,
+                            ),
+                          )
+                        else
+                          for (final group in view.groups) ...[
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  18,
+                                  14,
+                                  18,
+                                  6,
+                                ),
+                                child: Text(
+                                  DateFormat(
+                                    'd MMMM',
+                                    locale,
+                                  ).format(group.date).toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.7,
+                                    color: semantic.fg2,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            sliver: SliverList.builder(
-                              itemCount: group.items.length,
-                              itemBuilder: (context, index) => _TransactionRow(
-                                record: group.items[index],
-                                currency: currency,
-                                incomeLabel:
-                                    l10n.transactionHistoryIncomeClassification,
-                                archivedLabel:
-                                    l10n.transactionHistoryArchivedItem,
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              sliver: SliverList.builder(
+                                itemCount: group.items.length,
+                                itemBuilder: (context, index) => _TransactionRow(
+                                  record: group.items[index],
+                                  currency: currency,
+                                  incomeLabel: l10n
+                                      .transactionHistoryIncomeClassification,
+                                  archivedLabel:
+                                      l10n.transactionHistoryArchivedItem,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                    ],
-                  );
-                },
+                          ],
+                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ],

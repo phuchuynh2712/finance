@@ -1,5 +1,41 @@
 <!--
 Sync Impact Report
+Version change: 1.6.0 → 1.7.0 (MINOR: new Development Workflow bullet —
+  materially expanded governance guidance requiring root-cause fixes for
+  bugs found in shared/`core/` code during an unrelated feature, rather
+  than allowing a locally-scoped patch by default; no principle redefined
+  or removed)
+Modified sections (this amendment):
+  - Development Workflow → new bullet immediately after the existing
+    "Breaking changes to shared `core/` utilities REQUIRE explicit
+    call-out" bullet, requiring a root-cause fix at the shared code itself
+    when a real bug is found there while implementing a narrower feature —
+    a locally-scoped patch is permitted only when the root-cause fix is
+    genuinely infeasible within the current feature's scope, and even then
+    MUST be documented with the deferral's rationale (transaction-history-
+    redesign feature, User Story 1 planning — an `AdaptiveBody` scroll-
+    position-loss bug was found and fixed at its root rather than patched
+    per-caller, per explicit user direction to prioritize output quality
+    over minimizing an individual PR's footprint)
+Templates requiring updates (this amendment):
+  - .specify/templates/plan-template.md: ✅ compatible (Constitution Check
+    section already reads "[Gates determined based on constitution file]"
+    — generated fresh per feature from this file, no template edit needed;
+    a future plan whose Constitution Check cites this bullet does so in
+    its own filled-in content, not in the template itself)
+  - .specify/templates/spec-template.md: ✅ compatible (no `core/`- or
+    shared-code-specific references)
+  - .specify/templates/tasks-template.md: ✅ compatible (generic
+    Setup/Foundational/User-Story phase structure; a root-cause `core/`
+    fix found during a feature's planning is expressed as that feature's
+    own Foundational-phase tasks when `/speckit-tasks` runs, same pattern
+    already used by transaction-history-redesign's own plan.md)
+  - .specify/templates/commands/*.md: not present in this project
+Follow-up TODOs: none — this amendment is self-contained; the concrete
+  application (the `AdaptiveBody` fix) is tracked in
+  specs/20260928-081611-transaction-history-redesign/research.md
+  Decision 1a, not here.
+Previous amendment (1.5.0 → 1.6.0) Sync Impact Report below, kept for history:
 Version change: 1.5.0 → 1.6.0 (MINOR: new Security bullet closing a
   previously-silent gap — an explicit, reasoned accept-the-risk decision
   for flutter_secure_storage's experimental Web backend, conditional on
@@ -474,6 +510,25 @@ once features assume an insecure default.
   Architecture and Offline-First Data & Sync sections, and any change to
   platform-capability detection or integration points per Multi-Platform
   Support.
+- **A real bug discovered in shared code (`core/`, or any other code two or
+  more features already depend on) while implementing an unrelated,
+  narrower feature MUST be fixed at its root, in the shared code itself —
+  not worked around or duplicated at the call site currently being
+  touched.** A locally-scoped patch (e.g. an opt-in flag, a per-caller
+  key, a wrapper that suppresses the symptom only where it was noticed)
+  MAY be used instead only when the root-cause fix is genuinely
+  infeasible within the current feature's scope (e.g. it requires a
+  separate migration, a breaking API change needing its own deprecation
+  cycle, or investigation deep enough to itself warrant a dedicated
+  feature) — and even then, the decision MUST be documented (this
+  constitution's Governance section's amendment-rationale standard
+  applies equally to a plan's own documented trade-offs) with the
+  root-cause problem, why the fix was deferred, and a reference for
+  whoever picks it up next. Keeping an individual pull request's diff
+  small or single-purpose is never sufficient justification on its own to
+  leave a known shared-code bug unfixed at its source — this project's
+  priority is the correctness and long-term quality of the shared
+  foundation every feature builds on, not the size of any one PR.
 
 ## Governance
 
@@ -493,4 +548,4 @@ for backward-incompatible governance/principle removals or redefinitions,
 MINOR for new principles or materially expanded guidance, PATCH for wording
 clarifications and non-semantic refinements.
 
-**Version**: 1.6.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-25
+**Version**: 1.7.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-28
