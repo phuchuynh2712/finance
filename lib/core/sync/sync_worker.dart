@@ -53,9 +53,12 @@ class SyncWorker {
         switch (row.operation) {
           case SyncOperation.insert:
           case SyncOperation.update:
-            await table.upsert(payload);
           case SyncOperation.delete:
-            await table.delete().eq('id', row.rowId);
+            // Soft-delete: a "delete" is an upsert carrying a populated
+            // `deleted_at` (research.md's rejected-hard-delete decision) —
+            // never a real DELETE, which would break FK-referencing rows
+            // (e.g. financial_transactions) permanently, with no local undo.
+            await table.upsert(payload);
         }
         await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id)))
             .write(SyncOutboxCompanion(syncedAt: Value(DateTime.now())));

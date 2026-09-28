@@ -73,7 +73,10 @@ class ExpenseControlRepositoryImpl
         );
   }
 
-  Map<String, dynamic> _payloadOf(ExpenseControlItem item) => {
+  Map<String, dynamic> _payloadOf(
+    ExpenseControlItem item, {
+    DateTime? deletedAt,
+  }) => {
     'id': item.id,
     'user_id': item.userId,
     'parent_id': item.parentId,
@@ -85,6 +88,7 @@ class ExpenseControlRepositoryImpl
     'allocation_value': item.allocationValue,
     'balance': item.balance,
     'is_savings_receiver': item.isSavingsReceiver,
+    'deleted_at': deletedAt?.toIso8601String(),
   };
 
   /// Snake_case payload for a `financial_transactions` outbox row, matching
@@ -92,21 +96,26 @@ class ExpenseControlRepositoryImpl
   /// [_payloadOf] — that method's shape is for `expense_control_items` rows
   /// only and MUST NOT be reused here (research.md/tasks.md's explicit
   /// warning against payload-shape confusion between the two tables).
+  ///
+  /// Every `timestamptz` field is sent as an ISO 8601 string
+  /// ([DateTime.toIso8601String]), not a raw epoch integer — PostgREST's
+  /// JSON-to-`timestamptz` coercion only accepts date-time strings; a bare
+  /// integer triggers Postgres error 22008
+  /// ("date/time field value out of range") because it's parsed as
+  /// malformed date-time text, not interpreted as Unix epoch seconds.
   Map<String, dynamic> _payloadOfTransaction(FinancialTransactionRow row) => {
     'id': row.id,
     'user_id': row.userId,
     'expense_control_item_id': row.expenseControlItemId,
     'direction': row.direction.name,
     'amount': row.amount,
-    'occurred_at': row.occurredAt.millisecondsSinceEpoch ~/ 1000,
-    'created_at': row.createdAt.millisecondsSinceEpoch ~/ 1000,
+    'occurred_at': row.occurredAt.toIso8601String(),
+    'created_at': row.createdAt.toIso8601String(),
     'display_name': row.displayName,
     'display_group_name': row.displayGroupName,
     'display_icon_key': row.displayIconKey,
-    'updated_at': row.updatedAt.millisecondsSinceEpoch ~/ 1000,
-    'deleted_at': row.deletedAt == null
-        ? null
-        : row.deletedAt!.millisecondsSinceEpoch ~/ 1000,
+    'updated_at': row.updatedAt.toIso8601String(),
+    'deleted_at': row.deletedAt?.toIso8601String(),
   };
 
   TransactionHistoryRecord _toHistoryRecord(FinancialTransactionRow row) {
@@ -260,12 +269,23 @@ class ExpenseControlRepositoryImpl
       await (_db.update(_db.expenseControlItems)
             ..where((row) => row.id.equals(id)))
           .write(ExpenseControlItemsCompanion(deletedAt: Value(now)));
-      await _appendOutbox(id, SyncOperation.delete, {'id': id});
+      final deletedRow = await (_db.select(
+        _db.expenseControlItems,
+      )..where((row) => row.id.equals(id))).getSingle();
+      await _appendOutbox(
+        id,
+        SyncOperation.delete,
+        _payloadOf(_toDomain(deletedRow), deletedAt: now),
+      );
       for (final child in children) {
         await (_db.update(_db.expenseControlItems)
               ..where((row) => row.id.equals(child.id)))
             .write(ExpenseControlItemsCompanion(deletedAt: Value(now)));
-        await _appendOutbox(child.id, SyncOperation.delete, {'id': child.id});
+        await _appendOutbox(
+          child.id,
+          SyncOperation.delete,
+          _payloadOf(_toDomain(child), deletedAt: now),
+        );
       }
     });
   }
