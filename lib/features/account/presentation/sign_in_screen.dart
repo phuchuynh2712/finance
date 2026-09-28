@@ -7,7 +7,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'biometric_enable_prompt.dart';
 
 /// Login screen (FR-003) — also reused, unchanged, as the app's cold-start
@@ -25,10 +27,14 @@ class SignInScreen extends ConsumerStatefulWidget {
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _identifierFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _isSubmitting = false;
   String? _errorMessage;
   bool _biometricButtonVisible = false;
+
+  bool get _canSubmit => !_isSubmitting;
 
   @override
   void initState() {
@@ -40,6 +46,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   void dispose() {
     _identifierController.dispose();
     _passwordController.dispose();
+    _identifierFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -148,161 +156,177 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _LogoBlock(l10n: l10n, semantic: semantic, colors: colors),
-                const SizedBox(height: 36),
-                Text(
-                  l10n.signInIdentifierLabel,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: semantic.fg2,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _InputField(
-                  controller: _identifierController,
-                  keyboardType: TextInputType.emailAddress,
-                  semantic: semantic,
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  l10n.signInPasswordLabel,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: semantic.fg2,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _InputField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  semantic: semantic,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
-                      size: 18,
-                      color: semantic.fg3,
-                    ),
-                    tooltip: _obscurePassword
-                        ? l10n.signInShowPasswordSemantic
-                        : l10n.signInHidePasswordSemantic,
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => context.go('/forgot-password'),
-                    child: Text(
-                      l10n.signInForgotPasswordAction,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 8),
+            child: AdaptiveBody(
+              activatesAt: WindowSizeClass.medium,
+              maxWidth: AppLayoutTokens.authContentMaxWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _LogoBlock(l10n: l10n, semantic: semantic, colors: colors),
+                  const SizedBox(height: 36),
                   Text(
-                    _errorMessage!,
-                    style: TextStyle(color: colors.error, fontSize: 13),
+                    l10n.signInIdentifierLabel,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: semantic.fg2,
+                    ),
                   ),
-                ],
-                const SizedBox(height: 14),
-                SizedBox(
-                  height: 52,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                  const SizedBox(height: 6),
+                  _InputField(
+                    controller: _identifierController,
+                    focusNode: _identifierFocusNode,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) =>
+                        FocusScope.of(context).requestFocus(_passwordFocusNode),
+                    semantic: semantic,
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    l10n.signInPasswordLabel,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: semantic.fg2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _InputField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) {
+                      if (_canSubmit) _submit();
+                    },
+                    semantic: semantic,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                        size: 18,
+                        color: semantic.fg3,
+                      ),
+                      tooltip: _obscurePassword
+                          ? l10n.signInShowPasswordSemantic
+                          : l10n.signInHidePasswordSemantic,
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => context.go('/forgot-password'),
+                      child: Text(
+                        l10n.signInForgotPasswordAction,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    onPressed: _isSubmitting ? null : _submit,
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            l10n.signInSubmit,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
                   ),
-                ),
-                if (_biometricButtonVisible) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(color: semantic.border1, height: 1),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            l10n.signInOrDivider,
-                            style: TextStyle(fontSize: 12, color: semantic.fg3),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(color: semantic.border1, height: 1),
-                        ),
-                      ],
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(color: colors.error, fontSize: 13),
                     ),
-                  ),
+                  ],
+                  const SizedBox(height: 14),
                   SizedBox(
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(width: 1.5, color: semantic.border2),
+                    height: 52,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      onPressed: _isSubmitting ? null : _signInWithBiometric,
-                      icon: Icon(
-                        LucideIcons.fingerprint,
-                        size: 18,
-                        color: semantic.fg2,
+                      onPressed: _canSubmit ? _submit : null,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              l10n.signInSubmit,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (_biometricButtonVisible) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Divider(color: semantic.border1, height: 1),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              l10n.signInOrDivider,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: semantic.fg3,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(color: semantic.border1, height: 1),
+                          ),
+                        ],
                       ),
-                      label: Text(
-                        l10n.signInWithBiometricAction,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                    ),
+                    SizedBox(
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(width: 1.5, color: semantic.border2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        onPressed: _isSubmitting ? null : _signInWithBiometric,
+                        icon: Icon(
+                          LucideIcons.fingerprint,
+                          size: 18,
                           color: semantic.fg2,
                         ),
+                        label: Text(
+                          l10n.signInWithBiometricAction,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: semantic.fg2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  Center(
+                    child: TextButton(
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => context.go('/sign-up'),
+                      child: Text(
+                        l10n.signInNavigateToSignUp,
+                        style: TextStyle(fontSize: 13, color: semantic.fg3),
                       ),
                     ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                Center(
-                  child: TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => context.go('/sign-up'),
-                    child: Text(
-                      l10n.signInNavigateToSignUp,
-                      style: TextStyle(fontSize: 13, color: semantic.fg3),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -362,14 +386,20 @@ class _InputField extends StatelessWidget {
   const _InputField({
     required this.controller,
     required this.semantic,
+    this.focusNode,
     this.keyboardType,
+    this.textInputAction,
+    this.onSubmitted,
     this.obscureText = false,
     this.suffixIcon,
   });
 
   final TextEditingController controller;
   final AppSemanticColors semantic;
+  final FocusNode? focusNode;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
   final bool obscureText;
   final Widget? suffixIcon;
 
@@ -379,7 +409,10 @@ class _InputField extends StatelessWidget {
       height: 50,
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        onSubmitted: onSubmitted,
         obscureText: obscureText,
         style: TextStyle(fontSize: 15, color: semantic.fg2),
         decoration: InputDecoration(

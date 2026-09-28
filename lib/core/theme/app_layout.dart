@@ -61,4 +61,12 @@ class AppLayoutTokens {
   /// (list-detail, forms) may introduce their own constant here when
   /// they're tackled.
   static const double contentMaxWidth = 960;
+
+  /// Content max-width for the 4 Auth screens (Sign In, Sign Up, Forgot
+  /// Password, Reset Password) — matches MUI's own official Sign-in
+  /// template (research.md Decision 2, auth-screens-responsive feature).
+  /// Activated at [WindowSizeClass.medium] (600dp), narrower than
+  /// [contentMaxWidth]'s [WindowSizeClass.expanded] (840dp) activation, per
+  /// that feature's [contracts/auth-adaptive-ui.md] contract.
+  static const double authContentMaxWidth = 450;
 }

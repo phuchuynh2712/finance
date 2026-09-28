@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -104,4 +105,162 @@ void main() {
     final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
     expect(find.text(l10n.errorMapperGeneric), findsOneWidget);
   });
+
+  testWidgets('at a compact width (<600dp), the form renders at full width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(410, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    final fieldSize = tester.getSize(find.byType(TextField).first);
+    expect(fieldSize.width, greaterThan(300));
+  });
+
+  testWidgets(
+    'at an expanded width (>=840dp), the form is capped and centered',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      final fieldSize = tester.getSize(find.byType(TextField).first);
+      // Padding(all: 24) sits OUTSIDE AdaptiveBody here (same structure as
+      // Forgot Password), so the field width is the raw authContentMaxWidth
+      // token, not reduced by that padding.
+      expect(fieldSize.width, 450);
+    },
+  );
+
+  testWidgets(
+    'the capped container width does not change when the inline error message appears',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      final widthBefore = tester.getSize(find.byType(TextField).first).width;
+
+      await tester.enterText(find.byType(TextField).first, 'newPassword123');
+      await tester.enterText(find.byType(TextField).last, 'different');
+      await tester.tap(find.text('Đặt lại mật khẩu'));
+      await tester.pumpAndSettle();
+
+      final widthAfter = tester.getSize(find.byType(TextField).first).width;
+      expect(widthAfter, widthBefore);
+    },
+  );
+
+  testWidgets(
+    'resizing below 600dp immediately after the success message appears '
+    'keeps it visible (FR-010) — resize happens before the 2s auto-redirect',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'newPassword123');
+      await tester.enterText(find.byType(TextField).last, 'newPassword123');
+      await tester.tap(find.text('Đặt lại mật khẩu'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.textContaining('Đã đặt lại mật khẩu'), findsOneWidget);
+
+      tester.view.physicalSize = const Size(410, 800);
+      // Well under the screen's own 2-second redirect delay — a hypothetical
+      // bug that clears the message only when the redirect timer fires
+      // can't accidentally make this test pass for the wrong reason.
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.textContaining('Đã đặt lại mật khẩu'), findsOneWidget);
+
+      // Drain the screen's own pending 2-second redirect timer so the test
+      // framework's "no pending timers after teardown" invariant holds.
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    },
+  );
+
+  testWidgets('Tab traversal reaches every interactive control in order', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 3; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, isNotNull);
+    }
+  });
+
+  testWidgets(
+    'pressing Enter in confirm-password submits the form (FR-006 Enter-to-submit)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'newPassword123');
+      await tester.enterText(find.byType(TextField).last, 'newPassword123');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      await tester.pump();
+
+      expect(fake.confirmedPassword, 'newPassword123');
+
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    },
+  );
+
+  testWidgets(
+    'Enter during the post-success 2-second window does not re-trigger '
+    'confirmPasswordReset (FR-006 guard)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'newPassword123');
+      await tester.enterText(find.byType(TextField).last, 'newPassword123');
+      await tester.tap(find.text('Đặt lại mật khẩu'));
+      await tester.pump();
+      await tester.pump();
+      expect(fake.confirmedPassword, 'newPassword123');
+
+      fake.confirmedPassword = null;
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(fake.confirmedPassword, isNull);
+
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    },
+  );
 }

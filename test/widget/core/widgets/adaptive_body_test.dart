@@ -6,7 +6,12 @@ import 'package:finance/core/widgets/adaptive_body.dart';
 
 const _contentKey = Key('content');
 
-Future<void> _pumpAt(WidgetTester tester, double width) async {
+Future<void> _pumpAt(
+  WidgetTester tester,
+  double width, {
+  WindowSizeClass activatesAt = WindowSizeClass.expanded,
+  double maxWidth = AppLayoutTokens.contentMaxWidth,
+}) async {
   tester.view.physicalSize = Size(width, 800);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(() {
@@ -14,10 +19,12 @@ Future<void> _pumpAt(WidgetTester tester, double width) async {
     tester.view.resetDevicePixelRatio();
   });
   await tester.pumpWidget(
-    const MaterialApp(
+    MaterialApp(
       home: Scaffold(
         body: AdaptiveBody(
-          child: ColoredBox(
+          activatesAt: activatesAt,
+          maxWidth: maxWidth,
+          child: const ColoredBox(
             key: _contentKey,
             color: Colors.red,
             child: SizedBox(width: double.infinity, height: 50),
@@ -95,4 +102,59 @@ void main() {
     final size = tester.getSize(find.byKey(_contentKey));
     expect(size.width, 500);
   });
+
+  group('activatesAt: WindowSizeClass.medium (600dp)', () {
+    testWidgets('below 600dp, child fills the available width unchanged', (
+      tester,
+    ) async {
+      await _pumpAt(
+        tester,
+        599,
+        activatesAt: WindowSizeClass.medium,
+        maxWidth: 450,
+      );
+      final size = tester.getSize(find.byKey(_contentKey));
+      expect(size.width, 599);
+    });
+
+    testWidgets('at exactly 600dp, child is capped and centered', (
+      tester,
+    ) async {
+      await _pumpAt(
+        tester,
+        600,
+        activatesAt: WindowSizeClass.medium,
+        maxWidth: 450,
+      );
+      final size = tester.getSize(find.byKey(_contentKey));
+      final topLeft = tester.getTopLeft(find.byKey(_contentKey));
+      expect(size.width, 450);
+      expect(topLeft.dx, (600 - 450) / 2);
+    });
+
+    testWidgets('well above 600dp, child stays capped and centered', (
+      tester,
+    ) async {
+      await _pumpAt(
+        tester,
+        1200,
+        activatesAt: WindowSizeClass.medium,
+        maxWidth: 450,
+      );
+      final size = tester.getSize(find.byKey(_contentKey));
+      final topLeft = tester.getTopLeft(find.byKey(_contentKey));
+      expect(size.width, 450);
+      expect(topLeft.dx, (1200 - 450) / 2);
+    });
+  });
+
+  testWidgets(
+    'the default activatesAt is unchanged: at 600dp (medium), child still '
+    'fills the available width — the cap only starts at expanded (840dp)',
+    (tester) async {
+      await _pumpAt(tester, 600);
+      final size = tester.getSize(find.byKey(_contentKey));
+      expect(size.width, 600);
+    },
+  );
 }
