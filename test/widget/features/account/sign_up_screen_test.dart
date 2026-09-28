@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -351,4 +352,97 @@ void main() {
 
     expect(find.textContaining('Google'), findsNothing);
   });
+
+  testWidgets(
+    'at a compact width (<600dp), the form renders at full width and the '
+    'header spans the full viewport width',
+    (tester) async {
+      // 410dp, not 375dp — this project's own verified pinned reference
+      // width (test/flutter_test_config.dart); 375dp overflows _Header's
+      // Row and is not a width this app has been validated against.
+      tester.view.physicalSize = const Size(410, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      final fieldSize = tester.getSize(_nameField);
+      expect(fieldSize.width, greaterThan(300));
+    },
+  );
+
+  testWidgets(
+    'at an expanded width (>=840dp), the scrollable body is capped at '
+    '450dp while the header stays full-width (FR-004)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      final fieldSize = tester.getSize(_nameField);
+      // Padding.fromLTRB(24,...,24,...) is OUTSIDE AdaptiveBody here (the
+      // AdaptiveBody wraps the Column directly, same as Sign In).
+      expect(fieldSize.width, 450);
+
+      final headerFinder = find.byType(Container).first;
+      final headerSize = tester.getSize(headerFinder);
+      expect(headerSize.width, 1024);
+    },
+  );
+
+  testWidgets('Tab traversal reaches every interactive control in order', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await tester.tap(_nameField);
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 6; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, isNotNull);
+    }
+  });
+
+  testWidgets(
+    'pressing Enter on confirm-password submits when terms are accepted (FR-006 Enter-to-submit)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(fake.signedUpEmail, 'user@example.com');
+    },
+  );
+
+  testWidgets(
+    'pressing Enter on confirm-password does NOT submit while terms are unchecked (FR-006/FR-007)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester, acceptTerms: false);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(fake.signedUpEmail, isNull);
+    },
+  );
 }

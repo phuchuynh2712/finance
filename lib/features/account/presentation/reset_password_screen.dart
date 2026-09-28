@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'sign_up_validation.dart';
 
 /// "Set New Password" (FR-016) — reachable only via the router's
@@ -27,15 +29,21 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
   bool _isSubmitting = false;
   String? _confirmPasswordFieldError;
   String? _errorMessage;
   bool _succeeded = false;
 
+  bool get _canSubmit => !_isSubmitting && !_succeeded;
+
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -86,59 +94,75 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: l10n.resetPasswordNewPasswordLabel,
+          child: AdaptiveBody(
+            activatesAt: WindowSizeClass.medium,
+            maxWidth: AppLayoutTokens.authContentMaxWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  obscureText: true,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) => FocusScope.of(
+                    context,
+                  ).requestFocus(_confirmPasswordFocusNode),
+                  decoration: InputDecoration(
+                    labelText: l10n.resetPasswordNewPasswordLabel,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: l10n.resetPasswordConfirmPasswordLabel,
-                  errorText: _confirmPasswordFieldError,
-                ),
-              ),
-              if (_errorMessage != null) ...[
                 const SizedBox(height: 16),
-                Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                TextField(
+                  controller: _confirmPasswordController,
+                  focusNode: _confirmPasswordFocusNode,
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (_canSubmit) _submit();
+                  },
+                  decoration: InputDecoration(
+                    labelText: l10n.resetPasswordConfirmPasswordLabel,
+                    errorText: _confirmPasswordFieldError,
+                  ),
                 ),
-              ],
-              if (_succeeded) ...[
-                const SizedBox(height: 16),
-                Text(
-                  l10n.resetPasswordSuccessMessage,
-                  style: TextStyle(color: semantic.success),
-                ),
-              ],
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 52,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
-                  onPressed: (_isSubmitting || _succeeded) ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.resetPasswordSubmitAction),
+                ],
+                if (_succeeded) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.resetPasswordSuccessMessage,
+                    style: TextStyle(color: semantic.success),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    onPressed: _canSubmit ? _submit : null,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.resetPasswordSubmitAction),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

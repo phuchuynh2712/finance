@@ -6,7 +6,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/account/application/auth_error_mapper.dart';
 import 'biometric_enable_prompt.dart';
 import 'sign_up_validation.dart';
@@ -26,6 +28,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameFocusNode = FocusNode();
+  final _phoneFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _isSubmitting = false;
   bool _termsAccepted = false;
@@ -34,6 +41,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   String? _confirmPasswordFieldError;
   String? _errorMessage;
 
+  bool get _canSubmit => !_isSubmitting && _termsAccepted;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -41,6 +50,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameFocusNode.dispose();
+    _phoneFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -135,123 +149,150 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _FormField(
-                      label: l10n.signUpNameLabel,
-                      controller: _nameController,
-                      semantic: semantic,
-                    ),
-                    const SizedBox(height: 14),
-                    _FormField(
-                      label: l10n.signUpPhoneLabel,
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      semantic: semantic,
-                    ),
-                    const SizedBox(height: 14),
-                    _FormField(
-                      label: l10n.signUpEmailLabel,
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      errorText: _emailFieldError,
-                      semantic: semantic,
-                    ),
-                    const SizedBox(height: 14),
-                    _FormField(
-                      label: l10n.signUpPasswordLabel,
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      errorText: _passwordFieldError,
-                      semantic: semantic,
-                      suffixIcon: Semantics(
-                        button: true,
-                        label: _obscurePassword
-                            ? l10n.signInShowPasswordSemantic
-                            : l10n.signInHidePasswordSemantic,
-                        child: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? LucideIcons.eye
-                                : LucideIcons.eyeOff,
-                            size: 17,
-                            color: semantic.fg3,
-                          ),
-                          tooltip: _obscurePassword
+                child: AdaptiveBody(
+                  activatesAt: WindowSizeClass.medium,
+                  maxWidth: AppLayoutTokens.authContentMaxWidth,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _FormField(
+                        label: l10n.signUpNameLabel,
+                        controller: _nameController,
+                        focusNode: _nameFocusNode,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => FocusScope.of(
+                          context,
+                        ).requestFocus(_phoneFocusNode),
+                        semantic: semantic,
+                      ),
+                      const SizedBox(height: 14),
+                      _FormField(
+                        label: l10n.signUpPhoneLabel,
+                        controller: _phoneController,
+                        focusNode: _phoneFocusNode,
+                        keyboardType: TextInputType.phone,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => FocusScope.of(
+                          context,
+                        ).requestFocus(_emailFocusNode),
+                        semantic: semantic,
+                      ),
+                      const SizedBox(height: 14),
+                      _FormField(
+                        label: l10n.signUpEmailLabel,
+                        controller: _emailController,
+                        focusNode: _emailFocusNode,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => FocusScope.of(
+                          context,
+                        ).requestFocus(_passwordFocusNode),
+                        errorText: _emailFieldError,
+                        semantic: semantic,
+                      ),
+                      const SizedBox(height: 14),
+                      _FormField(
+                        label: l10n.signUpPasswordLabel,
+                        controller: _passwordController,
+                        focusNode: _passwordFocusNode,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => FocusScope.of(
+                          context,
+                        ).requestFocus(_confirmPasswordFocusNode),
+                        errorText: _passwordFieldError,
+                        semantic: semantic,
+                        suffixIcon: Semantics(
+                          button: true,
+                          label: _obscurePassword
                               ? l10n.signInShowPasswordSemantic
                               : l10n.signInHidePasswordSemantic,
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
+                          child: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? LucideIcons.eye
+                                  : LucideIcons.eyeOff,
+                              size: 17,
+                              color: semantic.fg3,
+                            ),
+                            tooltip: _obscurePassword
+                                ? l10n.signInShowPasswordSemantic
+                                : l10n.signInHidePasswordSemantic,
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    _FormField(
-                      label: l10n.signUpConfirmPasswordLabel,
-                      controller: _confirmPasswordController,
-                      obscureText: true,
-                      errorText: _confirmPasswordFieldError,
-                      semantic: semantic,
-                    ),
-                    const SizedBox(height: 4),
-                    _TermsCheckbox(
-                      value: _termsAccepted,
-                      onChanged: (value) =>
-                          setState(() => _termsAccepted = value),
-                      l10n: l10n,
-                      semantic: semantic,
-                      colors: colors,
-                    ),
-                    if (_errorMessage != null) ...[
                       const SizedBox(height: 14),
-                      Text(
-                        _errorMessage!,
-                        style: TextStyle(color: colors.error, fontSize: 13),
+                      _FormField(
+                        label: l10n.signUpConfirmPasswordLabel,
+                        controller: _confirmPasswordController,
+                        focusNode: _confirmPasswordFocusNode,
+                        obscureText: true,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) {
+                          if (_canSubmit) _submit();
+                        },
+                        errorText: _confirmPasswordFieldError,
+                        semantic: semantic,
+                      ),
+                      const SizedBox(height: 4),
+                      _TermsCheckbox(
+                        value: _termsAccepted,
+                        onChanged: (value) =>
+                            setState(() => _termsAccepted = value),
+                        l10n: l10n,
+                        semantic: semantic,
+                        colors: colors,
+                      ),
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 14),
+                        Text(
+                          _errorMessage!,
+                          style: TextStyle(color: colors.error, fontSize: 13),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 52,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          onPressed: _canSubmit ? _submit : null,
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  l10n.signUpSubmit,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Center(
+                        child: TextButton(
+                          onPressed: _isSubmitting
+                              ? null
+                              : () => context.go('/sign-in'),
+                          child: Text(
+                            l10n.signUpNavigateToSignIn,
+                            style: TextStyle(fontSize: 13, color: semantic.fg3),
+                          ),
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 52,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        onPressed: (_isSubmitting || !_termsAccepted)
-                            ? null
-                            : _submit,
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                l10n.signUpSubmit,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                      ),
-                    ),
-                    Center(
-                      child: TextButton(
-                        onPressed: _isSubmitting
-                            ? null
-                            : () => context.go('/sign-in'),
-                        child: Text(
-                          l10n.signUpNavigateToSignIn,
-                          style: TextStyle(fontSize: 13, color: semantic.fg3),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -320,7 +361,10 @@ class _FormField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.semantic,
+    this.focusNode,
     this.keyboardType,
+    this.textInputAction,
+    this.onSubmitted,
     this.obscureText = false,
     this.errorText,
     this.suffixIcon,
@@ -329,7 +373,10 @@ class _FormField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final AppSemanticColors semantic;
+  final FocusNode? focusNode;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
   final bool obscureText;
   final String? errorText;
   final Widget? suffixIcon;
@@ -352,7 +399,10 @@ class _FormField extends StatelessWidget {
           height: 48,
           child: TextField(
             controller: controller,
+            focusNode: focusNode,
             keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            onSubmitted: onSubmitted,
             obscureText: obscureText,
             style: TextStyle(fontSize: 14, color: semantic.fg2),
             decoration: InputDecoration(

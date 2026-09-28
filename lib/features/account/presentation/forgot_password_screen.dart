@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
 
 /// FR-015: request a password-reset email. Always shows the same generic
 /// confirmation regardless of whether the email is registered, per
@@ -20,12 +22,16 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
+  final _emailFocusNode = FocusNode();
   bool _isSubmitting = false;
   bool _submitted = false;
+
+  bool get _canSubmit => !_isSubmitting;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _emailFocusNode.dispose();
     super.dispose();
   }
 
@@ -65,66 +71,75 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _submitted
-                ? [
-                    Text(
-                      l10n.forgotPasswordConfirmationMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: semantic.fg2),
-                    ),
-                    const SizedBox(height: 24),
-                    TextButton(
-                      onPressed: () => context.go('/sign-in'),
-                      child: Text(l10n.forgotPasswordBackToSignIn),
-                    ),
-                  ]
-                : [
-                    Text(
-                      l10n.forgotPasswordInstructions,
-                      style: TextStyle(color: semantic.fg2),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: l10n.forgotPasswordEmailLabel,
+          child: AdaptiveBody(
+            activatesAt: WindowSizeClass.medium,
+            maxWidth: AppLayoutTokens.authContentMaxWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _submitted
+                  ? [
+                      Text(
+                        l10n.forgotPasswordConfirmationMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: semantic.fg2),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 52,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                      const SizedBox(height: 24),
+                      TextButton(
+                        onPressed: () => context.go('/sign-in'),
+                        child: Text(l10n.forgotPasswordBackToSignIn),
+                      ),
+                    ]
+                  : [
+                      Text(
+                        l10n.forgotPasswordInstructions,
+                        style: TextStyle(color: semantic.fg2),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _emailController,
+                        focusNode: _emailFocusNode,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) {
+                          if (_canSubmit) _submit();
+                        },
+                        decoration: InputDecoration(
+                          labelText: l10n.forgotPasswordEmailLabel,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 52,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          onPressed: _canSubmit ? _submit : null,
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(l10n.forgotPasswordSubmitAction),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => context.go('/sign-in'),
+                          child: Text(
+                            l10n.forgotPasswordBackToSignIn,
+                            style: TextStyle(color: colors.primary),
                           ),
                         ),
-                        onPressed: _isSubmitting ? null : _submit,
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(l10n.forgotPasswordSubmitAction),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () => context.go('/sign-in'),
-                        child: Text(
-                          l10n.forgotPasswordBackToSignIn,
-                          style: TextStyle(color: colors.primary),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+            ),
           ),
         ),
       ),

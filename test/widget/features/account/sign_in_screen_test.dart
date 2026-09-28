@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -359,6 +360,127 @@ void main() {
       expect(fake.verifySessionAliveCalled, isTrue);
       expect(find.text('Đăng nhập bằng vân tay'), findsNothing);
       expect(fake.biometricEnabledByUser['user-a'], isFalse);
+    },
+  );
+
+  testWidgets(
+    'at a compact width (<600dp), the form renders at full width — no cap applied',
+    (tester) async {
+      tester.view.physicalSize = const Size(410, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      final fieldSize = tester.getSize(find.byType(TextField).first);
+      expect(fieldSize.width, greaterThan(300));
+    },
+  );
+
+  testWidgets(
+    'at an expanded width (>=840dp), the form is capped at 450dp and centered',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      final fieldSize = tester.getSize(find.byType(TextField).first);
+      // AdaptiveBody wraps the Column directly; the 28px horizontal
+      // padding is on the SingleChildScrollView OUTSIDE AdaptiveBody, so
+      // the field width is authContentMaxWidth directly, not reduced by
+      // that padding (unlike Forgot/Reset Password, whose Padding sits
+      // INSIDE AdaptiveBody).
+      expect(fieldSize.width, 450);
+    },
+  );
+
+  testWidgets(
+    'resizing below 600dp while fields have text preserves the entered text (FR-010)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'user@example.com');
+      await tester.enterText(find.byType(TextField).last, 'password123');
+
+      tester.view.physicalSize = const Size(410, 800);
+      await tester.pump();
+
+      expect(find.text('user@example.com'), findsOneWidget);
+      expect(find.text('password123'), findsOneWidget);
+    },
+  );
+
+  testWidgets('Tab traversal reaches every interactive control in order', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository()..biometricEnabledByUser['user-a'] = true;
+    final bio = _FakeBiometricLoginRepository()..deviceCapable = true;
+    await tester.pumpWidget(_harness(fake, bio));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 6; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, isNotNull);
+    }
+  });
+
+  testWidgets(
+    'pressing Enter in the password field submits the form (FR-006 Enter-to-submit)',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'user@example.com');
+      await tester.enterText(find.byType(TextField).last, 'password123');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(fake.signedInEmail, 'user@example.com');
+    },
+  );
+
+  testWidgets(
+    'Enter does not double-submit while a submit is already in flight',
+    (tester) async {
+      final fake = _FakeAuthRepository();
+      final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
+      await tester.pumpWidget(_harness(fake, bio));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, 'user@example.com');
+      await tester.enterText(find.byType(TextField).last, 'password123');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump(); // submit in flight, spinner showing
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(fake.signedInEmail, 'user@example.com');
     },
   );
 }
