@@ -12,6 +12,7 @@ import 'core/l10n/locale_notifier.dart';
 import 'core/network/supabase_client_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/app_preferences_storage.dart';
+import 'core/sync/sync_worker_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_notifier.dart';
 
@@ -82,6 +83,9 @@ class FinanceApp extends ConsumerWidget {
     // Instantiates the observer once and keeps it alive for the app's
     // lifetime (FR-020's background-resume threshold).
     ref.watch(appLifecycleObserverProvider);
+    // Starts the periodic outbox-drain sync worker once, kept alive for
+    // the app's lifetime — same pattern as the lifecycle observer above.
+    ref.watch(syncWorkerProvider);
     return MaterialApp.router(
       title: 'Kiểm Soát',
       routerConfig: ref.watch(appRouterProvider),
