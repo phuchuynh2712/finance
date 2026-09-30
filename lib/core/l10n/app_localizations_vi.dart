@@ -331,6 +331,13 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get expenseControlSaveFormulaSuccessMessage => 'Đã lưu công thức.';
+
+  @override
+  String get expenseControlSaveFormulaErrorMessage =>
+      'Không thể lưu công thức. Vui lòng thử lại.';
+
+  @override
   String get historyPlaceholderMessage => 'Tính năng đang được phát triển.';
 
   @override

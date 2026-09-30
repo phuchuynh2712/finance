@@ -88,6 +88,12 @@ dev_dependencies:
   drift_dev: ^2.22.1
   riverpod_generator: ^2.6.3
 
+  # Deterministic clock-skew simulation for SC-006's test (two "devices"
+  # with skewed local clocks) — research.md Decision 10/`/speckit-tasks`
+  # T015a. Only ever used to construct a fixed DateTime in a test, never to
+  # override the app's own DateTime.now() calls at runtime.
+  clock: ^1.1.1
+
   # Was already an undeclared transitive dependency via drift/drift_flutter;
   # declared explicitly since the v2→v3 migration integration test seeds a
   # raw SQLite fixture directly (spec.md SC-007)

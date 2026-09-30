@@ -332,6 +332,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseControlSaveFormulaSuccessMessage => 'Formula saved.';
+
+  @override
+  String get expenseControlSaveFormulaErrorMessage =>
+      'Couldn\'t save the formula. Please try again.';
+
+  @override
   String get historyPlaceholderMessage => 'Coming soon.';
 
   @override

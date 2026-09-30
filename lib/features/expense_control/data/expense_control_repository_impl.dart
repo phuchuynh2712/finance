@@ -302,10 +302,27 @@ class ExpenseControlRepositoryImpl
             updatedAt: Value(DateTime.now()),
           ),
         );
-        await _appendOutbox(orderedIds[i], SyncOperation.update, {
-          'id': orderedIds[i],
-          'sort_order': i,
-        });
+        // A full payload, not just the changed field — SyncWorker's push
+        // path is an `upsert()`, which PostgREST/Postgres treats as a
+        // candidate INSERT on conflict, not a partial `UPDATE SET`: any
+        // column missing from the payload is written as NULL (or its
+        // column default), not "left as whatever the server already has."
+        // A payload with only `sort_order` violates every other NOT NULL
+        // column (name, icon_key, ...), and separately, a payload missing
+        // `user_id` fails the RLS `WITH CHECK (auth.uid() = user_id)`
+        // policy outright — both silently swallowed by drainOutbox()'s
+        // catch-all, which just increments retry_count forever. Read the
+        // row back (already updated above, in the same transaction) so
+        // every column is present, matching every other call site's use of
+        // `_payloadOf`.
+        final row = await (_db.select(
+          _db.expenseControlItems,
+        )..where((r) => r.id.equals(orderedIds[i]))).getSingle();
+        await _appendOutbox(
+          orderedIds[i],
+          SyncOperation.update,
+          _payloadOf(_toDomain(row)),
+        );
       }
     });
   }
@@ -342,16 +359,19 @@ class ExpenseControlRepositoryImpl
             updatedAt: Value(DateTime.now()),
           ),
         );
-        await _appendOutbox(id, SyncOperation.update, {
-          'id': id,
-          if (edit.name != null) 'name': edit.name,
-          if (edit.iconKey != null) 'icon_key': edit.iconKey,
-          if (edit.description != null) 'description': edit.description,
-          if (edit.method != null) 'allocation_method': edit.method!.name,
-          if (edit.value != null) 'allocation_value': edit.value,
-          if (edit.isSavingsReceiver != null)
-            'is_savings_receiver': edit.isSavingsReceiver,
-        });
+        // A full payload, not just the edited fields — see
+        // reorderTopLevel's comment on why a partial payload silently
+        // breaks against SyncWorker's `upsert()` push (missing NOT NULL
+        // columns, missing `user_id` failing RLS). Read the row back
+        // (already updated above, in the same transaction).
+        final row = await (_db.select(
+          _db.expenseControlItems,
+        )..where((r) => r.id.equals(id))).getSingle();
+        await _appendOutbox(
+          id,
+          SyncOperation.update,
+          _payloadOf(_toDomain(row)),
+        );
       }
     });
   }
@@ -388,7 +408,10 @@ class ExpenseControlRepositoryImpl
           'updated_at = ? WHERE id = ?',
           variables: [
             Variable(delta),
-            Variable(now.millisecondsSinceEpoch ~/ 1000),
+            // ISO-8601 text, matching store_date_time_values_as_text
+            // (build.yaml) — a raw INTEGER write here would silently
+            // corrupt this TEXT-typed column (research.md Decision 10).
+            Variable(now.toIso8601String()),
             Variable(itemId),
           ],
           updates: {_db.expenseControlItems},
@@ -455,7 +478,10 @@ class ExpenseControlRepositoryImpl
         'updated_at = ? WHERE id = ?',
         variables: [
           Variable(amount),
-          Variable(now.millisecondsSinceEpoch ~/ 1000),
+          // ISO-8601 text, matching store_date_time_values_as_text
+          // (build.yaml) — a raw INTEGER write here would silently
+          // corrupt this TEXT-typed column (research.md Decision 10).
+          Variable(now.toIso8601String()),
           Variable(itemId),
         ],
         updates: {_db.expenseControlItems},

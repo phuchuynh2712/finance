@@ -13,6 +13,8 @@ import 'package:finance/features/expense_control/domain/expense_control_reposito
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expense_control/presentation/expense_control_screen.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
   _FakeExpenseControlRepository(List<ExpenseControlItem> initial)
     : _items = List.of(initial);
@@ -22,6 +24,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
   final List<Map<String, PendingItemEdit>> savedFormulaBatches = [];
   final List<List<String>> reorderCalls = [];
   Object? throwOnCreate;
+  Object? throwOnSaveFormulas;
 
   void _emit() => _controller.add(List.of(_items));
 
@@ -78,6 +81,7 @@ class _FakeExpenseControlRepository implements ExpenseControlRepository {
 
   @override
   Future<void> saveFormulas(Map<String, PendingItemEdit> changes) async {
+    if (throwOnSaveFormulas != null) throw throwOnSaveFormulas!;
     savedFormulaBatches.add(changes);
     for (final entry in changes.entries) {
       final index = _items.indexWhere((item) => item.id == entry.key);
@@ -130,6 +134,7 @@ Widget _harness(_FakeExpenseControlRepository repository) {
     overrides: [
       expenseControlRepositoryProvider.overrideWithValue(repository),
       currentUserIdProvider.overrideWithValue('u1'),
+      pullCompleteOverride,
     ],
     child: MaterialApp(
       theme: AppTheme.light,
@@ -165,6 +170,7 @@ ProviderContainer _containerFor(_FakeExpenseControlRepository repository) {
     overrides: [
       expenseControlRepositoryProvider.overrideWithValue(repository),
       currentUserIdProvider.overrideWithValue('u1'),
+      pullCompleteOverride,
     ],
   );
 }
@@ -424,6 +430,64 @@ void main() {
       expect(repository._items.single.allocationValue, 50);
       expect(repository.savedFormulaBatches, hasLength(1));
       expect(container.read(pendingItemEditsProvider), isEmpty);
+    },
+  );
+
+  testWidgets(
+    '"Lưu công thức" shows a confirmation snackbar on success, so the user '
+    'has explicit feedback instead of only the button disappearing (found '
+    'during manual multi-device verification: a real save that silently '
+    'failed server-side was indistinguishable from one that succeeded, '
+    'both leaving nothing visible on screen)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a', value: 20)]);
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harnessWithContainer(repository, container));
+      await tester.pumpAndSettle();
+
+      container.read(pendingItemEditsProvider.notifier).state = {
+        'a': const PendingItemEdit(value: 50),
+      };
+      await tester.pump();
+
+      await tester.tap(find.text('Lưu công thức'));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(
+        find.text(l10n.expenseControlSaveFormulaSuccessMessage),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    '"Lưu công thức" shows an error snackbar and keeps the pending edits '
+    'when the save fails, so the user can retry without re-entering '
+    'anything (a failed save must never silently discard staged work)',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a', value: 20)])
+        ..throwOnSaveFormulas = Exception('boom');
+      final container = _containerFor(repository);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_harnessWithContainer(repository, container));
+      await tester.pumpAndSettle();
+
+      const pendingEdit = {'a': PendingItemEdit(value: 50)};
+      container.read(pendingItemEditsProvider.notifier).state = pendingEdit;
+      await tester.pump();
+
+      await tester.tap(find.text('Lưu công thức'));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(
+        find.text(l10n.expenseControlSaveFormulaErrorMessage),
+        findsOneWidget,
+      );
+      expect(repository._items.single.allocationValue, 20);
+      expect(container.read(pendingItemEditsProvider), pendingEdit);
     },
   );
 

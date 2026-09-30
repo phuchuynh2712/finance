@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
@@ -26,6 +27,12 @@ class ExpenseControlScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final semantic = theme.extension<AppSemanticColors>()!;
     final treeAsync = ref.watch(expenseControlTreeProvider);
+    // FR-011: while this device's initial catch-up pull hasn't finished,
+    // show loading rather than risk this screen's own empty-state UI
+    // (below, inside treeAsync's `data:` branch) firing for an account
+    // that genuinely has data, just not locally yet.
+    final pullComplete =
+        ref.watch(initialPullCompleteProvider).valueOrNull ?? false;
 
     return Scaffold(
       body: SafeArea(
@@ -73,23 +80,26 @@ class ExpenseControlScreen extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: treeAsync.when(
-                data: (tree) {
-                  if (tree.isEmpty) {
-                    return EmptyStateView(
-                      icon: LucideIcons.slidersHorizontal,
-                      message: l10n.expenseControlEmptyStateMessage,
-                      actionLabel: l10n.expenseControlAddItemAction,
-                      onAction: () =>
-                          _openCreateDialog(context, ref, parentId: null),
-                    );
-                  }
-                  return _ScreenContent(tree: tree);
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stackTrace) =>
-                    Center(child: Text(error.toString())),
-              ),
+              child: !pullComplete
+                  ? const Center(child: CircularProgressIndicator())
+                  : treeAsync.when(
+                      data: (tree) {
+                        if (tree.isEmpty) {
+                          return EmptyStateView(
+                            icon: LucideIcons.slidersHorizontal,
+                            message: l10n.expenseControlEmptyStateMessage,
+                            actionLabel: l10n.expenseControlAddItemAction,
+                            onAction: () =>
+                                _openCreateDialog(context, ref, parentId: null),
+                          );
+                        }
+                        return _ScreenContent(tree: tree);
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stackTrace) =>
+                          Center(child: Text(error.toString())),
+                    ),
             ),
           ],
         ),
@@ -253,10 +263,36 @@ class _ScreenContent extends ConsumerWidget {
               ),
               onPressed: (validation?.isValid ?? true)
                   ? () async {
-                      await ref
-                          .read(expenseControlRepositoryProvider)
-                          .saveFormulas(pendingEdits);
-                      ref.read(pendingItemEditsProvider.notifier).state = {};
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await ref
+                            .read(expenseControlRepositoryProvider)
+                            .saveFormulas(pendingEdits);
+                        ref.read(pendingItemEditsProvider.notifier).state = {};
+                        if (!context.mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n.expenseControlSaveFormulaSuccessMessage,
+                            ),
+                          ),
+                        );
+                      } catch (_) {
+                        // Pending edits are deliberately kept (not cleared)
+                        // so the user can retry without re-entering them —
+                        // clearing them here would silently discard staged
+                        // work on a failed save (FR-012's own "never a
+                        // silent, undocumented loss" bar, applied to this
+                        // save path too).
+                        if (!context.mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n.expenseControlSaveFormulaErrorMessage,
+                            ),
+                          ),
+                        );
+                      }
                     }
                   : null,
               icon: const Icon(LucideIcons.check, size: 20),

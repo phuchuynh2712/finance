@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
@@ -12,6 +13,8 @@ import 'package:finance/features/expense_control/domain/transaction_history_repo
 import 'package:finance/features/expenses/application/transaction_history.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
+
+import '../../../support/pull_complete_override.dart';
 
 void main() {
   testWidgets(
@@ -180,6 +183,7 @@ void main() {
           transactionHistoryRepositoryProvider.overrideWithValue(
             _HistoryRepository(records),
           ),
+          pullCompleteOverride,
         ],
       );
       addTearDown(container.dispose);
@@ -308,6 +312,7 @@ void main() {
             transactionHistoryRepositoryProvider.overrideWithValue(
               _ErrorHistoryRepository(),
             ),
+            pullCompleteOverride,
           ],
           child: MaterialApp(
             theme: AppTheme.light,
@@ -471,6 +476,7 @@ void main() {
             transactionHistoryRepositoryProvider.overrideWithValue(
               _ErrorHistoryRepository(),
             ),
+            pullCompleteOverride,
           ],
           child: MaterialApp(
             theme: AppTheme.light,
@@ -502,6 +508,58 @@ void main() {
       expect(find.text(l10n.transactionHistoryLoadError), findsOneWidget);
     },
   );
+
+  group('FR-011/SC-008 — loading vs. empty distinction', () {
+    testWidgets(
+      'with initialPullCompleteProvider false, the screen shows loading, '
+      'not the empty state, even when the underlying data stream is empty',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              transactionHistoryRepositoryProvider.overrideWithValue(
+                const _HistoryRepository([]),
+              ),
+              initialPullCompleteProvider.overrideWith(
+                (ref) => Stream.value(false),
+              ),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              locale: const Locale('vi'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: const TransactionHistoryScreen(),
+            ),
+          ),
+        );
+        // NOT pumpAndSettle() — a permanently-loading CircularProgressIndicator
+        // never stops animating, so pumpAndSettle() would time out here by
+        // design (this is exactly the state under test: the pull never
+        // completes in this scenario). A few finite pumps let the initial
+        // frame and the StreamProvider's first emission settle instead.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+        expect(find.text(l10n.transactionHistoryEmpty), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'with initialPullCompleteProvider true and an empty stream, the '
+      'screen shows its normal empty state, not loading (SC-008)',
+      (tester) async {
+        await tester.pumpWidget(_harness(const []));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+        expect(find.text(l10n.transactionHistoryEmpty), findsOneWidget);
+      },
+    );
+  });
 }
 
 Widget _harness(List<TransactionHistoryRecord> records) {
@@ -510,6 +568,7 @@ Widget _harness(List<TransactionHistoryRecord> records) {
       transactionHistoryRepositoryProvider.overrideWithValue(
         _HistoryRepository(records),
       ),
+      pullCompleteOverride,
     ],
     child: MaterialApp(
       theme: AppTheme.light,

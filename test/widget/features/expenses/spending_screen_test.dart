@@ -18,6 +18,8 @@ import 'package:finance/features/expenses/presentation/spending_screen.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 import 'package:finance/features/expenses/presentation/widgets/balance_group_card.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
   _FakeExpenseControlRepository([List<ExpenseControlItem> initial = const []])
     : _items = List.of(initial);
@@ -97,7 +99,10 @@ ExpenseControlItem _leaf(
 // (not a placeholder) keep working unchanged.
 Widget _harness(_FakeExpenseControlRepository repository) {
   return ProviderScope(
-    overrides: [expenseControlRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      expenseControlRepositoryProvider.overrideWithValue(repository),
+      pullCompleteOverride,
+    ],
     child: MaterialApp.router(
       theme: AppTheme.light,
       locale: const Locale('vi'),

@@ -24,6 +24,8 @@ import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/report_providers.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 /// FR-016–FR-018, SC-006 — visual correctness of the shared bottom
 /// [NavigationBar], verified via the real [_AppShell] (through
 /// [appRouterProvider], the only way to reach it — see
@@ -145,6 +147,7 @@ ProviderContainer _container({List<Override> extra = const []}) {
         (ref) =>
             LocaleNotifier(_FakeAppPreferencesStorage(), const Locale('vi')),
       ),
+      pullCompleteOverride,
     ],
   );
 }

@@ -94,6 +94,8 @@
   "expenseControlDeleteGroupConfirmAction": "Delete",
   "expenseControlSaveFormulaAction": "Save formula",
   "expenseControlSaveFormulaBlockedMessage": "Can't save: total is {total}%, over the allowed limit.",
+  "expenseControlSaveFormulaSuccessMessage": "Formula saved.",
+  "expenseControlSaveFormulaErrorMessage": "Couldn't save the formula. Please try again.",
   "historyPlaceholderMessage": "Coming soon.",
   "expenseControlDiscardPromptTitle": "Save changes?",
   "expenseControlDiscardPromptMessage": "You have unsaved changes in Expense Control. Do you want to save before leaving?",

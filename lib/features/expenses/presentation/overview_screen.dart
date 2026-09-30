@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_colors.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
@@ -27,6 +28,12 @@ class OverviewScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(overviewSummaryProvider);
     final recentAsync = ref.watch(overviewRecentTransactionsProvider);
     final l10n = AppLocalizations.of(context);
+    // FR-011: while this device's initial catch-up pull hasn't finished,
+    // show loading rather than risk either section's own empty-state UI
+    // (inside _SummaryBlock/_RecentTransactionsSection) firing for an
+    // account that genuinely has data, just not locally yet.
+    final pullComplete =
+        ref.watch(initialPullCompleteProvider).valueOrNull ?? false;
 
     return Scaffold(
       body: SafeArea(
@@ -35,38 +42,44 @@ class OverviewScreen extends ConsumerWidget {
             const _Header(),
             Expanded(
               child: AdaptiveBody(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                  children: [
-                    summaryAsync.when(
-                      loading: () => const _SummaryLoading(),
-                      error: (error, stackTrace) => _SummaryError(
-                        message: l10n.overviewLoadError,
-                        retryLabel: l10n.overviewRetry,
-                        // Invalidates the root stream-wrapping provider, not
-                        // the derived overviewSummaryProvider — the failure
-                        // happened at the source (repository.watchAll()'s
-                        // stream), and only re-invoking that source triggers
-                        // a fresh attempt.
-                        onRetry: () =>
-                            ref.invalidate(expenseControlItemsStreamProvider),
+                child: !pullComplete
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                        children: [
+                          summaryAsync.when(
+                            loading: () => const _SummaryLoading(),
+                            error: (error, stackTrace) => _SummaryError(
+                              message: l10n.overviewLoadError,
+                              retryLabel: l10n.overviewRetry,
+                              // Invalidates the root stream-wrapping
+                              // provider, not the derived
+                              // overviewSummaryProvider — the failure
+                              // happened at the source
+                              // (repository.watchAll()'s stream), and only
+                              // re-invoking that source triggers a fresh
+                              // attempt.
+                              onRetry: () => ref.invalidate(
+                                expenseControlItemsStreamProvider,
+                              ),
+                            ),
+                            data: (summary) => _SummaryBlock(summary: summary),
+                          ),
+                          const SizedBox(height: 22),
+                          recentAsync.when(
+                            loading: () => const _SummaryLoading(),
+                            error: (error, stackTrace) => _SummaryError(
+                              message: l10n.overviewLoadError,
+                              retryLabel: l10n.overviewRetry,
+                              onRetry: () => ref.invalidate(
+                                overviewRecentTransactionsProvider,
+                              ),
+                            ),
+                            data: (records) =>
+                                _RecentTransactionsSection(records: records),
+                          ),
+                        ],
                       ),
-                      data: (summary) => _SummaryBlock(summary: summary),
-                    ),
-                    const SizedBox(height: 22),
-                    recentAsync.when(
-                      loading: () => const _SummaryLoading(),
-                      error: (error, stackTrace) => _SummaryError(
-                        message: l10n.overviewLoadError,
-                        retryLabel: l10n.overviewRetry,
-                        onRetry: () =>
-                            ref.invalidate(overviewRecentTransactionsProvider),
-                      ),
-                      data: (records) =>
-                          _RecentTransactionsSection(records: records),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

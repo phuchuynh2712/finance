@@ -15,6 +15,8 @@ import 'package:finance/features/expenses/presentation/report_providers.dart';
 import 'package:finance/features/expenses/presentation/report_screen.dart';
 import 'package:finance/features/expenses/presentation/widgets/report_usage_bar.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 class _FakeExpenseControlRepository implements ExpenseControlRepository {
   _FakeExpenseControlRepository([this._items = const []]);
 
@@ -143,6 +145,7 @@ Widget _harness({
       ),
       if (selectedMonth != null)
         selectedReportMonthProvider.overrideWith((ref) => selectedMonth),
+      pullCompleteOverride,
     ],
     child: MaterialApp(
       theme: AppTheme.light,

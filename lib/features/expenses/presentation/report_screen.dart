@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
@@ -28,6 +29,13 @@ class ReportScreen extends ConsumerWidget {
     final totalsAsync = ref.watch(reportTotalsProvider(selectedMonth));
     final breakdownAsync = ref.watch(reportBreakdownProvider(selectedMonth));
     final l10n = AppLocalizations.of(context);
+    // FR-011: while this device's initial catch-up pull hasn't finished,
+    // show loading rather than risk either section's own empty-state UI
+    // (inside _BreakdownSection) firing for an account that genuinely has
+    // data, just not locally yet. The month selector itself stays visible
+    // — it's navigation, not pulled data.
+    final pullComplete =
+        ref.watch(initialPullCompleteProvider).valueOrNull ?? false;
 
     return Scaffold(
       body: SafeArea(
@@ -41,28 +49,33 @@ class ReportScreen extends ConsumerWidget {
                   children: [
                     const _MonthSelector(),
                     const SizedBox(height: 16),
-                    totalsAsync.when(
-                      loading: () => const _SectionLoading(),
-                      error: (error, stackTrace) => _SectionError(
-                        message: l10n.reportLoadError,
-                        retryLabel: l10n.reportRetry,
-                        onRetry: () =>
-                            ref.invalidate(reportTotalsProvider(selectedMonth)),
-                      ),
-                      data: (totals) => _TotalsCards(totals: totals),
-                    ),
-                    const SizedBox(height: 20),
-                    breakdownAsync.when(
-                      loading: () => const _SectionLoading(),
-                      error: (error, stackTrace) => _SectionError(
-                        message: l10n.reportLoadError,
-                        retryLabel: l10n.reportRetry,
-                        onRetry: () => ref.invalidate(
-                          reportBreakdownProvider(selectedMonth),
+                    if (!pullComplete)
+                      const Center(child: CircularProgressIndicator())
+                    else ...[
+                      totalsAsync.when(
+                        loading: () => const _SectionLoading(),
+                        error: (error, stackTrace) => _SectionError(
+                          message: l10n.reportLoadError,
+                          retryLabel: l10n.reportRetry,
+                          onRetry: () => ref.invalidate(
+                            reportTotalsProvider(selectedMonth),
+                          ),
                         ),
+                        data: (totals) => _TotalsCards(totals: totals),
                       ),
-                      data: (entries) => _BreakdownSection(entries: entries),
-                    ),
+                      const SizedBox(height: 20),
+                      breakdownAsync.when(
+                        loading: () => const _SectionLoading(),
+                        error: (error, stackTrace) => _SectionError(
+                          message: l10n.reportLoadError,
+                          retryLabel: l10n.reportRetry,
+                          onRetry: () => ref.invalidate(
+                            reportBreakdownProvider(selectedMonth),
+                          ),
+                        ),
+                        data: (entries) => _BreakdownSection(entries: entries),
+                      ),
+                    ],
                   ],
                 ),
               ),
