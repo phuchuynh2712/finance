@@ -12,6 +12,7 @@ import 'core/l10n/locale_notifier.dart';
 import 'core/network/supabase_client_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/app_preferences_storage.dart';
+import 'core/sync/pull_service_provider.dart';
 import 'core/sync/sync_worker_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_notifier.dart';
@@ -86,6 +87,11 @@ class FinanceApp extends ConsumerWidget {
     // Starts the periodic outbox-drain sync worker once, kept alive for
     // the app's lifetime — same pattern as the lifecycle observer above.
     ref.watch(syncWorkerProvider);
+    // Starts/stops the pull for the currently signed-in user — unlike the
+    // two providers above, this one legitimately rebuilds across the
+    // app's lifetime (every sign-in/sign-out/user-switch), per
+    // pull_service_provider.dart's own doc.
+    ref.watch(pullServiceProvider);
     return MaterialApp.router(
       title: 'Kiểm Soát',
       routerConfig: ref.watch(appRouterProvider),

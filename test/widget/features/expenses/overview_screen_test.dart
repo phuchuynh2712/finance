@@ -27,6 +27,8 @@ import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 class _FakeAccountAuthActions implements AccountAuthActions {
   _FakeAccountAuthActions({this.displayName, this.email});
 
@@ -169,6 +171,7 @@ Widget _harness(
       overviewAuthActionsProvider.overrideWithValue(
         authActions ?? _FakeAccountAuthActions(),
       ),
+      pullCompleteOverride,
     ],
     child: MaterialApp.router(
       theme: AppTheme.light,
@@ -414,6 +417,7 @@ void main() {
             ),
             isSignedInProvider.overrideWithValue(true),
             isPasswordRecoveryProvider.overrideWithValue(false),
+            pullCompleteOverride,
           ],
           child: Builder(
             builder: (context) {
@@ -666,6 +670,7 @@ void main() {
           overviewAuthActionsProvider.overrideWithValue(
             _FakeAccountAuthActions(),
           ),
+          pullCompleteOverride,
         ],
         child: MaterialApp(
           theme: AppTheme.dark,

@@ -1,9 +1,12 @@
-import 'package:drift/drift.dart' show Value;
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show OrderingTerm, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart' show SyncOperation;
 import 'package:finance/features/expense_control/data/expense_control_repository_impl.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
@@ -78,6 +81,36 @@ void main() {
     },
   );
 
+  test('saveFormulas appends a full-row outbox payload, not just the edited '
+      'fields — SyncWorker pushes via upsert(), which PostgREST treats as a '
+      'candidate INSERT on conflict: any column missing from the payload is '
+      'written as NULL/its column default, not "left as the server\'s '
+      'existing value." A payload with only the edited field would violate '
+      'every other NOT NULL column server-side, and separately, one missing '
+      'user_id would fail RLS\'s WITH CHECK(auth.uid() = user_id) outright — '
+      'both silently swallowed by drainOutbox()\'s catch-all as an infinite, '
+      'invisible retry loop (found while manually verifying the pull feature '
+      'end-to-end: a real rename never reached Supabase).', () async {
+    await repository.create(_leaf('a', value: 10));
+
+    await repository.saveFormulas({'a': const PendingItemEdit(value: 40)});
+
+    final outboxRows =
+        await (db.select(db.syncOutbox)
+              ..where((row) => row.rowId.equals('a'))
+              ..orderBy([(row) => OrderingTerm.desc(row.id)]))
+            .get();
+    final updateRow = outboxRows.firstWhere(
+      (row) => row.operation == SyncOperation.update,
+    );
+    final payload = jsonDecode(updateRow.payload) as Map<String, dynamic>;
+
+    expect(payload['user_id'], _userId);
+    expect(payload['name'], 'a');
+    expect(payload['icon_key'], 'home');
+    expect(payload['allocation_value'], 40);
+  });
+
   test('reorderTopLevel persists new sort order', () async {
     await repository.create(_leaf('a', sortOrder: 0));
     await repository.create(_leaf('b', sortOrder: 1));
@@ -89,6 +122,30 @@ void main() {
     final b = all.firstWhere((item) => item.id == 'b');
     expect(b.sortOrder, 0);
     expect(a.sortOrder, 1);
+  });
+
+  test('reorderTopLevel appends a full-row outbox payload, not just '
+      'sort_order — see saveFormulas\' matching test for why a partial '
+      'payload silently breaks against SyncWorker\'s upsert() push.', () async {
+    await repository.create(_leaf('a', sortOrder: 0));
+    await repository.create(_leaf('b', sortOrder: 1));
+
+    await repository.reorderTopLevel(['b', 'a']);
+
+    final outboxRows =
+        await (db.select(db.syncOutbox)
+              ..where((row) => row.rowId.equals('a'))
+              ..orderBy([(row) => OrderingTerm.desc(row.id)]))
+            .get();
+    final updateRow = outboxRows.firstWhere(
+      (row) => row.operation == SyncOperation.update,
+    );
+    final payload = jsonDecode(updateRow.payload) as Map<String, dynamic>;
+
+    expect(payload['user_id'], _userId);
+    expect(payload['name'], 'a');
+    expect(payload['icon_key'], 'home');
+    expect(payload['sort_order'], 1);
   });
 
   test(

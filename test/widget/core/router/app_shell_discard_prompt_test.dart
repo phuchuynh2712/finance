@@ -22,6 +22,8 @@ import 'package:finance/features/expense_control/domain/transaction_history_repo
 import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
 
+import '../../../support/pull_complete_override.dart';
+
 /// FR-009–FR-012, spec.md US3 — renders the *real* [_AppShell] (via
 /// [appRouterProvider], since `_AppShell` is private to app_router.dart and
 /// only reachable through the shell route it builds) with every
@@ -200,6 +202,7 @@ ProviderContainer _containerFor(
         (ref) =>
             LocaleNotifier(_FakeAppPreferencesStorage(), const Locale('vi')),
       ),
+      pullCompleteOverride,
     ],
   );
 }

@@ -2061,6 +2061,400 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
   }
 }
 
+class $PullCursorTable extends PullCursor
+    with TableInfo<$PullCursorTable, PullCursorRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PullCursorTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncTableNameMeta = const VerificationMeta(
+    'syncTableName',
+  );
+  @override
+  late final GeneratedColumn<String> syncTableName = GeneratedColumn<String>(
+    'table_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastUpdatedAtMeta = const VerificationMeta(
+    'lastUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUpdatedAt =
+      GeneratedColumn<DateTime>(
+        'last_updated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastIdMeta = const VerificationMeta('lastId');
+  @override
+  late final GeneratedColumn<String> lastId = GeneratedColumn<String>(
+    'last_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _initialPullCompletedMeta =
+      const VerificationMeta('initialPullCompleted');
+  @override
+  late final GeneratedColumn<bool> initialPullCompleted = GeneratedColumn<bool>(
+    'initial_pull_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("initial_pull_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    userId,
+    syncTableName,
+    lastUpdatedAt,
+    lastId,
+    initialPullCompleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pull_cursor';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PullCursorRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('table_name')) {
+      context.handle(
+        _syncTableNameMeta,
+        syncTableName.isAcceptableOrUnknown(
+          data['table_name']!,
+          _syncTableNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_syncTableNameMeta);
+    }
+    if (data.containsKey('last_updated_at')) {
+      context.handle(
+        _lastUpdatedAtMeta,
+        lastUpdatedAt.isAcceptableOrUnknown(
+          data['last_updated_at']!,
+          _lastUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_id')) {
+      context.handle(
+        _lastIdMeta,
+        lastId.isAcceptableOrUnknown(data['last_id']!, _lastIdMeta),
+      );
+    }
+    if (data.containsKey('initial_pull_completed')) {
+      context.handle(
+        _initialPullCompletedMeta,
+        initialPullCompleted.isAcceptableOrUnknown(
+          data['initial_pull_completed']!,
+          _initialPullCompletedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, syncTableName};
+  @override
+  PullCursorRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PullCursorRow(
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      syncTableName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}table_name'],
+      )!,
+      lastUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_updated_at'],
+      ),
+      lastId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_id'],
+      ),
+      initialPullCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}initial_pull_completed'],
+      )!,
+    );
+  }
+
+  @override
+  $PullCursorTable createAlias(String alias) {
+    return $PullCursorTable(attachedDatabase, alias);
+  }
+}
+
+class PullCursorRow extends DataClass implements Insertable<PullCursorRow> {
+  final String userId;
+  final String syncTableName;
+  final DateTime? lastUpdatedAt;
+  final String? lastId;
+  final bool initialPullCompleted;
+  const PullCursorRow({
+    required this.userId,
+    required this.syncTableName,
+    this.lastUpdatedAt,
+    this.lastId,
+    required this.initialPullCompleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['table_name'] = Variable<String>(syncTableName);
+    if (!nullToAbsent || lastUpdatedAt != null) {
+      map['last_updated_at'] = Variable<DateTime>(lastUpdatedAt);
+    }
+    if (!nullToAbsent || lastId != null) {
+      map['last_id'] = Variable<String>(lastId);
+    }
+    map['initial_pull_completed'] = Variable<bool>(initialPullCompleted);
+    return map;
+  }
+
+  PullCursorCompanion toCompanion(bool nullToAbsent) {
+    return PullCursorCompanion(
+      userId: Value(userId),
+      syncTableName: Value(syncTableName),
+      lastUpdatedAt: lastUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUpdatedAt),
+      lastId: lastId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastId),
+      initialPullCompleted: Value(initialPullCompleted),
+    );
+  }
+
+  factory PullCursorRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PullCursorRow(
+      userId: serializer.fromJson<String>(json['userId']),
+      syncTableName: serializer.fromJson<String>(json['syncTableName']),
+      lastUpdatedAt: serializer.fromJson<DateTime?>(json['lastUpdatedAt']),
+      lastId: serializer.fromJson<String?>(json['lastId']),
+      initialPullCompleted: serializer.fromJson<bool>(
+        json['initialPullCompleted'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'syncTableName': serializer.toJson<String>(syncTableName),
+      'lastUpdatedAt': serializer.toJson<DateTime?>(lastUpdatedAt),
+      'lastId': serializer.toJson<String?>(lastId),
+      'initialPullCompleted': serializer.toJson<bool>(initialPullCompleted),
+    };
+  }
+
+  PullCursorRow copyWith({
+    String? userId,
+    String? syncTableName,
+    Value<DateTime?> lastUpdatedAt = const Value.absent(),
+    Value<String?> lastId = const Value.absent(),
+    bool? initialPullCompleted,
+  }) => PullCursorRow(
+    userId: userId ?? this.userId,
+    syncTableName: syncTableName ?? this.syncTableName,
+    lastUpdatedAt: lastUpdatedAt.present
+        ? lastUpdatedAt.value
+        : this.lastUpdatedAt,
+    lastId: lastId.present ? lastId.value : this.lastId,
+    initialPullCompleted: initialPullCompleted ?? this.initialPullCompleted,
+  );
+  PullCursorRow copyWithCompanion(PullCursorCompanion data) {
+    return PullCursorRow(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      syncTableName: data.syncTableName.present
+          ? data.syncTableName.value
+          : this.syncTableName,
+      lastUpdatedAt: data.lastUpdatedAt.present
+          ? data.lastUpdatedAt.value
+          : this.lastUpdatedAt,
+      lastId: data.lastId.present ? data.lastId.value : this.lastId,
+      initialPullCompleted: data.initialPullCompleted.present
+          ? data.initialPullCompleted.value
+          : this.initialPullCompleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PullCursorRow(')
+          ..write('userId: $userId, ')
+          ..write('syncTableName: $syncTableName, ')
+          ..write('lastUpdatedAt: $lastUpdatedAt, ')
+          ..write('lastId: $lastId, ')
+          ..write('initialPullCompleted: $initialPullCompleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    userId,
+    syncTableName,
+    lastUpdatedAt,
+    lastId,
+    initialPullCompleted,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PullCursorRow &&
+          other.userId == this.userId &&
+          other.syncTableName == this.syncTableName &&
+          other.lastUpdatedAt == this.lastUpdatedAt &&
+          other.lastId == this.lastId &&
+          other.initialPullCompleted == this.initialPullCompleted);
+}
+
+class PullCursorCompanion extends UpdateCompanion<PullCursorRow> {
+  final Value<String> userId;
+  final Value<String> syncTableName;
+  final Value<DateTime?> lastUpdatedAt;
+  final Value<String?> lastId;
+  final Value<bool> initialPullCompleted;
+  final Value<int> rowid;
+  const PullCursorCompanion({
+    this.userId = const Value.absent(),
+    this.syncTableName = const Value.absent(),
+    this.lastUpdatedAt = const Value.absent(),
+    this.lastId = const Value.absent(),
+    this.initialPullCompleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PullCursorCompanion.insert({
+    required String userId,
+    required String syncTableName,
+    this.lastUpdatedAt = const Value.absent(),
+    this.lastId = const Value.absent(),
+    this.initialPullCompleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId),
+       syncTableName = Value(syncTableName);
+  static Insertable<PullCursorRow> custom({
+    Expression<String>? userId,
+    Expression<String>? syncTableName,
+    Expression<DateTime>? lastUpdatedAt,
+    Expression<String>? lastId,
+    Expression<bool>? initialPullCompleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (syncTableName != null) 'table_name': syncTableName,
+      if (lastUpdatedAt != null) 'last_updated_at': lastUpdatedAt,
+      if (lastId != null) 'last_id': lastId,
+      if (initialPullCompleted != null)
+        'initial_pull_completed': initialPullCompleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PullCursorCompanion copyWith({
+    Value<String>? userId,
+    Value<String>? syncTableName,
+    Value<DateTime?>? lastUpdatedAt,
+    Value<String?>? lastId,
+    Value<bool>? initialPullCompleted,
+    Value<int>? rowid,
+  }) {
+    return PullCursorCompanion(
+      userId: userId ?? this.userId,
+      syncTableName: syncTableName ?? this.syncTableName,
+      lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      lastId: lastId ?? this.lastId,
+      initialPullCompleted: initialPullCompleted ?? this.initialPullCompleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (syncTableName.present) {
+      map['table_name'] = Variable<String>(syncTableName.value);
+    }
+    if (lastUpdatedAt.present) {
+      map['last_updated_at'] = Variable<DateTime>(lastUpdatedAt.value);
+    }
+    if (lastId.present) {
+      map['last_id'] = Variable<String>(lastId.value);
+    }
+    if (initialPullCompleted.present) {
+      map['initial_pull_completed'] = Variable<bool>(
+        initialPullCompleted.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PullCursorCompanion(')
+          ..write('userId: $userId, ')
+          ..write('syncTableName: $syncTableName, ')
+          ..write('lastUpdatedAt: $lastUpdatedAt, ')
+          ..write('lastId: $lastId, ')
+          ..write('initialPullCompleted: $initialPullCompleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2069,6 +2463,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FinancialTransactionsTable financialTransactions =
       $FinancialTransactionsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
+  late final $PullCursorTable pullCursor = $PullCursorTable(this);
   late final Index expenseControlItemsUserIdIdx = Index(
     'expense_control_items_user_id_idx',
     'CREATE INDEX expense_control_items_user_id_idx ON expense_control_items (user_id)',
@@ -2089,10 +2484,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     expenseControlItems,
     financialTransactions,
     syncOutbox,
+    pullCursor,
     expenseControlItemsUserIdIdx,
     financialTransactionsUserIdOccurredAtIdx,
     syncOutboxUnsyncedIdx,
   ];
+  @override
+  DriftDatabaseOptions get options =>
+      const DriftDatabaseOptions(storeDateTimeAsText: true);
 }
 
 typedef $$ExpenseControlItemsTableCreateCompanionBuilder =
@@ -3109,6 +3508,212 @@ typedef $$SyncOutboxTableProcessedTableManager =
       SyncOutboxRow,
       PrefetchHooks Function()
     >;
+typedef $$PullCursorTableCreateCompanionBuilder =
+    PullCursorCompanion Function({
+      required String userId,
+      required String syncTableName,
+      Value<DateTime?> lastUpdatedAt,
+      Value<String?> lastId,
+      Value<bool> initialPullCompleted,
+      Value<int> rowid,
+    });
+typedef $$PullCursorTableUpdateCompanionBuilder =
+    PullCursorCompanion Function({
+      Value<String> userId,
+      Value<String> syncTableName,
+      Value<DateTime?> lastUpdatedAt,
+      Value<String?> lastId,
+      Value<bool> initialPullCompleted,
+      Value<int> rowid,
+    });
+
+class $$PullCursorTableFilterComposer
+    extends Composer<_$AppDatabase, $PullCursorTable> {
+  $$PullCursorTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncTableName => $composableBuilder(
+    column: $table.syncTableName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUpdatedAt => $composableBuilder(
+    column: $table.lastUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastId => $composableBuilder(
+    column: $table.lastId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get initialPullCompleted => $composableBuilder(
+    column: $table.initialPullCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PullCursorTableOrderingComposer
+    extends Composer<_$AppDatabase, $PullCursorTable> {
+  $$PullCursorTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncTableName => $composableBuilder(
+    column: $table.syncTableName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUpdatedAt => $composableBuilder(
+    column: $table.lastUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastId => $composableBuilder(
+    column: $table.lastId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get initialPullCompleted => $composableBuilder(
+    column: $table.initialPullCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PullCursorTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PullCursorTable> {
+  $$PullCursorTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncTableName => $composableBuilder(
+    column: $table.syncTableName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastUpdatedAt => $composableBuilder(
+    column: $table.lastUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastId =>
+      $composableBuilder(column: $table.lastId, builder: (column) => column);
+
+  GeneratedColumn<bool> get initialPullCompleted => $composableBuilder(
+    column: $table.initialPullCompleted,
+    builder: (column) => column,
+  );
+}
+
+class $$PullCursorTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PullCursorTable,
+          PullCursorRow,
+          $$PullCursorTableFilterComposer,
+          $$PullCursorTableOrderingComposer,
+          $$PullCursorTableAnnotationComposer,
+          $$PullCursorTableCreateCompanionBuilder,
+          $$PullCursorTableUpdateCompanionBuilder,
+          (
+            PullCursorRow,
+            BaseReferences<_$AppDatabase, $PullCursorTable, PullCursorRow>,
+          ),
+          PullCursorRow,
+          PrefetchHooks Function()
+        > {
+  $$PullCursorTableTableManager(_$AppDatabase db, $PullCursorTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PullCursorTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PullCursorTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PullCursorTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> userId = const Value.absent(),
+                Value<String> syncTableName = const Value.absent(),
+                Value<DateTime?> lastUpdatedAt = const Value.absent(),
+                Value<String?> lastId = const Value.absent(),
+                Value<bool> initialPullCompleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PullCursorCompanion(
+                userId: userId,
+                syncTableName: syncTableName,
+                lastUpdatedAt: lastUpdatedAt,
+                lastId: lastId,
+                initialPullCompleted: initialPullCompleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String userId,
+                required String syncTableName,
+                Value<DateTime?> lastUpdatedAt = const Value.absent(),
+                Value<String?> lastId = const Value.absent(),
+                Value<bool> initialPullCompleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PullCursorCompanion.insert(
+                userId: userId,
+                syncTableName: syncTableName,
+                lastUpdatedAt: lastUpdatedAt,
+                lastId: lastId,
+                initialPullCompleted: initialPullCompleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PullCursorTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PullCursorTable,
+      PullCursorRow,
+      $$PullCursorTableFilterComposer,
+      $$PullCursorTableOrderingComposer,
+      $$PullCursorTableAnnotationComposer,
+      $$PullCursorTableCreateCompanionBuilder,
+      $$PullCursorTableUpdateCompanionBuilder,
+      (
+        PullCursorRow,
+        BaseReferences<_$AppDatabase, $PullCursorTable, PullCursorRow>,
+      ),
+      PullCursorRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3119,4 +3724,6 @@ class $AppDatabaseManager {
       $$FinancialTransactionsTableTableManager(_db, _db.financialTransactions);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
+  $$PullCursorTableTableManager get pullCursor =>
+      $$PullCursorTableTableManager(_db, _db.pullCursor);
 }

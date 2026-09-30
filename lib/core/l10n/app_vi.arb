@@ -454,6 +454,14 @@
       }
     }
   },
+  "expenseControlSaveFormulaSuccessMessage": "Đã lưu công thức.",
+  "@expenseControlSaveFormulaSuccessMessage": {
+    "description": "Snackbar shown after \"Lưu công thức\" successfully persists pending formula edits, so the user has explicit confirmation instead of relying on the button silently disappearing"
+  },
+  "expenseControlSaveFormulaErrorMessage": "Không thể lưu công thức. Vui lòng thử lại.",
+  "@expenseControlSaveFormulaErrorMessage": {
+    "description": "Snackbar shown when \"Lưu công thức\" fails unexpectedly (e.g. a network/server error) — the pending edits are kept so the user can retry"
+  },
   "historyPlaceholderMessage": "Tính năng đang được phát triển.",
   "@historyPlaceholderMessage": {
     "description": "Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)"

@@ -662,6 +662,18 @@ abstract class AppLocalizations {
   /// **'Không thể lưu: tổng phần trăm là {total}%, vượt quá giới hạn cho phép.'**
   String expenseControlSaveFormulaBlockedMessage(String total);
 
+  /// Snackbar shown after "Lưu công thức" successfully persists pending formula edits, so the user has explicit confirmation instead of relying on the button silently disappearing
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu công thức.'**
+  String get expenseControlSaveFormulaSuccessMessage;
+
+  /// Snackbar shown when "Lưu công thức" fails unexpectedly (e.g. a network/server error) — the pending edits are kept so the user can retry
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu công thức. Vui lòng thử lại.'**
+  String get expenseControlSaveFormulaErrorMessage;
+
   /// Placeholder message on the Lịch sử/Báo cáo screen (out of scope for this feature)
   ///
   /// In vi, this message translates to:

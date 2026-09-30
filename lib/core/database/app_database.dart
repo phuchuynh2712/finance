@@ -3,11 +3,19 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import 'tables/expense_control_items_table.dart';
 import 'tables/financial_transactions_table.dart';
+import 'tables/pull_cursor_table.dart';
 import 'package:finance/core/sync/sync_outbox_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [ExpenseControlItems, FinancialTransactions, SyncOutbox])
+@DriftDatabase(
+  tables: [
+    ExpenseControlItems,
+    FinancialTransactions,
+    SyncOutbox,
+    PullCursor,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   // `web:` is required on Web — drift_flutter throws ArgumentError without
   // it there (Multi-Platform Support section). Both assets are same-origin
@@ -29,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,6 +127,56 @@ class AppDatabase extends _$AppDatabase {
             updated_at = created_at
           WHERE display_name IS NULL
         ''');
+      }
+      if (from <= 6) {
+        await m.createTable(pullCursor);
+
+        // FR-005a/research.md Decision 10: switch every existing
+        // DateTimeColumn on the two syncable tables from Drift's default
+        // unix-seconds integer encoding to ISO-8601 text, matching the
+        // `store_date_time_values_as_text: true` build option now enabled
+        // (build.yaml). This project's migrations use the simple cumulative
+        // `onUpgrade` callback style, not `stepByStep`, so the generated
+        // `schema.entities.whereType<TableInfo>()` snapshot Drift's own
+        // migration guide recommends for step-by-step migrations is not
+        // available here — verified directly against Drift's docs before
+        // writing this. Using `allTables` instead would be the documented
+        // data-loss pitfall (GitHub Discussion #3603): it reflects the
+        // CURRENT (latest-code) schema, not the schema as it exists in an
+        // upgrading user's actual v6-or-earlier database, and would break
+        // the moment a future `if (from <= 7)` block adds or removes a
+        // table. Iterating this fixed, explicit list of the two tables
+        // actually being migrated sidesteps that risk entirely, and stays
+        // safe even after future migration blocks are added above this one.
+        for (final table in <TableInfo>[
+          expenseControlItems,
+          financialTransactions,
+        ]) {
+          final dateTimeColumns = table.$columns.where(
+            (c) => c.type == DriftSqlType.dateTime,
+          );
+          if (dateTimeColumns.isNotEmpty) {
+            // `TableMigration` is marked `@experimental` as of drift 2.22.1
+            // (this project's pinned version) — it has been the documented,
+            // stable-since-2.4 API for this exact migration pattern per
+            // Drift's own official guide the entire time; the annotation was
+            // only lifted at drift 2.32.0. Verified directly against Drift's
+            // changelog before accepting this warning rather than avoiding
+            // the API (research.md Decision 10).
+            await m.alterTable(
+              // ignore: experimental_member_use
+              TableMigration(
+                table,
+                columnTransformer: {
+                  for (final column in dateTimeColumns)
+                    column: DateTimeExpressions.fromUnixEpoch(
+                      column.dartCast<int>(),
+                    ),
+                },
+              ),
+            );
+          }
+        }
       }
     },
     beforeOpen: (details) async {

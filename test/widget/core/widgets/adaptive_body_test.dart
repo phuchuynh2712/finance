@@ -157,4 +157,85 @@ void main() {
       expect(size.width, 600);
     },
   );
+
+  group('state preservation across a live threshold crossing (research.md '
+      'Decision 1a — regression coverage for the scroll/state-loss bug)', () {
+    testWidgets(
+      'a ListView.controller scroll offset survives a resize crossing the '
+      'activatesAt threshold from above to below',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AdaptiveBody(
+                child: ListView.builder(
+                  controller: controller,
+                  itemCount: 100,
+                  itemBuilder: (context, index) =>
+                      SizedBox(height: 50, child: Text('Item $index')),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        controller.jumpTo(500);
+        await tester.pump();
+        expect(controller.offset, 500.0);
+
+        tester.view.physicalSize = const Size(410, 800);
+        await tester.pump();
+
+        expect(controller.offset, 500.0);
+      },
+    );
+
+    testWidgets(
+      'a ListView.controller scroll offset survives a resize crossing the '
+      'activatesAt threshold from below to above',
+      (tester) async {
+        tester.view.physicalSize = const Size(410, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AdaptiveBody(
+                child: ListView.builder(
+                  controller: controller,
+                  itemCount: 100,
+                  itemBuilder: (context, index) =>
+                      SizedBox(height: 50, child: Text('Item $index')),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        controller.jumpTo(500);
+        await tester.pump();
+        expect(controller.offset, 500.0);
+
+        tester.view.physicalSize = const Size(1024, 800);
+        await tester.pump();
+
+        expect(controller.offset, 500.0);
+      },
+    );
+  });
 }
