@@ -59,8 +59,7 @@ const syncableTables = ['expense_control_items', 'financial_transactions'];
 /// `SyncWorker`'s `PushRow` seam) — the real implementation is wired by
 /// [pullServiceProvider].
 typedef Subscribe =
-    Future<void> Function()
-    Function(
+    Future<void> Function() Function(
       List<String> tables,
       void Function(String table, Map<String, dynamic> row) onEvent,
       void Function() onReady,
@@ -325,8 +324,9 @@ class PullService {
   Future<_Cursor?> _loadCursor(String table) async {
     final row =
         await (_db.select(_db.pullCursor)..where(
-          (t) => t.userId.equals(_userId) & t.syncTableName.equals(table),
-        )).getSingleOrNull();
+              (t) => t.userId.equals(_userId) & t.syncTableName.equals(table),
+            ))
+            .getSingleOrNull();
     if (row == null || row.lastUpdatedAt == null || row.lastId == null) {
       return null;
     }

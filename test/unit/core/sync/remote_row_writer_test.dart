@@ -71,10 +71,9 @@ void main() {
       final row = _itemRow('food', updatedAt: DateTime.utc(2026, 1, 1));
       await applyRemoteExpenseControlItem(db, _userId, row);
 
-      final stored =
-          await (db.select(
-            db.expenseControlItems,
-          )..where((t) => t.id.equals('food'))).getSingle();
+      final stored = await (db.select(
+        db.expenseControlItems,
+      )..where((t) => t.id.equals('food'))).getSingle();
       expect(stored.name, 'Food');
     });
 
@@ -105,10 +104,9 @@ void main() {
           _userId,
           _itemRow('food', name: 'Older', updatedAt: older),
         );
-        var stored =
-            await (db.select(
-              db.expenseControlItems,
-            )..where((t) => t.id.equals('food'))).getSingle();
+        var stored = await (db.select(
+          db.expenseControlItems,
+        )..where((t) => t.id.equals('food'))).getSingle();
         expect(stored.name, 'Newer');
 
         await applyRemoteExpenseControlItem(
@@ -116,10 +114,9 @@ void main() {
           _userId,
           _itemRow('food', name: 'SameTimestamp', updatedAt: newer),
         );
-        stored =
-            await (db.select(
-              db.expenseControlItems,
-            )..where((t) => t.id.equals('food'))).getSingle();
+        stored = await (db.select(
+          db.expenseControlItems,
+        )..where((t) => t.id.equals('food'))).getSingle();
         expect(stored.name, 'Newer');
       },
     );
@@ -135,10 +132,9 @@ void main() {
         );
         await applyRemoteExpenseControlItem(db, _userId, row);
 
-        final stored =
-            await (db.select(
-              db.expenseControlItems,
-            )..where((t) => t.id.equals('food'))).getSingle();
+        final stored = await (db.select(
+          db.expenseControlItems,
+        )..where((t) => t.id.equals('food'))).getSingle();
         expect(stored.deletedAt, deletedAt);
       },
     );
@@ -176,10 +172,9 @@ void main() {
       final row = _transactionRow('txn', updatedAt: DateTime.utc(2026, 1, 1));
       await applyRemoteFinancialTransaction(db, _userId, row);
 
-      final stored =
-          await (db.select(
-            db.financialTransactions,
-          )..where((t) => t.id.equals('txn'))).getSingle();
+      final stored = await (db.select(
+        db.financialTransactions,
+      )..where((t) => t.id.equals('txn'))).getSingle();
       expect(stored.amount, 1000);
     });
 
@@ -204,10 +199,9 @@ void main() {
         );
         await applyRemoteFinancialTransaction(db, _userId, row);
 
-        final stored =
-            await (db.select(
-              db.financialTransactions,
-            )..where((t) => t.id.equals('txn'))).getSingle();
+        final stored = await (db.select(
+          db.financialTransactions,
+        )..where((t) => t.id.equals('txn'))).getSingle();
         expect(stored.deletedAt, deletedAt);
       },
     );

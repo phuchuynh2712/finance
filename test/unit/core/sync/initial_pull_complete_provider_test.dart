@@ -47,10 +47,7 @@ void main() {
     await db.close();
   });
 
-  Future<void> setCursor(
-    String table, {
-    required bool completed,
-  }) async {
+  Future<void> setCursor(String table, {required bool completed}) async {
     await db
         .into(db.pullCursor)
         .insertOnConflictUpdate(
@@ -67,18 +64,13 @@ void main() {
     expect(result, isFalse);
   });
 
-  test(
-    'false when one table is complete but the other isn\'t',
-    () async {
-      await setCursor('expense_control_items', completed: true);
-      await setCursor('financial_transactions', completed: false);
+  test('false when one table is complete but the other isn\'t', () async {
+    await setCursor('expense_control_items', completed: true);
+    await setCursor('financial_transactions', completed: false);
 
-      final result = await container.read(
-        initialPullCompleteProvider.future,
-      );
-      expect(result, isFalse);
-    },
-  );
+    final result = await container.read(initialPullCompleteProvider.future);
+    expect(result, isFalse);
+  });
 
   test('true only when both tables are true', () async {
     await setCursor('expense_control_items', completed: true);
@@ -92,14 +84,13 @@ void main() {
     'updates reactively when the underlying PullCursor rows change',
     () async {
       final values = <bool>[];
-      final subscription = container.listen(
-        initialPullCompleteProvider,
-        (previous, next) {
-          final value = next.valueOrNull;
-          if (value != null) values.add(value);
-        },
-        fireImmediately: true,
-      );
+      final subscription = container.listen(initialPullCompleteProvider, (
+        previous,
+        next,
+      ) {
+        final value = next.valueOrNull;
+        if (value != null) values.add(value);
+      }, fireImmediately: true);
       addTearDown(subscription.close);
 
       // Let the stream's first (empty-cursor) emission land.
@@ -120,7 +111,10 @@ void main() {
 
       // Every emission before the last one must still be false — the
       // provider never reports "complete" before both tables actually are.
-      expect(values.sublist(0, values.length - 1).every((v) => v == false), isTrue);
+      expect(
+        values.sublist(0, values.length - 1).every((v) => v == false),
+        isTrue,
+      );
       expect(values.last, isTrue);
     },
   );

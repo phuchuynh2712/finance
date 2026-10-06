@@ -148,10 +148,9 @@ void main() {
 
       // (b) Every migrated row's DateTime values round-trip correctly and
       // are readable via the regenerated (text-expecting) typed API.
-      final items =
-          await (database.select(database.expenseControlItems)
-                ..orderBy([(t) => OrderingTerm.asc(t.id)]))
-              .get();
+      final items = await (database.select(
+        database.expenseControlItems,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
       expect(items, hasLength(2));
       final food = items.firstWhere((r) => r.id == 'food');
       final rent = items.firstWhere((r) => r.id == 'rent');
@@ -174,8 +173,7 @@ void main() {
       );
 
       final transactionRow =
-          (await database.select(database.financialTransactions).get())
-              .single;
+          (await database.select(database.financialTransactions).get()).single;
       expect(
         transactionRow.updatedAt,
         DateTime.fromMillisecondsSinceEpoch(1717200000 * 1000, isUtc: true),
