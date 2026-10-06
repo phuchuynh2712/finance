@@ -8,7 +8,7 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
-import 'sign_up_validation.dart';
+import 'package:finance/features/account/domain/password_policy.dart';
 
 /// "Set New Password" (FR-016) — reachable only via the router's
 /// `isPasswordRecovery` redirect (contracts §4), after the user opens the
@@ -32,6 +32,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
   bool _isSubmitting = false;
+  String? _passwordFieldError;
   String? _confirmPasswordFieldError;
   String? _errorMessage;
   bool _succeeded = false;
@@ -53,15 +54,26 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (!SignUpValidation.isConfirmPasswordValid(password, confirmPassword)) {
-      setState(
-        () => _confirmPasswordFieldError = l10n.resetPasswordMismatchError,
-      );
+    // FR-015: the same minimum as sign-up and change password, checked before
+    // any request so a short password never reaches the service.
+    final passwordError = PasswordPolicy.meetsMinimum(password)
+        ? null
+        : l10n.passwordTooShortError;
+    final confirmPasswordError =
+        PasswordPolicy.matches(password, confirmPassword)
+        ? null
+        : l10n.resetPasswordMismatchError;
+    if (passwordError != null || confirmPasswordError != null) {
+      setState(() {
+        _passwordFieldError = passwordError;
+        _confirmPasswordFieldError = confirmPasswordError;
+      });
       return;
     }
 
     setState(() {
       _isSubmitting = true;
+      _passwordFieldError = null;
       _confirmPasswordFieldError = null;
       _errorMessage = null;
     });
@@ -110,6 +122,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ).requestFocus(_confirmPasswordFocusNode),
                   decoration: InputDecoration(
                     labelText: l10n.resetPasswordNewPasswordLabel,
+                    helperText: l10n.passwordRequirementHint,
+                    errorText: _passwordFieldError,
                   ),
                 ),
                 const SizedBox(height: 16),

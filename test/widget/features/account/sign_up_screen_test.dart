@@ -266,7 +266,55 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fake.signedUpEmail, isNull);
-    expect(find.text('Mật khẩu phải có ít nhất 6 ký tự.'), findsOneWidget);
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsOneWidget);
+  });
+
+  testWidgets('a 7-character password is rejected with the 8-character '
+      'message and no account is created (FR-015)', (tester) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await _fillValidForm(
+      tester,
+      password: '1234567',
+      confirmPassword: '1234567',
+    );
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.pumpAndSettle();
+
+    expect(fake.signedUpEmail, isNull);
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsOneWidget);
+  });
+
+  testWidgets('an 8-character password is accepted and sign-up proceeds', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await _fillValidForm(
+      tester,
+      password: '12345678',
+      confirmPassword: '12345678',
+    );
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng ký'));
+    await tester.pumpAndSettle();
+
+    expect(fake.signedUpPassword, '12345678');
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsNothing);
+  });
+
+  testWidgets('the 8-character requirement is visible before typing, in '
+      'Vietnamese', (tester) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tối thiểu 8 ký tự'), findsOneWidget);
   });
 
   testWidgets('invalid email shows an inline field error, no submission', (

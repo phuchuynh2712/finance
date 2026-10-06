@@ -149,10 +149,6 @@
   "@signUpEmailInvalidError": {
     "description": "Inline error shown when the entered email fails format validation"
   },
-  "signUpPasswordTooShortError": "Mật khẩu phải có ít nhất 6 ký tự.",
-  "@signUpPasswordTooShortError": {
-    "description": "Inline error shown when the entered password is shorter than the minimum length"
-  },
   "signUpConfirmPasswordMismatchError": "Mật khẩu xác nhận không khớp.",
   "@signUpConfirmPasswordMismatchError": {
     "description": "Inline error shown when the confirm-password field doesn't match the password field"
@@ -625,7 +621,7 @@
   "expenseScanConfirmAction": "Xác nhận & lưu",
   "errorMapperInvalidCredentials": "Sai email hoặc mật khẩu. Vui lòng thử lại.",
   "errorMapperEmailExists": "Email này đã được đăng ký. Hãy đăng nhập bằng mật khẩu.",
-  "errorMapperWeakPassword": "Mật khẩu chưa đủ mạnh. Vui lòng chọn mật khẩu khác.",
+  "errorMapperWeakPassword": "Mật khẩu chưa đủ mạnh. Hãy dùng ít nhất 8 ký tự.",
   "errorMapperRateLimited": "Bạn đã thử quá nhiều lần. Vui lòng đợi một chút rồi thử lại.",
   "errorMapperNetworkFailure": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.",
   "errorMapperGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
@@ -702,5 +698,97 @@
     "placeholders": {
       "percent": { "type": "String" }
     }
+  },
+  "securityScreenTitle": "Bảo mật",
+  "@securityScreenTitle": {
+    "description": "Title of the Security screen opened from the Profile screen's Security row"
+  },
+  "securityChangePasswordRow": "Đổi mật khẩu",
+  "@securityChangePasswordRow": {
+    "description": "Row on the Security screen that opens the change-password form"
+  },
+  "securityBiometricRow": "Đăng nhập bằng vân tay",
+  "@securityBiometricRow": {
+    "description": "Label of the switch on the Security screen that turns biometric sign-in on or off"
+  },
+  "securityBiometricReasonWeb": "Đăng nhập bằng vân tay chưa hỗ trợ trên web.",
+  "@securityBiometricReasonWeb": {
+    "description": "Caption shown under the disabled biometric switch when the app runs in a browser"
+  },
+  "securityBiometricReasonNoHardware": "Thiết bị này không hỗ trợ đăng nhập bằng vân tay.",
+  "@securityBiometricReasonNoHardware": {
+    "description": "Caption shown under the disabled biometric switch when the device has no biometric hardware"
+  },
+  "securityBiometricReasonNotEnrolled": "Hãy thêm vân tay hoặc khuôn mặt trong cài đặt thiết bị để bật tính năng này.",
+  "@securityBiometricReasonNotEnrolled": {
+    "description": "Caption shown under the disabled biometric switch when no biometrics are enrolled on the device"
+  },
+  "securityBiometricPromptReason": "Xác nhận để bật đăng nhập bằng vân tay",
+  "@securityBiometricPromptReason": {
+    "description": "Reason text shown in the system biometric prompt when the person turns the switch on"
+  },
+  "securityBiometricEnableFailed": "Chưa bật được đăng nhập bằng vân tay.",
+  "@securityBiometricEnableFailed": {
+    "description": "Brief notice shown when the biometric check was cancelled or failed while turning the switch on"
+  },
+  "securityPasswordChangedNotice": "Đã đổi mật khẩu.",
+  "@securityPasswordChangedNotice": {
+    "description": "Confirmation shown on the Security screen after the password was changed and other devices were signed out"
+  },
+  "securityPasswordChangedOthersNotEnded": "Đã đổi mật khẩu, nhưng chưa đăng xuất được các thiết bị khác.",
+  "@securityPasswordChangedOthersNotEnded": {
+    "description": "Notice shown when the password changed but signing out the other devices failed; offers a retry action"
+  },
+  "securityOthersRetryAction": "Thử lại",
+  "@securityOthersRetryAction": {
+    "description": "Button on the other-devices notice that retries signing out the other devices"
+  },
+  "securityOthersSignedOutNotice": "Đã đăng xuất các thiết bị khác.",
+  "@securityOthersSignedOutNotice": {
+    "description": "Confirmation shown after retrying and successfully signing out the other devices"
+  },
+  "changePasswordTitle": "Đổi mật khẩu",
+  "@changePasswordTitle": {
+    "description": "Title of the change-password screen"
+  },
+  "changePasswordCurrentLabel": "Mật khẩu hiện tại",
+  "@changePasswordCurrentLabel": {
+    "description": "Label of the current-password field on the change-password screen"
+  },
+  "changePasswordNewLabel": "Mật khẩu mới",
+  "@changePasswordNewLabel": {
+    "description": "Label of the new-password field on the change-password screen"
+  },
+  "changePasswordConfirmLabel": "Nhập lại mật khẩu mới",
+  "@changePasswordConfirmLabel": {
+    "description": "Label of the confirm-new-password field on the change-password screen"
+  },
+  "passwordRequirementHint": "Tối thiểu 8 ký tự",
+  "@passwordRequirementHint": {
+    "description": "Helper text shown under every field where a new password is set, stating the minimum length"
+  },
+  "passwordTooShortError": "Mật khẩu phải có ít nhất 8 ký tự.",
+  "@passwordTooShortError": {
+    "description": "Inline error shown when a password being set is shorter than the minimum length"
+  },
+  "changePasswordCurrentRequiredError": "Nhập mật khẩu hiện tại.",
+  "@changePasswordCurrentRequiredError": {
+    "description": "Inline error shown when the current-password field is empty"
+  },
+  "changePasswordSameAsCurrentError": "Mật khẩu mới phải khác mật khẩu hiện tại.",
+  "@changePasswordSameAsCurrentError": {
+    "description": "Inline error shown when the new password equals the current password"
+  },
+  "changePasswordWrongCurrentError": "Mật khẩu hiện tại không đúng.",
+  "@changePasswordWrongCurrentError": {
+    "description": "Inline error shown under the current-password field when the service rejects it"
+  },
+  "changePasswordSubmit": "Đổi mật khẩu",
+  "@changePasswordSubmit": {
+    "description": "Label of the submit button on the change-password screen"
+  },
+  "errorMapperSessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+  "@errorMapperSessionExpired": {
+    "description": "Message for an expired or revoked session"
   }
 }

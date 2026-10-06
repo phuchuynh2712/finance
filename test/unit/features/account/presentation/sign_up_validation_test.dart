@@ -26,8 +26,8 @@ void main() {
   });
 
   group('SignUpValidation.isPasswordValid', () {
-    test('accepts a password of exactly the minimum length', () {
-      expect(SignUpValidation.isPasswordValid('123456'), isTrue);
+    test('accepts a password of exactly the minimum length (8)', () {
+      expect(SignUpValidation.isPasswordValid('12345678'), isTrue);
     });
 
     test('accepts a password longer than the minimum', () {
@@ -36,6 +36,14 @@ void main() {
 
     test('rejects a password shorter than the minimum', () {
       expect(SignUpValidation.isPasswordValid('12345'), isFalse);
+    });
+
+    test('rejects a 6-character password, the previous minimum', () {
+      expect(SignUpValidation.isPasswordValid('123456'), isFalse);
+    });
+
+    test('rejects a 7-character password', () {
+      expect(SignUpValidation.isPasswordValid('1234567'), isFalse);
     });
 
     test('rejects an empty password', () {

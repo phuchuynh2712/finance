@@ -119,9 +119,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get signUpEmailInvalidError => 'Email không hợp lệ.';
 
   @override
-  String get signUpPasswordTooShortError => 'Mật khẩu phải có ít nhất 6 ký tự.';
-
-  @override
   String get signUpConfirmPasswordMismatchError =>
       'Mật khẩu xác nhận không khớp.';
 
@@ -514,7 +511,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get errorMapperWeakPassword =>
-      'Mật khẩu chưa đủ mạnh. Vui lòng chọn mật khẩu khác.';
+      'Mật khẩu chưa đủ mạnh. Hãy dùng ít nhất 8 ký tự.';
 
   @override
   String get errorMapperRateLimited =>
@@ -671,4 +668,81 @@ class AppLocalizationsVi extends AppLocalizations {
   String reportUsagePercentValue(String percent) {
     return '$percent%';
   }
+
+  @override
+  String get securityScreenTitle => 'Bảo mật';
+
+  @override
+  String get securityChangePasswordRow => 'Đổi mật khẩu';
+
+  @override
+  String get securityBiometricRow => 'Đăng nhập bằng vân tay';
+
+  @override
+  String get securityBiometricReasonWeb =>
+      'Đăng nhập bằng vân tay chưa hỗ trợ trên web.';
+
+  @override
+  String get securityBiometricReasonNoHardware =>
+      'Thiết bị này không hỗ trợ đăng nhập bằng vân tay.';
+
+  @override
+  String get securityBiometricReasonNotEnrolled =>
+      'Hãy thêm vân tay hoặc khuôn mặt trong cài đặt thiết bị để bật tính năng này.';
+
+  @override
+  String get securityBiometricPromptReason =>
+      'Xác nhận để bật đăng nhập bằng vân tay';
+
+  @override
+  String get securityBiometricEnableFailed =>
+      'Chưa bật được đăng nhập bằng vân tay.';
+
+  @override
+  String get securityPasswordChangedNotice => 'Đã đổi mật khẩu.';
+
+  @override
+  String get securityPasswordChangedOthersNotEnded =>
+      'Đã đổi mật khẩu, nhưng chưa đăng xuất được các thiết bị khác.';
+
+  @override
+  String get securityOthersRetryAction => 'Thử lại';
+
+  @override
+  String get securityOthersSignedOutNotice => 'Đã đăng xuất các thiết bị khác.';
+
+  @override
+  String get changePasswordTitle => 'Đổi mật khẩu';
+
+  @override
+  String get changePasswordCurrentLabel => 'Mật khẩu hiện tại';
+
+  @override
+  String get changePasswordNewLabel => 'Mật khẩu mới';
+
+  @override
+  String get changePasswordConfirmLabel => 'Nhập lại mật khẩu mới';
+
+  @override
+  String get passwordRequirementHint => 'Tối thiểu 8 ký tự';
+
+  @override
+  String get passwordTooShortError => 'Mật khẩu phải có ít nhất 8 ký tự.';
+
+  @override
+  String get changePasswordCurrentRequiredError => 'Nhập mật khẩu hiện tại.';
+
+  @override
+  String get changePasswordSameAsCurrentError =>
+      'Mật khẩu mới phải khác mật khẩu hiện tại.';
+
+  @override
+  String get changePasswordWrongCurrentError => 'Mật khẩu hiện tại không đúng.';
+
+  @override
+  String get changePasswordSubmit => 'Đổi mật khẩu';
+
+  @override
+  String get errorMapperSessionExpired =>
+      'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
 }

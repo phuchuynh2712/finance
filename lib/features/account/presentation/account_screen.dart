@@ -9,6 +9,7 @@ import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'account_controller.dart';
 import '../account_routes.dart' show AccountPlaceholderFeature;
+import 'widgets/account_menu.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -126,6 +127,9 @@ class _AccountIdentityHeader extends ConsumerWidget {
   }
 }
 
+/// The Notifications / Security / Help rows. Security opens the real
+/// Security screen at `/account/security`; the other two still open their
+/// placeholders.
 class _MenuCard extends StatelessWidget {
   const _MenuCard({required this.semantic});
 
@@ -134,97 +138,42 @@ class _MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border.all(color: semantic.border1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          _MenuRow(
-            icon: LucideIcons.bell,
-            label: l10n.accountNotificationsRowLabel,
-            semantic: semantic,
-            showDivider: true,
-            onTap: () => context.push(
-              '/account/placeholder/'
-              '${AccountPlaceholderFeature.notifications.name}',
-            ),
+    return AccountMenuCard(
+      semantic: semantic,
+      children: [
+        AccountMenuRow(
+          icon: LucideIcons.bell,
+          label: l10n.accountNotificationsRowLabel,
+          semantic: semantic,
+          showDivider: true,
+          onTap: () => context.push(
+            '/account/placeholder/'
+            '${AccountPlaceholderFeature.notifications.name}',
           ),
-          _MenuRow(
-            icon: LucideIcons.shieldCheck,
-            label: l10n.accountSecurityRowLabel,
-            semantic: semantic,
-            showDivider: true,
-            onTap: () => context.push(
-              '/account/placeholder/'
-              '${AccountPlaceholderFeature.security.name}',
-            ),
-          ),
-          _MenuRow(
-            icon: LucideIcons.helpCircle,
-            label: l10n.accountHelpRowLabel,
-            semantic: semantic,
-            showDivider: false,
-            onTap: () => context.push(
-              '/account/placeholder/'
-              '${AccountPlaceholderFeature.help.name}',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({
-    required this.icon,
-    required this.label,
-    required this.semantic,
-    required this.showDivider,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final AppSemanticColors semantic;
-  final bool showDivider;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: showDivider
-            ? BoxDecoration(
-                border: Border(bottom: BorderSide(color: semantic.border1)),
-              )
-            : null,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: semantic.fg2),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Icon(LucideIcons.chevronRight, size: 16, color: semantic.fg3),
-          ],
         ),
-      ),
+        AccountMenuRow(
+          icon: LucideIcons.shieldCheck,
+          label: l10n.accountSecurityRowLabel,
+          semantic: semantic,
+          showDivider: true,
+          // `go`, not `push`: on web `push` leaves the address bar on
+          // /account, so the Security screen could not be bookmarked or
+          // reloaded. `/account/security` is a child of `/account`, so Back
+          // still returns to Hồ sơ.
+          onTap: () => context.go('/account/security'),
+        ),
+        AccountMenuRow(
+          icon: LucideIcons.helpCircle,
+          label: l10n.accountHelpRowLabel,
+          semantic: semantic,
+          showDivider: false,
+          onTap: () => context.push(
+            '/account/placeholder/'
+            '${AccountPlaceholderFeature.help.name}',
+          ),
+        ),
+      ],
     );
   }
 }

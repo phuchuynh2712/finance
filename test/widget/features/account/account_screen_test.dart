@@ -7,15 +7,20 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/auth/auth_repository.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/auth/biometric_login_repository.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/storage/app_preferences_storage.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'package:finance/features/account/account_routes.dart'
-    show accountPlaceholderRoute;
+    show accountPlaceholderRoute, securityRoute;
+import 'package:finance/features/account/application/change_password_service.dart';
 import 'package:finance/features/account/presentation/account_controller.dart';
 import 'package:finance/features/account/presentation/account_screen.dart';
+import 'package:finance/features/account/presentation/change_password_controller.dart';
+import 'package:finance/features/account/presentation/security_screen.dart';
 
 class _FakeAccountAuthActions implements AccountAuthActions {
   _FakeAccountAuthActions({
@@ -54,6 +59,19 @@ class _FakeAccountAuthActions implements AccountAuthActions {
   }
 }
 
+/// The Security screen reads the device's biometric availability.
+class _FakeBiometricLoginRepository extends Fake
+    implements BiometricLoginRepository {
+  @override
+  Future<BiometricAvailability> availability() async =>
+      BiometricAvailability.available;
+}
+
+/// The Security screen reads the change-password service; a fake keeps the
+/// real Supabase-backed one (which needs an initialized client) out of the test.
+class _FakeChangePasswordService extends Fake
+    implements ChangePasswordService {}
+
 class _FakeAppPreferencesStorage implements AppPreferencesStorage {
   ThemeMode? storedThemeMode;
   Locale? storedLocale;
@@ -79,6 +97,12 @@ Widget _harness(
   return ProviderScope(
     overrides: [
       accountAuthActionsProvider.overrideWithValue(fake),
+      changePasswordServiceProvider.overrideWithValue(
+        _FakeChangePasswordService(),
+      ),
+      biometricLoginRepositoryProvider.overrideWithValue(
+        _FakeBiometricLoginRepository(),
+      ),
       themeModeProvider.overrideWith(
         (ref) =>
             ThemeModeNotifier(_FakeAppPreferencesStorage(), initialThemeMode),
@@ -107,6 +131,7 @@ Widget _harness(
                 path: 'placeholder/:feature',
                 builder: accountPlaceholderRoute,
               ),
+              GoRoute(path: 'security', builder: securityRoute),
             ],
           ),
         ],
@@ -264,7 +289,7 @@ void main() {
     );
 
     testWidgets(
-      'tapping "Thông báo" navigates to a placeholder distinct from "Bảo mật"/"Trợ giúp"',
+      'tapping "Thông báo" still opens its "not available yet" placeholder',
       (tester) async {
         final fake = _FakeAccountAuthActions();
         await tester.pumpWidget(_harness(fake));
@@ -274,12 +299,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Thông báo'), findsOneWidget);
-        expect(find.text('Bảo mật'), findsNothing);
+        expect(find.text('Tính năng đang được phát triển.'), findsOneWidget);
+        expect(find.byType(SecurityScreen), findsNothing);
       },
     );
 
     testWidgets(
-      'tapping "Bảo mật" navigates to a placeholder distinct from "Thông báo"/"Trợ giúp"',
+      'tapping "Bảo mật" opens the real Security screen, not a placeholder',
       (tester) async {
         final fake = _FakeAccountAuthActions();
         await tester.pumpWidget(_harness(fake));
@@ -288,13 +314,31 @@ void main() {
         await tester.tap(find.text('Bảo mật'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Bảo mật'), findsOneWidget);
+        expect(find.byType(SecurityScreen), findsOneWidget);
+        expect(find.text('Đổi mật khẩu'), findsOneWidget);
+        expect(find.text('Tính năng đang được phát triển.'), findsNothing);
         expect(find.text('Thông báo'), findsNothing);
       },
     );
 
+    testWidgets('Back from the Security screen returns to Hồ sơ', (
+      tester,
+    ) async {
+      final fake = _FakeAccountAuthActions();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Bảo mật'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AccountScreen), findsOneWidget);
+      expect(find.byType(SecurityScreen), findsNothing);
+    });
+
     testWidgets(
-      'tapping "Trợ giúp" navigates to a placeholder distinct from "Thông báo"/"Bảo mật"',
+      'tapping "Trợ giúp" still opens its "not available yet" placeholder',
       (tester) async {
         final fake = _FakeAccountAuthActions();
         await tester.pumpWidget(_harness(fake));
@@ -304,7 +348,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Trợ giúp'), findsOneWidget);
-        expect(find.text('Thông báo'), findsNothing);
+        expect(find.text('Tính năng đang được phát triển.'), findsOneWidget);
+        expect(find.byType(SecurityScreen), findsNothing);
       },
     );
   });

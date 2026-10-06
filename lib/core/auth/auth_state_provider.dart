@@ -5,9 +5,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:finance/core/network/supabase_client_provider.dart';
 import 'auth_repository.dart';
 import 'biometric_login_repository.dart';
+import 'password_change_gateway.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref.watch(supabaseClientProvider));
+});
+
+/// The seam the change-password flow depends on; overridden with a fake in
+/// tests. Backed by the same [AuthRepository] instance.
+final passwordChangeGatewayProvider = Provider<PasswordChangeGateway>((ref) {
+  return ref.watch(authRepositoryProvider);
 });
 
 final biometricLoginRepositoryProvider = Provider<BiometricLoginRepository>((

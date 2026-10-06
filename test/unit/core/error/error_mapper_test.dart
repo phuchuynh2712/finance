@@ -97,6 +97,74 @@ void main() {
       },
     );
 
+    test(
+      'over_request_rate_limit AuthApiException (sign-in throttling, HTTP 429) '
+      'maps to the rate-limited message',
+      () {
+        const error = AuthApiException(
+          'Too many requests',
+          statusCode: '429',
+          code: 'over_request_rate_limit',
+        );
+        expect(mapErrorToMessage(error, vi), vi.errorMapperRateLimited);
+        expect(mapErrorToMessage(error, en), en.errorMapperRateLimited);
+      },
+    );
+
+    test(
+      'same_password AuthApiException maps to the same-as-current message',
+      () {
+        const error = AuthApiException(
+          'New password should be different from the old password.',
+          statusCode: '422',
+          code: 'same_password',
+        );
+        expect(
+          mapErrorToMessage(error, vi),
+          vi.changePasswordSameAsCurrentError,
+        );
+        expect(
+          mapErrorToMessage(error, en),
+          en.changePasswordSameAsCurrentError,
+        );
+      },
+    );
+
+    group('a session that has ended maps to the session-expired message', () {
+      // The first group of codes has a constant in gotrue's ErrorCode; the
+      // refresh-token codes are compared as wire strings (no constant exists),
+      // like invalid_credentials.
+      for (final code in [
+        'session_expired',
+        'session_not_found',
+        'reauthentication_needed',
+        'bad_jwt',
+        'refresh_token_not_found',
+        'refresh_token_already_used',
+      ]) {
+        test(code, () {
+          final error = AuthApiException(
+            'Session problem',
+            statusCode: '400',
+            code: code,
+          );
+          expect(mapErrorToMessage(error, vi), vi.errorMapperSessionExpired);
+          expect(mapErrorToMessage(error, en), en.errorMapperSessionExpired);
+        });
+      }
+
+      test('AuthSessionMissingException', () {
+        final error = AuthSessionMissingException();
+        expect(mapErrorToMessage(error, vi), vi.errorMapperSessionExpired);
+        expect(mapErrorToMessage(error, en), en.errorMapperSessionExpired);
+      });
+    });
+
+    test('the weak-password copy states the 8-character minimum', () {
+      expect(vi.errorMapperWeakPassword, contains('8'));
+      expect(en.errorMapperWeakPassword, contains('8'));
+    });
+
     test('SocketException maps to the network-failure message', () {
       final error = SocketException('Connection refused');
       expect(mapErrorToMessage(error, vi), vi.errorMapperNetworkFailure);

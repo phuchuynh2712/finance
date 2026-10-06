@@ -36,7 +36,6 @@
   "signUpNameLabel": "Full Name",
   "signUpPhoneLabel": "Phone Number",
   "signUpEmailInvalidError": "Enter a valid email address.",
-  "signUpPasswordTooShortError": "Password must be at least 6 characters.",
   "signUpConfirmPasswordMismatchError": "Passwords do not match.",
   "signUpTermsPrefix": "I agree to the ",
   "signUpTermsOfServiceLink": "Terms of Service",
@@ -147,7 +146,7 @@
   "expenseScanConfirmAction": "Confirm & save",
   "errorMapperInvalidCredentials": "Wrong email or password. Please try again.",
   "errorMapperEmailExists": "This email is already registered. Sign in with your password.",
-  "errorMapperWeakPassword": "This password isn't strong enough. Please choose another one.",
+  "errorMapperWeakPassword": "That password is not strong enough. Use at least 8 characters.",
   "errorMapperRateLimited": "Too many attempts. Please wait a moment and try again.",
   "errorMapperNetworkFailure": "Couldn't reach the server. Please check your connection and try again.",
   "errorMapperGeneric": "Something went wrong. Please try again.",
@@ -224,5 +223,28 @@
     "placeholders": {
       "percent": { "type": "String" }
     }
-  }
+  },
+  "securityScreenTitle": "Security",
+  "securityChangePasswordRow": "Change password",
+  "securityBiometricRow": "Fingerprint sign-in",
+  "securityBiometricReasonWeb": "Fingerprint sign-in is not supported on the web.",
+  "securityBiometricReasonNoHardware": "This device does not support fingerprint sign-in.",
+  "securityBiometricReasonNotEnrolled": "Add a fingerprint or face in the device settings to turn this on.",
+  "securityBiometricPromptReason": "Confirm to turn on fingerprint sign-in",
+  "securityBiometricEnableFailed": "Fingerprint sign-in was not turned on.",
+  "securityPasswordChangedNotice": "Password changed.",
+  "securityPasswordChangedOthersNotEnded": "Password changed, but other devices could not be signed out.",
+  "securityOthersRetryAction": "Try again",
+  "securityOthersSignedOutNotice": "Other devices were signed out.",
+  "changePasswordTitle": "Change password",
+  "changePasswordCurrentLabel": "Current password",
+  "changePasswordNewLabel": "New password",
+  "changePasswordConfirmLabel": "Confirm new password",
+  "passwordRequirementHint": "At least 8 characters",
+  "passwordTooShortError": "Password must be at least 8 characters.",
+  "changePasswordCurrentRequiredError": "Enter your current password.",
+  "changePasswordSameAsCurrentError": "The new password must differ from the current one.",
+  "changePasswordWrongCurrentError": "The current password is incorrect.",
+  "changePasswordSubmit": "Change password",
+  "errorMapperSessionExpired": "Your session has expired. Please sign in again."
 }
