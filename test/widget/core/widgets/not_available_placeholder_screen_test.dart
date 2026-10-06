@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 
 void main() {

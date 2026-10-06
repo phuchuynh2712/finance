@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20260929-014317-supabase-realtime-pull/plan.md
+specs/20261005-211030-fix-lucide-icons-compat/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

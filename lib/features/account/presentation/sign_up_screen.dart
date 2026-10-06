@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';

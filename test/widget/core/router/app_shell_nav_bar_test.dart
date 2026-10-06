@@ -10,6 +10,7 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/router/app_router.dart';
 import 'package:finance/core/storage/app_preferences_storage.dart';
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
@@ -22,7 +23,6 @@ import 'package:finance/features/expense_control/presentation/expense_control_pr
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_screen.dart';
 import 'package:finance/features/expenses/presentation/report_providers.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../support/pull_complete_override.dart';
 

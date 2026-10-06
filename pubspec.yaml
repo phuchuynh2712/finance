@@ -67,7 +67,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
 
   # Icon library (single consistent icon set across the app)
-  lucide_icons: ^0.257.0
+  lucide_flutter: ^1.47.0
 
   # Biometric (fingerprint/Face ID) quick login
   local_auth: ^3.0.2

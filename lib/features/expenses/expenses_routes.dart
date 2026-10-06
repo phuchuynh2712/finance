@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'application/transaction_history.dart';
 import 'presentation/expense_screen.dart';

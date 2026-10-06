@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_colors.dart';
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
