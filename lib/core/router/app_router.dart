@@ -21,11 +21,18 @@ class _RouterRefreshListenable extends ChangeNotifier {
   void ping() => notifyListeners();
 }
 
-final _routerRefreshListenableProvider = Provider<_RouterRefreshListenable>((
-  ref,
-) {
+/// The signal [appRouterProvider] hands to [GoRouter] as its
+/// `refreshListenable`. Exposed (typed as a plain [Listenable]) only so tests
+/// can observe exactly when the router is told to re-evaluate its redirect.
+@visibleForTesting
+final routerRefreshListenableProvider = Provider<Listenable>((ref) {
   final listenable = _RouterRefreshListenable();
-  ref.listen(authStateChangesProvider, (previous, next) => listenable.ping());
+  // Listen to the derived value the redirect actually reads, not to the
+  // upstream auth stream: a listener on the stream fires before
+  // [isSignedInProvider] has caught up, so the redirect would still see
+  // "signed out" and the first sign-in would appear to do nothing (only a
+  // second attempt, when the cached value was already current, navigated).
+  ref.listen(isSignedInProvider, (previous, next) => listenable.ping());
   // isLocked/isPasswordRecovery can change independently of an auth-state
   // event (e.g. a biometric unlock — FR-011 makes no network call), so the
   // router must also re-evaluate its redirect when either changes.
@@ -77,7 +84,7 @@ String? computeAuthRedirect({
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/overview',
-    refreshListenable: ref.watch(_routerRefreshListenableProvider),
+    refreshListenable: ref.watch(routerRefreshListenableProvider),
     redirect: (context, state) => computeAuthRedirect(
       isSignedIn: ref.read(isSignedInProvider),
       isLocked: ref.read(appLockProvider),
