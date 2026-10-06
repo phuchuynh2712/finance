@@ -53,25 +53,22 @@ void main() {
     );
   }
 
-  test(
-    'a signed-in state (fresh sign-in or cold-start-with-session, '
-    'indistinguishable at this provider — see its own doc) starts a pull '
-    'for that user',
-    () async {
-      final startedForUserIds = <String>[];
-      final container = buildContainer(
-        signedIn: true,
-        userId: 'user-a',
-        startedForUserIds: startedForUserIds,
-      );
-      addTearDown(container.dispose);
+  test('a signed-in state (fresh sign-in or cold-start-with-session, '
+      'indistinguishable at this provider — see its own doc) starts a pull '
+      'for that user', () async {
+    final startedForUserIds = <String>[];
+    final container = buildContainer(
+      signedIn: true,
+      userId: 'user-a',
+      startedForUserIds: startedForUserIds,
+    );
+    addTearDown(container.dispose);
 
-      final service = container.read(pullServiceProvider);
+    final service = container.read(pullServiceProvider);
 
-      expect(service, isNotNull);
-      expect(startedForUserIds, ['user-a']);
-    },
-  );
+    expect(service, isNotNull);
+    expect(startedForUserIds, ['user-a']);
+  });
 
   test('a signed-out state does not start any pull', () async {
     final startedForUserIds = <String>[];
@@ -88,40 +85,15 @@ void main() {
     expect(startedForUserIds, isEmpty);
   });
 
-  test(
-    'a sign-out followed by a different user signing in starts a NEW '
-    'pull scoped to the new userId (confirms non-reuse of '
-    "AppLockNotifier's \"only the first event ever\" guard)",
-    () async {
-      final startedForUserIds = <String>[];
-      final container = ProviderContainer(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          isSignedInProvider.overrideWithValue(true),
-          currentUserIdProvider.overrideWithValue('user-a'),
-          pullServiceFactoryProvider.overrideWithValue((db, userId) {
-            startedForUserIds.add(userId);
-            return PullService(
-              db,
-              userId: userId,
-              subscribe: _noopSubscribe,
-              fetchBatch: (table, userId, cursor) async => const [],
-            );
-          }),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      final firstService = container.read(pullServiceProvider);
-      expect(startedForUserIds, ['user-a']);
-
-      // Sign out, then a DIFFERENT user signs in — both overrides change,
-      // simulating the real authStateChangesProvider emitting a new
-      // session for a different user.
-      container.updateOverrides([
+  test('a sign-out followed by a different user signing in starts a NEW '
+      'pull scoped to the new userId (confirms non-reuse of '
+      "AppLockNotifier's \"only the first event ever\" guard)", () async {
+    final startedForUserIds = <String>[];
+    final container = ProviderContainer(
+      overrides: [
         appDatabaseProvider.overrideWithValue(db),
         isSignedInProvider.overrideWithValue(true),
-        currentUserIdProvider.overrideWithValue('user-b'),
+        currentUserIdProvider.overrideWithValue('user-a'),
         pullServiceFactoryProvider.overrideWithValue((db, userId) {
           startedForUserIds.add(userId);
           return PullService(
@@ -131,12 +103,34 @@ void main() {
             fetchBatch: (table, userId, cursor) async => const [],
           );
         }),
-      ]);
+      ],
+    );
+    addTearDown(container.dispose);
 
-      final secondService = container.read(pullServiceProvider);
+    final firstService = container.read(pullServiceProvider);
+    expect(startedForUserIds, ['user-a']);
 
-      expect(startedForUserIds, ['user-a', 'user-b']);
-      expect(secondService, isNot(same(firstService)));
-    },
-  );
+    // Sign out, then a DIFFERENT user signs in — both overrides change,
+    // simulating the real authStateChangesProvider emitting a new
+    // session for a different user.
+    container.updateOverrides([
+      appDatabaseProvider.overrideWithValue(db),
+      isSignedInProvider.overrideWithValue(true),
+      currentUserIdProvider.overrideWithValue('user-b'),
+      pullServiceFactoryProvider.overrideWithValue((db, userId) {
+        startedForUserIds.add(userId);
+        return PullService(
+          db,
+          userId: userId,
+          subscribe: _noopSubscribe,
+          fetchBatch: (table, userId, cursor) async => const [],
+        );
+      }),
+    ]);
+
+    final secondService = container.read(pullServiceProvider);
+
+    expect(startedForUserIds, ['user-a', 'user-b']);
+    expect(secondService, isNot(same(firstService)));
+  });
 }

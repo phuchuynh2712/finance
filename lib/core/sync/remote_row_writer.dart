@@ -39,10 +39,9 @@ Future<void> applyRemoteExpenseControlItem(
 ) async {
   if (row.userId != userId) return;
 
-  final existing =
-      await (db.select(
-        db.expenseControlItems,
-      )..where((t) => t.id.equals(row.id))).getSingleOrNull();
+  final existing = await (db.select(
+    db.expenseControlItems,
+  )..where((t) => t.id.equals(row.id))).getSingleOrNull();
   if (existing != null && !row.updatedAt.isAfter(existing.updatedAt)) {
     return;
   }
@@ -62,10 +61,9 @@ Future<void> applyRemoteFinancialTransaction(
 ) async {
   if (row.userId != userId) return;
 
-  final existing =
-      await (db.select(
-        db.financialTransactions,
-      )..where((t) => t.id.equals(row.id))).getSingleOrNull();
+  final existing = await (db.select(
+    db.financialTransactions,
+  )..where((t) => t.id.equals(row.id))).getSingleOrNull();
   if (existing != null && !row.updatedAt.isAfter(existing.updatedAt)) {
     return;
   }

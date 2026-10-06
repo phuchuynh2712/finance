@@ -9,12 +9,7 @@ import 'package:finance/core/sync/sync_outbox_table.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [
-    ExpenseControlItems,
-    FinancialTransactions,
-    SyncOutbox,
-    PullCursor,
-  ],
+  tables: [ExpenseControlItems, FinancialTransactions, SyncOutbox, PullCursor],
 )
 class AppDatabase extends _$AppDatabase {
   // `web:` is required on Web — drift_flutter throws ArgumentError without

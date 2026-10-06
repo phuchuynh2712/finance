@@ -42,8 +42,6 @@ final initialPullCompleteProvider = StreamProvider<bool>((ref) {
     // Every syncable table must have a row AND be marked complete — a
     // table with no row yet is exactly as "not done" as one with a row
     // whose initialPullCompleted is still false.
-    return syncableTables.every(
-      (table) => completedByTable[table] ?? false,
-    );
+    return syncableTables.every((table) => completedByTable[table] ?? false);
   });
 });
