@@ -73,7 +73,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         : l10n.signUpEmailInvalidError;
     final passwordError = SignUpValidation.isPasswordValid(password)
         ? null
-        : l10n.signUpPasswordTooShortError;
+        : l10n.passwordTooShortError;
     final confirmPasswordError =
         SignUpValidation.isConfirmPasswordValid(password, confirmPassword)
         ? null
@@ -201,6 +201,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           context,
                         ).requestFocus(_confirmPasswordFocusNode),
                         errorText: _passwordFieldError,
+                        helperText: l10n.passwordRequirementHint,
                         semantic: semantic,
                         suffixIcon: Semantics(
                           button: true,
@@ -367,6 +368,7 @@ class _FormField extends StatelessWidget {
     this.onSubmitted,
     this.obscureText = false,
     this.errorText,
+    this.helperText,
     this.suffixIcon,
   });
 
@@ -379,6 +381,10 @@ class _FormField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final bool obscureText;
   final String? errorText;
+
+  /// A requirement shown under the field before anything is typed (for example
+  /// the minimum password length).
+  final String? helperText;
   final Widget? suffixIcon;
 
   @override
@@ -427,6 +433,14 @@ class _FormField extends StatelessWidget {
             ),
           ),
         ),
+        if (helperText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              helperText!,
+              style: TextStyle(fontSize: 12, color: semantic.fg3),
+            ),
+          ),
       ],
     );
   }

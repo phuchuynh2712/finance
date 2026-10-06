@@ -314,12 +314,6 @@ abstract class AppLocalizations {
   /// **'Email không hợp lệ.'**
   String get signUpEmailInvalidError;
 
-  /// Inline error shown when the entered password is shorter than the minimum length
-  ///
-  /// In vi, this message translates to:
-  /// **'Mật khẩu phải có ít nhất 6 ký tự.'**
-  String get signUpPasswordTooShortError;
-
   /// Inline error shown when the confirm-password field doesn't match the password field
   ///
   /// In vi, this message translates to:
@@ -983,7 +977,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorMapperWeakPassword.
   ///
   /// In vi, this message translates to:
-  /// **'Mật khẩu chưa đủ mạnh. Vui lòng chọn mật khẩu khác.'**
+  /// **'Mật khẩu chưa đủ mạnh. Hãy dùng ít nhất 8 ký tự.'**
   String get errorMapperWeakPassword;
 
   /// No description provided for @errorMapperRateLimited.
@@ -1261,6 +1255,144 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{percent}%'**
   String reportUsagePercentValue(String percent);
+
+  /// Title of the Security screen opened from the Profile screen's Security row
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảo mật'**
+  String get securityScreenTitle;
+
+  /// Row on the Security screen that opens the change-password form
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu'**
+  String get securityChangePasswordRow;
+
+  /// Label of the switch on the Security screen that turns biometric sign-in on or off
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập bằng vân tay'**
+  String get securityBiometricRow;
+
+  /// Caption shown under the disabled biometric switch when the app runs in a browser
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập bằng vân tay chưa hỗ trợ trên web.'**
+  String get securityBiometricReasonWeb;
+
+  /// Caption shown under the disabled biometric switch when the device has no biometric hardware
+  ///
+  /// In vi, this message translates to:
+  /// **'Thiết bị này không hỗ trợ đăng nhập bằng vân tay.'**
+  String get securityBiometricReasonNoHardware;
+
+  /// Caption shown under the disabled biometric switch when no biometrics are enrolled on the device
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy thêm vân tay hoặc khuôn mặt trong cài đặt thiết bị để bật tính năng này.'**
+  String get securityBiometricReasonNotEnrolled;
+
+  /// Reason text shown in the system biometric prompt when the person turns the switch on
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận để bật đăng nhập bằng vân tay'**
+  String get securityBiometricPromptReason;
+
+  /// Brief notice shown when the biometric check was cancelled or failed while turning the switch on
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa bật được đăng nhập bằng vân tay.'**
+  String get securityBiometricEnableFailed;
+
+  /// Confirmation shown on the Security screen after the password was changed and other devices were signed out
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đổi mật khẩu.'**
+  String get securityPasswordChangedNotice;
+
+  /// Notice shown when the password changed but signing out the other devices failed; offers a retry action
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đổi mật khẩu, nhưng chưa đăng xuất được các thiết bị khác.'**
+  String get securityPasswordChangedOthersNotEnded;
+
+  /// Button on the other-devices notice that retries signing out the other devices
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get securityOthersRetryAction;
+
+  /// Confirmation shown after retrying and successfully signing out the other devices
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đăng xuất các thiết bị khác.'**
+  String get securityOthersSignedOutNotice;
+
+  /// Title of the change-password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu'**
+  String get changePasswordTitle;
+
+  /// Label of the current-password field on the change-password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu hiện tại'**
+  String get changePasswordCurrentLabel;
+
+  /// Label of the new-password field on the change-password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới'**
+  String get changePasswordNewLabel;
+
+  /// Label of the confirm-new-password field on the change-password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập lại mật khẩu mới'**
+  String get changePasswordConfirmLabel;
+
+  /// Helper text shown under every field where a new password is set, stating the minimum length
+  ///
+  /// In vi, this message translates to:
+  /// **'Tối thiểu 8 ký tự'**
+  String get passwordRequirementHint;
+
+  /// Inline error shown when a password being set is shorter than the minimum length
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu phải có ít nhất 8 ký tự.'**
+  String get passwordTooShortError;
+
+  /// Inline error shown when the current-password field is empty
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập mật khẩu hiện tại.'**
+  String get changePasswordCurrentRequiredError;
+
+  /// Inline error shown when the new password equals the current password
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới phải khác mật khẩu hiện tại.'**
+  String get changePasswordSameAsCurrentError;
+
+  /// Inline error shown under the current-password field when the service rejects it
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu hiện tại không đúng.'**
+  String get changePasswordWrongCurrentError;
+
+  /// Label of the submit button on the change-password screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu'**
+  String get changePasswordSubmit;
+
+  /// Message for an expired or revoked session
+  ///
+  /// In vi, this message translates to:
+  /// **'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'**
+  String get errorMapperSessionExpired;
 }
 
 class _AppLocalizationsDelegate

@@ -90,6 +90,62 @@ void main() {
     },
   );
 
+  testWidgets('a 7-character new password is rejected before any request '
+      '(FR-015)', (tester) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '1234567');
+    await tester.enterText(find.byType(TextField).last, '1234567');
+    await tester.tap(find.text('Đặt lại mật khẩu'));
+    await tester.pumpAndSettle();
+
+    expect(fake.confirmedPassword, isNull);
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsOneWidget);
+  });
+
+  testWidgets('an 8-character new password is sent', (tester) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '12345678');
+    await tester.enterText(find.byType(TextField).last, '12345678');
+    await tester.tap(find.text('Đặt lại mật khẩu'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fake.confirmedPassword, '12345678');
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsNothing);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('the length check comes before the mismatch check, and both '
+      'messages stay specific', (tester) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'short');
+    await tester.enterText(find.byType(TextField).last, 'different');
+    await tester.tap(find.text('Đặt lại mật khẩu'));
+    await tester.pumpAndSettle();
+
+    expect(fake.confirmedPassword, isNull);
+    expect(find.text('Mật khẩu phải có ít nhất 8 ký tự.'), findsOneWidget);
+  });
+
+  testWidgets('the 8-character requirement is visible before typing', (
+    tester,
+  ) async {
+    final fake = _FakeAuthRepository();
+    await tester.pumpWidget(_harness(fake));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tối thiểu 8 ký tự'), findsOneWidget);
+  });
+
   testWidgets('a failure shows a retryable error message', (tester) async {
     final fake = _FakeAuthRepository()
       ..throwOnConfirmPasswordReset = Exception('Network error');

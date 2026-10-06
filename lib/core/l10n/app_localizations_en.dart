@@ -119,10 +119,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUpEmailInvalidError => 'Enter a valid email address.';
 
   @override
-  String get signUpPasswordTooShortError =>
-      'Password must be at least 6 characters.';
-
-  @override
   String get signUpConfirmPasswordMismatchError => 'Passwords do not match.';
 
   @override
@@ -516,7 +512,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorMapperWeakPassword =>
-      'This password isn\'t strong enough. Please choose another one.';
+      'That password is not strong enough. Use at least 8 characters.';
 
   @override
   String get errorMapperRateLimited =>
@@ -674,4 +670,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String reportUsagePercentValue(String percent) {
     return '$percent%';
   }
+
+  @override
+  String get securityScreenTitle => 'Security';
+
+  @override
+  String get securityChangePasswordRow => 'Change password';
+
+  @override
+  String get securityBiometricRow => 'Fingerprint sign-in';
+
+  @override
+  String get securityBiometricReasonWeb =>
+      'Fingerprint sign-in is not supported on the web.';
+
+  @override
+  String get securityBiometricReasonNoHardware =>
+      'This device does not support fingerprint sign-in.';
+
+  @override
+  String get securityBiometricReasonNotEnrolled =>
+      'Add a fingerprint or face in the device settings to turn this on.';
+
+  @override
+  String get securityBiometricPromptReason =>
+      'Confirm to turn on fingerprint sign-in';
+
+  @override
+  String get securityBiometricEnableFailed =>
+      'Fingerprint sign-in was not turned on.';
+
+  @override
+  String get securityPasswordChangedNotice => 'Password changed.';
+
+  @override
+  String get securityPasswordChangedOthersNotEnded =>
+      'Password changed, but other devices could not be signed out.';
+
+  @override
+  String get securityOthersRetryAction => 'Try again';
+
+  @override
+  String get securityOthersSignedOutNotice => 'Other devices were signed out.';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get changePasswordCurrentLabel => 'Current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get passwordRequirementHint => 'At least 8 characters';
+
+  @override
+  String get passwordTooShortError => 'Password must be at least 8 characters.';
+
+  @override
+  String get changePasswordCurrentRequiredError =>
+      'Enter your current password.';
+
+  @override
+  String get changePasswordSameAsCurrentError =>
+      'The new password must differ from the current one.';
+
+  @override
+  String get changePasswordWrongCurrentError =>
+      'The current password is incorrect.';
+
+  @override
+  String get changePasswordSubmit => 'Change password';
+
+  @override
+  String get errorMapperSessionExpired =>
+      'Your session has expired. Please sign in again.';
 }

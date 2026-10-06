@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/config/app_environment.dart';
+import 'password_change_gateway.dart';
+import 'temporary_password_session.dart';
 
 /// FR-004/FR-005/FR-006: picks which password-reset redirect to use.
 /// A plain, side-effect-free function (no [BuildContext], no platform
@@ -34,10 +37,31 @@ abstract interface class AccountAuthActions {
 /// Email+password is the only supported authentication method (spec.md
 /// Clarifications) — a phone number collected at sign-up is profile data
 /// only, never a login credential (FR-005).
-class AuthRepository implements AccountAuthActions {
-  AuthRepository(this._client);
+class AuthRepository implements AccountAuthActions, PasswordChangeGateway {
+  /// [supabaseUrl], [publishableKey] and [httpClient] feed only the temporary
+  /// password-change session (see [verifyCurrentPassword]); they default to the
+  /// app's runtime values and a fresh HTTP client, and tests hand in fakes.
+  ///
+  /// [sessionCheckTimeout] caps [ensureSessionActive]: gotrue retries a refresh
+  /// with backoff for up to ~30 s while offline, which would leave the form
+  /// spinning that long before it could say "no connection".
+  AuthRepository(
+    this._client, {
+    String? supabaseUrl,
+    String? publishableKey,
+    http.Client? httpClient,
+    Duration? sessionCheckTimeout,
+  }) : _supabaseUrl = supabaseUrl ?? AppEnvironment.supabaseUrl,
+       _publishableKey =
+           publishableKey ?? AppEnvironment.supabasePublishableKey,
+       _httpClient = httpClient,
+       _sessionCheckTimeout = sessionCheckTimeout ?? const Duration(seconds: 8);
 
   final SupabaseClient _client;
+  final String _supabaseUrl;
+  final String _publishableKey;
+  final http.Client? _httpClient;
+  final Duration _sessionCheckTimeout;
 
   Stream<AuthState> get onAuthStateChange => _client.auth.onAuthStateChange;
 
@@ -91,6 +115,69 @@ class AuthRepository implements AccountAuthActions {
       password: password,
       data: metadata.isEmpty ? null : metadata,
     );
+  }
+
+  /// Step 0 of changing the password: confirms this device's own session is
+  /// still valid by refreshing it (the same call [verifySessionAlive] makes
+  /// for the biometric unlock). A revoked or expired session throws here,
+  /// before anything is changed, and gotrue emits `signedOut` so the app's
+  /// existing redirect goes to sign-in.
+  @override
+  Future<void> ensureSessionActive() =>
+      verifySessionAlive().timeout(_sessionCheckTimeout);
+
+  /// Verifies [currentPassword] by signing a temporary session in as the
+  /// signed-in user over plain REST, so the app's own session, router, lock and
+  /// sync never see a second sign-in (and, on web, no second `GoTrueClient`
+  /// shares the app's `BroadcastChannel`). Throws `invalid_credentials` when it
+  /// is wrong. The temporary session is freshly created, which also meets
+  /// Supabase's "secure password change" recency rule.
+  @override
+  Future<VerifiedPasswordSession> verifyCurrentPassword(
+    String currentPassword,
+  ) async {
+    final email = _client.auth.currentUser?.email;
+    if (email == null) throw AuthSessionMissingException();
+
+    final injected = _httpClient;
+    final rest = SupabaseAuthRest(
+      baseUrl: _supabaseUrl,
+      apiKey: _publishableKey,
+      httpClient: injected ?? http.Client(),
+      ownsHttpClient: injected == null,
+    );
+    final AuthTokens tokens;
+    try {
+      tokens = await rest.signInWithPassword(
+        email: email,
+        password: currentPassword,
+      );
+    } catch (_) {
+      rest.close();
+      rethrow;
+    }
+    return TemporaryPasswordSession(
+      rest: rest,
+      tokens: tokens,
+      appAuth: _client.auth,
+    );
+  }
+
+  /// Signs every other session of the account out and keeps this device
+  /// signed in. Deliberately does NOT touch the biometric preference (only
+  /// [signOut] with the `local` scope clears it).
+  ///
+  /// gotrue's `signOut` ignores 401/403/404 from the admin endpoint ("an
+  /// invalid or expired JWT should sign out the current session"), so with
+  /// scope `others` a stale access token would return normally and end
+  /// nothing. Refuse to run instead, so the caller reports the truth.
+  @override
+  Future<void> endOtherSessions() async {
+    final session = _client.auth.currentSession;
+    if (session == null || session.isExpired) {
+      throw AuthSessionMissingException();
+    }
+    await _client.auth.signOut(scope: SignOutScope.others);
   }
 
   /// FR-014a/FR-016a/FR-016b: [scope] controls which sessions are revoked —

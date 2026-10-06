@@ -1,6 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 
+/// Why biometric sign-in can or cannot be used on this device right now. The
+/// Security screen turns each unavailable value into its own explanation
+/// (`local_auth.canCheckBiometrics` alone cannot tell "no hardware" from
+/// "nothing enrolled").
+enum BiometricAvailability {
+  /// Hardware present and at least one biometric enrolled.
+  available,
+
+  /// Running in a browser: there is no biometric API to use.
+  webUnsupported,
+
+  /// The device cannot check biometrics at all.
+  noHardware,
+
+  /// The device can, but no fingerprint or face is enrolled in system settings.
+  notEnrolled,
+}
+
 /// Wraps `local_auth` for device biometric (fingerprint/Face ID) quick login
 /// (FR-008/FR-011/FR-012/FR-014). Kept separate from [AuthRepository] since
 /// it wraps a different SDK (device hardware, not Supabase) — mirrors the
@@ -11,9 +29,27 @@ import 'package:local_auth/local_auth.dart';
 /// (spec.md Assumptions — biometric is a local convenience layer, not a new
 /// identity provider).
 class BiometricLoginRepository {
-  BiometricLoginRepository(this._localAuth);
+  /// [isWeb] only feeds [availability] and exists so a VM test can exercise
+  /// the web branch; it defaults to the real [kIsWeb].
+  BiometricLoginRepository(this._localAuth, {bool? isWeb})
+    : _isWeb = isWeb ?? kIsWeb;
 
   final LocalAuthentication _localAuth;
+  final bool _isWeb;
+
+  /// The detailed answer behind the Security screen's switch: whether
+  /// biometric sign-in can be used, and if not, why. Detected at runtime, never
+  /// assumed from the platform (constitution: capability detection).
+  Future<BiometricAvailability> availability() async {
+    if (_isWeb) return BiometricAvailability.webUnsupported;
+    if (!await _localAuth.isDeviceSupported()) {
+      return BiometricAvailability.noHardware;
+    }
+    final enrolled = await _localAuth.getAvailableBiometrics();
+    return enrolled.isEmpty
+        ? BiometricAvailability.notEnrolled
+        : BiometricAvailability.available;
+  }
 
   /// True only when the device has biometric hardware AND at least one
   /// fingerprint/face is enrolled at the OS level (FR-008's device-capable

@@ -5,18 +5,21 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'presentation/account_screen.dart';
+import 'presentation/change_password_screen.dart';
 import 'presentation/forgot_password_screen.dart';
 import 'presentation/reset_password_screen.dart';
+import 'presentation/security_screen.dart';
 import 'presentation/sign_in_screen.dart';
 import 'presentation/sign_up_screen.dart';
 
 Widget accountScreenRoute(BuildContext context, GoRouterState state) =>
     const AccountScreen();
 
-/// The 3 "not available yet" menu rows on Hồ sơ (secure-storage-routing-
-/// cleanup Tier B) — one route, keyed by [AccountPlaceholderFeature], so
-/// each gets its own URL instead of sharing an unaddressable push.
-enum AccountPlaceholderFeature { notifications, security, help }
+/// The remaining "not available yet" menu rows on Hồ sơ (secure-storage-
+/// routing-cleanup Tier B) — one route, keyed by [AccountPlaceholderFeature],
+/// so each gets its own URL instead of sharing an unaddressable push. Bảo mật
+/// is no longer one of them: it opens the real [SecurityScreen].
+enum AccountPlaceholderFeature { notifications, help }
 
 Widget accountPlaceholderRoute(BuildContext context, GoRouterState state) {
   final l10n = AppLocalizations.of(context);
@@ -27,10 +30,6 @@ Widget accountPlaceholderRoute(BuildContext context, GoRouterState state) {
     AccountPlaceholderFeature.notifications => (
       LucideIcons.bell,
       l10n.accountNotificationsRowLabel,
-    ),
-    AccountPlaceholderFeature.security => (
-      LucideIcons.shieldCheck,
-      l10n.accountSecurityRowLabel,
     ),
     AccountPlaceholderFeature.help => (
       LucideIcons.helpCircle,
@@ -43,6 +42,14 @@ Widget accountPlaceholderRoute(BuildContext context, GoRouterState state) {
     message: l10n.notAvailablePlaceholderMessage,
   );
 }
+
+/// `/account/security` — the Security screen (change password, biometric).
+Widget securityRoute(BuildContext context, GoRouterState state) =>
+    const SecurityScreen();
+
+/// `/account/security/change-password`, pushed from the Security screen.
+Widget changePasswordRoute(BuildContext context, GoRouterState state) =>
+    const ChangePasswordScreen();
 
 Widget signInRoute(BuildContext context, GoRouterState state) =>
     const SignInScreen();

@@ -155,6 +155,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     path: 'placeholder/:feature',
                     builder: accountPlaceholderRoute,
                   ),
+                  GoRoute(
+                    path: 'security',
+                    builder: securityRoute,
+                    routes: [
+                      GoRoute(
+                        path: 'change-password',
+                        builder: changePasswordRoute,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ],
