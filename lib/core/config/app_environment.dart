@@ -3,6 +3,17 @@ import 'package:flutter/foundation.dart';
 class AppEnvironment {
   AppEnvironment._();
 
+  /// Every runtime value the app reads through `--dart-define-from-file`.
+  /// Must list exactly the `String.fromEnvironment` keys below (and any added
+  /// to `lib/`): `test/unit/core/config/app_environment_keys_test.dart` ties
+  /// this list to `tool/env.example.json` and to the README table, so a key
+  /// cannot be added, renamed or documented in only one place.
+  static const keys = [
+    'SUPABASE_URL',
+    'SUPABASE_PUBLISHABLE_KEY',
+    'WEB_PASSWORD_RESET_REDIRECT_URL',
+  ];
+
   static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const supabasePublishableKey = String.fromEnvironment(
     'SUPABASE_PUBLISHABLE_KEY',
