@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
+import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/core/widgets/expense_control_icons.dart';

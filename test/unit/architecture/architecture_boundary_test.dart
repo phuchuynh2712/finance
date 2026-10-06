@@ -80,6 +80,34 @@ void main() {
       reason: 'Core code must not import feature presentation internals.',
     );
   });
+
+  test('icon package is imported only through core/theme/app_icons.dart', () {
+    final iconPackageImport = RegExp(
+      r'''import\s+['"]package:(lucide_flutter|lucide_icons|lucide_icons_flutter)\b''',
+    );
+    final violations = <String>[];
+
+    for (final rootName in ['lib', 'test']) {
+      final root = Directory(
+        '${projectRoot.path}${Platform.pathSeparator}$rootName',
+      );
+      for (final file in _dartFilesUnder(root)) {
+        final normalized = file.path.replaceAll('\\', '/');
+        if (normalized.endsWith('/lib/core/theme/app_icons.dart')) continue;
+        if (iconPackageImport.hasMatch(file.readAsStringSync())) {
+          violations.add(file.path);
+        }
+      }
+    }
+
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Only lib/core/theme/app_icons.dart may name the icon package, so a '
+          'future package swap stays a one-file change.',
+    );
+  });
 }
 
 String? _featureName(String path) {
