@@ -80,6 +80,20 @@ unlocked after 30 s (the define is ignored), and locked after the real 5 minutes
 A dialog that is open when the 20 s pass is replaced by the lock screen, like any other screen (seen once while a script
 was slow): the lock covers the whole app.
 
+### Phone, iOS simulator `iPhone 17` (added 2026-10-07 after the pull requests merged)
+
+The same checks on the iOS simulator, debug build with the 20 s define; the owner signed in by hand because the
+simulator's software keyboard was on Vietnamese Telex.
+
+| Check | Result |
+|-------|--------|
+| 25 s untouched in front | pass: lock screen (twice) |
+| the app sent to the background (Settings opened over it) for 25 s, then brought back | pass: lock screen |
+| a swipe up or down every 10 s for 60 s, then 25 s untouched | pass: never locked during the swipes, locked after the 25 s |
+
+A first run of the swipe check was marked as failed only because the script looked for the greeting on Tổng quan,
+which scrolls out of view; it now checks that the lock screen is absent and the bottom navigation present.
+
 ### Contract rows of `contracts/inactivity-lock.md` §5
 
 | Row | Evidence |
