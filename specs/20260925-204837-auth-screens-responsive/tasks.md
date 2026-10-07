@@ -214,13 +214,16 @@ User Story 2.
   assertions — otherwise the Flutter test framework's "no pending timers
   after teardown" invariant fails, since that timer is still scheduled
   when the test (deliberately) ends before it fires.
-- [ ] T013b [US1] In `test/widget/features/account/forgot_password_screen_test.dart`,
+- [X] T013b [US1] In `test/widget/features/account/forgot_password_screen_test.dart`,
   add the equivalent live-resize test for the OTHER screen with a
   persistent post-submit state FR-010 covers: pump at ≥600dp, submit to
   reach the post-submit confirmation-message branch, change
   `tester.view.physicalSize` to <600dp and pump again, assert the
   confirmation message is still shown (the screen does not revert to the
   pre-submit form branch) (`/speckit-analyze` finding C2). Depends on T011.
+  **Result**: the test "resizing below 600dp after reaching the post-submit
+  confirmation keeps it shown (FR-010)" exists in that file and passes (the
+  T023 run counted it); ticked in the 2026-10-07 task audit.
 
 **Checkpoint**: User Story 1 is fully functional and independently
 testable — all 4 Auth screens respect the shared 450dp auth content

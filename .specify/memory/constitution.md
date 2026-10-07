@@ -38,10 +38,10 @@ Templates requiring updates (this amendment):
   - .specify/templates/spec-template.md: ✅ compatible (no lock-specific text)
   - .specify/templates/tasks-template.md: ✅ compatible (generic phases)
   - .specify/templates/commands/*.md: not present in this project
-Follow-up TODOs: implement the lock — specs/20261007-170025-pin-lock-fallback
-  (spec written, plan and tasks pending). The earlier web-platform-enablement
-  spec still lists "PIN fallback for Web" as deferred work; it is historical
-  and is not edited.
+Follow-up TODOs: none. The lock was implemented by
+  specs/20261007-170025-pin-lock-fallback (the inactivity lock in #31, the PIN
+  in #32). The earlier web-platform-enablement spec still lists "PIN fallback
+  for Web" as deferred work; it is historical and is not edited.
 Previous amendment (1.6.0 → 1.7.0) Sync Impact Report below, kept for history:
 Version change: 1.6.0 → 1.7.0 (MINOR: new Development Workflow bullet —
   materially expanded governance guidance requiring root-cause fixes for
