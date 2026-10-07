@@ -26,7 +26,7 @@
   },
   "signInAppName": "Kiểm Soát",
   "@signInAppName": {
-    "description": "Brand name shown in the Login screen's logo block (FR-003)"
+    "description": "The app's name: shown in the Login screen's logo block (FR-003) and used as the app's title (browser tab, task switcher). The home-screen label is localized separately in the Android and iOS projects"
   },
   "signInAppSubtitle": "Quản lý thu chi thông minh",
   "@signInAppSubtitle": {

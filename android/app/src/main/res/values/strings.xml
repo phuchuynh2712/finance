@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launcher label. Vietnamese devices use values-vi/strings.xml; every
+         other language shows this one. -->
+    <string name="app_name">Finance</string>
+</resources>

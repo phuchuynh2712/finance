@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabAccount => 'Profile';
 
   @override
-  String get signInAppName => 'Budget Control';
+  String get signInAppName => 'Finance';
 
   @override
   String get signInAppSubtitle => 'Smart income & expense management';

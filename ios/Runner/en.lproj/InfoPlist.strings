@@ -1,0 +1,3 @@
+/* The home-screen label for every language except Vietnamese. */
+"CFBundleDisplayName" = "Finance";
+"CFBundleName" = "Finance";

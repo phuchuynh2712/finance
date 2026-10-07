@@ -137,14 +137,15 @@ void main() {
   );
 
   testWidgets(
-    'displays "Budget Control" as the app name in the English locale (FR-001)',
+    'displays "Finance" as the app name in the English locale (FR-001)',
     (tester) async {
       final fake = _FakeAuthRepository();
       final bio = _FakeBiometricLoginRepository()..deviceCapable = false;
       await tester.pumpWidget(_harness(fake, bio, locale: const Locale('en')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Budget Control'), findsOneWidget);
+      expect(find.text('Finance'), findsOneWidget);
+      expect(find.text('Budget Control'), findsNothing);
       expect(find.text('Khai Tam'), findsNothing);
     },
   );

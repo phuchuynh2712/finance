@@ -134,7 +134,7 @@ abstract class AppLocalizations {
   /// **'Hồ sơ'**
   String get tabAccount;
 
-  /// Brand name shown in the Login screen's logo block (FR-003)
+  /// The app's name: shown in the Login screen's logo block (FR-003) and used as the app's title (browser tab, task switcher). The home-screen label is localized separately in the Android and iOS projects
   ///
   /// In vi, this message translates to:
   /// **'Kiểm Soát'**
