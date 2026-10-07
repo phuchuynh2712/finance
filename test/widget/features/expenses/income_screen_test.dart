@@ -97,6 +97,35 @@ Widget _harness(_FakeExpenseControlRepository repository) {
 }
 
 void main() {
+  // Constitution Principle III: every interactive target is at least 48 x 48dp.
+  testWidgets(
+    'the amount field and the add-source button are at least 48dp high',
+    (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+
+      expect(
+        tester.getSize(find.byKey(const ValueKey('income-amount-0'))).height,
+        greaterThanOrEqualTo(48),
+      );
+      expect(
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text(l10n.incomeAddSourceAction),
+                    matching: find.byType(InkWell),
+                  )
+                  .first,
+            )
+            .height,
+        greaterThanOrEqualTo(48),
+      );
+    },
+  );
+
   testWidgets(
     'entering an income source displays it as the running total (FR-003)',
     (tester) async {

@@ -327,9 +327,11 @@ class _IncomeSourceRowWidgetState extends State<_IncomeSourceRowWidget> {
                 hintText: l10n.incomeSourceAmountLabel,
                 hintStyle: const TextStyle(fontWeight: FontWeight.bold),
                 isDense: true,
+                // 12 + the dense text height makes the field 48dp high (it was 40,
+                // below the constitution's touch-target minimum).
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,
-                  vertical: 8,
+                  vertical: 12,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4),
@@ -383,7 +385,7 @@ class _AddSourceButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(6),
           child: SizedBox(
-            height: 46,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
