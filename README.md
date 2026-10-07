@@ -194,7 +194,7 @@ flutter test
 ## Notes
 
 - The app is localized in Vietnamese and English.
-- Branding currently follows the “Kiểm Soát” name used in the app UI.
+- The app is called **Kiểm Soát** in Vietnamese and **Finance** in English, in the app itself (sign-in screen, browser tab, task switcher) and on the home screen of Android and iOS (`values-vi/strings.xml` and `vi.lproj/InfoPlist.strings` for Vietnamese, the default for every other language). The web install manifest is a single static file, so it keeps the Vietnamese name.
 - Platform identifiers and core app assets are intentionally kept consistent with current project configuration.
 
 ## License

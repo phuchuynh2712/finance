@@ -98,7 +98,9 @@ class FinanceApp extends ConsumerWidget {
     // pull_service_provider.dart's own doc.
     ref.watch(pullServiceProvider);
     return MaterialApp.router(
-      title: 'Kiểm Soát',
+      // The browser tab and the task switcher show the app's name in the
+      // language the app is in ("Kiểm Soát" or "Finance").
+      onGenerateTitle: localizedAppTitle,
       routerConfig: ref.watch(appRouterProvider),
       locale: ref.watch(localeProvider),
       supportedLocales: AppLocalizations.supportedLocales,
@@ -114,6 +116,12 @@ class FinanceApp extends ConsumerWidget {
     );
   }
 }
+
+/// The app's name in the language the app is in: "Kiểm Soát" in Vietnamese,
+/// "Finance" in English. Used as the title of the browser tab and the task
+/// switcher; the home-screen label is localized by the Android and iOS projects.
+String localizedAppTitle(BuildContext context) =>
+    AppLocalizations.of(context).signInAppName;
 
 /// Distinguishes which localized copy [StartupErrorApp] shows — the two
 /// failure points in [main] that occur before a normal [FinanceApp] (and
