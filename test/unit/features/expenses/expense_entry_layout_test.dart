@@ -54,8 +54,11 @@ void main() {
       expect(layout.keyGap, 8);
       expect(layout.chooserWraps, isFalse);
       expect(layout.chooserMaxHeight, isNull);
-      expect(layout.tabHeight, 38);
-      expect(layout.tabsTopPadding, 16);
+      // The tabs are 48dp high (the touch-target minimum) and the top padding
+      // gives back the 10dp they gained: everything below them is unchanged.
+      expect(layout.tabHeight, 48);
+      expect(layout.tabsTopPadding, 6);
+      expect(layout.tabHeight + layout.tabsTopPadding, 38 + 16);
       expect(layout.contentTopGap, 8);
       expect(layout.amountVerticalPadding, 8);
       expect(layout.keypadVerticalPadding, 14);

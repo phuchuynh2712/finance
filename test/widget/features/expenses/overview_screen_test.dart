@@ -208,6 +208,71 @@ Widget _harness(
 }
 
 void main() {
+  // Constitution Principle III: every interactive target is at least 48 x 48dp.
+  // These were smaller (the links about 25dp and 17dp high) before.
+  group('touch targets are at least 48dp', () {
+    Size inkWellSizeAround(WidgetTester tester, Finder text) => tester.getSize(
+      find.ancestor(of: text, matching: find.byType(InkWell)).first,
+    );
+
+    testWidgets('both "Xem tất cả" links', (tester) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      final records = [
+        TransactionHistoryRecord(
+          id: 't1',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.expense,
+          amount: 1000,
+          occurredAt: DateTime.now(),
+          displayName: 'Some expense',
+          displayGroupName: 'Group',
+          displayIconKey: 'home',
+        ),
+      ];
+      await tester.pumpWidget(
+        _harness(
+          repository,
+          historyRepository: _FakeHistoryRepository(records),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      final links = find.text(l10n.overviewSeeAllAction);
+      expect(links, findsNWidgets(2));
+      for (var i = 0; i < 2; i++) {
+        final size = inkWellSizeAround(tester, links.at(i));
+        expect(size.height, greaterThanOrEqualTo(48), reason: 'link $i');
+        expect(size.width, greaterThanOrEqualTo(48), reason: 'link $i');
+      }
+    });
+
+    testWidgets('the negative-balance banner is one 48dp-high target', (
+      tester,
+    ) async {
+      final repository = _FakeExpenseControlRepository([
+        _leaf('a', balance: -50000, name: 'Điện, nước, rác'),
+      ]);
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(
+        inkWellSizeAround(
+          tester,
+          find.text(l10n.overviewSeeDetailAction),
+        ).height,
+        greaterThanOrEqualTo(48),
+      );
+      // Tapping the sentence opens the same screen as the "Xem chi tiết →" line.
+      expect(
+        inkWellSizeAround(
+          tester,
+          find.text(l10n.overviewNegativeBalanceWarning('Điện, nước, rác')),
+        ),
+        inkWellSizeAround(tester, find.text(l10n.overviewSeeDetailAction)),
+      );
+    });
+  });
+
   group('total balance card', () {
     testWidgets('shows a loading indicator before data arrives', (
       tester,

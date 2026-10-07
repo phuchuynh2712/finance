@@ -70,7 +70,7 @@ class OverviewScreen extends ConsumerWidget {
                             ),
                             data: (summary) => _SummaryBlock(summary: summary),
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 10),
                           recentAsync.when(
                             loading: () => const _SummaryLoading(),
                             error: (error, stackTrace) => _SummaryError(
@@ -204,13 +204,14 @@ class _SummaryBlock extends StatelessWidget {
           const SizedBox(height: 14),
           _NegativeBalanceBanner(accountName: negativeAccounts.first.name),
         ],
-        const SizedBox(height: 22),
+        // The header row is 48dp high now (its link is a full touch target),
+        // so the gaps around it shrink by the same amount the row grew.
+        const SizedBox(height: 10),
         _SectionHeader(
           title: l10n.overviewAccountsSectionTitle(summary.accounts.length),
           seeAllSemanticLabel: l10n.overviewSeeAllAccountsSemantic,
           onSeeAll: () => context.go('/expense-control'),
         ),
-        const SizedBox(height: 10),
         if (summary.accounts.isEmpty)
           EmptyStateView(
             icon: LucideIcons.wallet,
@@ -241,8 +242,9 @@ class _SectionHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+      // Both texts are 12 sp, so centering lines their baselines up, and it
+      // lets the link below be a full 48dp-high target.
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Container(
@@ -268,14 +270,22 @@ class _SectionHeader extends StatelessWidget {
           label: seeAllSemanticLabel,
           child: InkWell(
             onTap: onSeeAll,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text(
-                l10n.overviewSeeAllAction,
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+            // Constitution Principle III: a touch target is at least 48 x 48dp
+            // (the link used to be about 25dp high).
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    l10n.overviewSeeAllAction,
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -397,7 +407,6 @@ class _RecentTransactionsSection extends StatelessWidget {
           seeAllSemanticLabel: l10n.overviewSeeAllTransactionsSemantic,
           onSeeAll: () => context.push('/overview/history'),
         ),
-        const SizedBox(height: 4),
         if (items.isEmpty)
           EmptyStateView(
             icon: LucideIcons.history,
@@ -562,52 +571,60 @@ class _NegativeBalanceBanner extends StatelessWidget {
     final semantic = theme.extension<AppSemanticColors>()!;
     final l10n = AppLocalizations.of(context);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: semantic.dangerSoft,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(LucideIcons.alertTriangle, size: 18, color: semantic.dangerFg),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.overviewNegativeBalanceWarning(accountName),
-                  style: TextStyle(
-                    color: semantic.dangerFg,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
+    // The whole banner is the touch target: the "Xem chi tiết →" line alone
+    // was about 17dp high, and a taller link would have changed the banner's
+    // look (constitution Principle III: at least 48 x 48dp).
+    return Material(
+      color: semantic.dangerSoft,
+      borderRadius: BorderRadius.circular(6),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(
+          '/overview/history/group/${Uri.encodeComponent(accountName)}',
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                LucideIcons.alertTriangle,
+                size: 18,
+                color: semantic.dangerFg,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.overviewNegativeBalanceWarning(accountName),
+                      style: TextStyle(
+                        color: semantic.dangerFg,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    // research.md Decision 9 (secure-storage-routing-cleanup
+                    // Tier C): a negative balance is explained by recorded
+                    // spending, not by the allocation plan, so this opens the
+                    // existing transaction-history screen filtered to this
+                    // account's group — not the Kế hoạch tab — via a nested
+                    // ProviderScope override reconstructed inside
+                    // overviewFilteredHistoryRoute's own builder, reusing
+                    // TransactionHistoryFilter.group without any change to the
+                    // history screen or its providers.
+                    Text(
+                      l10n.overviewSeeDetailAction,
+                      style: TextStyle(color: semantic.dangerFg, fontSize: 12),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                // research.md Decision 9 (secure-storage-routing-cleanup
-                // Tier C): a negative balance is explained by recorded
-                // spending, not by the allocation plan, so this opens the
-                // existing transaction-history screen filtered to this
-                // account's group — not the Kế hoạch tab — via a nested
-                // ProviderScope override reconstructed inside
-                // overviewFilteredHistoryRoute's own builder, reusing
-                // TransactionHistoryFilter.group without any change to the
-                // history screen or its providers.
-                InkWell(
-                  onTap: () => context.push(
-                    '/overview/history/group/${Uri.encodeComponent(accountName)}',
-                  ),
-                  child: Text(
-                    l10n.overviewSeeDetailAction,
-                    style: TextStyle(color: semantic.dangerFg, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

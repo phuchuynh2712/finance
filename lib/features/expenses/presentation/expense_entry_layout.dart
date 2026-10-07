@@ -96,8 +96,10 @@ class ExpenseEntryLayout {
         amountPinned: false,
         chooserWraps: false,
         chooserMaxHeight: null,
-        tabHeight: 38,
-        tabsTopPadding: 16,
+        // 48dp is the touch-target minimum (it was 38); the top padding gives
+        // back the same 10dp, so everything below the tabs stays where it was.
+        tabHeight: 48,
+        tabsTopPadding: 6,
         contentTopGap: 8,
         amountVerticalPadding: 8,
         keypadVerticalPadding: 14,

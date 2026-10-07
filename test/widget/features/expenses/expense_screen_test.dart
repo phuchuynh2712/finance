@@ -146,6 +146,26 @@ String _previewBannerText(WidgetTester tester) {
 }
 
 void main() {
+  // Constitution Principle III: every interactive target is at least 48 x 48dp
+  // (the compact tabs were 38dp high).
+  testWidgets('the two mode tabs are at least 48dp high on a phone', (
+    tester,
+  ) async {
+    final repository = _FakeExpenseControlRepository([_leaf('a')]);
+    await tester.pumpWidget(_harness(repository));
+    await tester.pumpAndSettle();
+    final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+    for (final label in [l10n.expenseTabManual, l10n.expenseTabScan]) {
+      final size = tester.getSize(
+        find
+            .ancestor(of: find.text(label), matching: find.byType(InkWell))
+            .first,
+      );
+      expect(size.height, greaterThanOrEqualTo(48), reason: label);
+      expect(size.width, greaterThanOrEqualTo(48), reason: label);
+    }
+  });
+
   testWidgets(
     'entering an amount and picking a leaf item enables "Lưu giao dịch"; tapping it calls recordExpense and pops',
     (tester) async {
