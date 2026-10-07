@@ -336,6 +336,13 @@ by using the root navigator's context.
   built (its `fireImmediately` callback sets `_initialCheckDone` even while the
   stream is still loading). If confirmed, FR-020's cold-start gate is not
   deterministic. Deferred for the same reason.
+  **Resolved (2026-10-08, pull request #31):** confirmed and fixed at the root.
+  `AppLockNotifier` now waits for the first real auth event (it ignores the
+  "still loading" value), so a saved session locks on every cold start however
+  early the notifier is created. `app_lock_notifier_test` has a test that fails
+  without the fix; on web a page reload, a direct address and a second tab, and
+  on Android and iOS every cold start with a saved session, land on the lock
+  screen.
 - **Local environment changes made while verifying** (outside the repo): Flutter
   user setting `jdk-dir` now points at JBR 21; Homebrew `cocoapods` 1.17.0 and
   its `ruby` dependency installed; Android Gradle auto-installed CMake 3.22.1
