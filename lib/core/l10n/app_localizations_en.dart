@@ -467,6 +467,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseSaveAction => 'Save transaction';
 
   @override
+  String get expenseKeypadDeleteSemantic => 'Delete last digit';
+
+  @override
   String get expenseEmptyStateMessage =>
       'No items yet. Set them up in Expense Control first.';
 

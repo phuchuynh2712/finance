@@ -7,6 +7,7 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
@@ -16,6 +17,7 @@ import 'widgets/allocation_mode_toggle.dart';
 import 'widgets/allocation_summary_banner.dart';
 import 'package:finance/core/widgets/dashed_border.dart';
 import 'widgets/expense_group_card.dart';
+import 'widgets/expense_item_row.dart' show useInlineFormulaLabel;
 import 'widgets/icon_picker.dart';
 
 class ExpenseControlScreen extends ConsumerWidget {
@@ -128,185 +130,204 @@ class _ScreenContent extends ConsumerWidget {
         ? null
         : planService.validateBudget(items, pendingEdits: pendingEdits);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: semantic.primarySoft,
-            border: Border.all(color: semantic.border1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                LucideIcons.info,
-                size: 16,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  l10n.expenseControlBannerHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
+    // One bounded, centered column from 840dp (the shared content width); the
+    // list spans the whole viewport, so the wheel works over the margins and
+    // the cards keep their State (expanded/collapsed) across a resize.
+    return AdaptiveGutters(
+      builder: (context, gutter) => ListView(
+        padding: EdgeInsets.fromLTRB(gutter, 16, gutter, 20),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: semantic.primarySoft,
+              border: Border.all(color: semantic.border1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  LucideIcons.info,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.expenseControlBannerHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        ReorderableListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          buildDefaultDragHandles: false,
-          itemCount: tree.length,
-          itemBuilder: (context, index) {
-            final node = tree[index];
-            return ExpenseGroupCard(
-              key: ValueKey(node.item.id),
-              node: node,
-              index: index,
-              onEditItem: (item) => _openEditDialog(context, ref, item),
-              onDeleteLeaf: (item) =>
-                  ref.read(expenseControlRepositoryProvider).delete(item.id),
-              onDeleteGroup: (group) =>
-                  _confirmDeleteGroup(context, ref, group),
-              onAddChild: (parent) =>
-                  _openCreateDialog(context, ref, parentId: parent.id),
-              // A group carries no formula of its own (FR-003/FR-004) — its
-              // *effective* value is the sum of its children's formulas,
-              // computed live (including any pending inline edits) rather
-              // than stored, so it's always in sync with its children.
-              groupSubtotal: node.isGroup
-                  ? planService.computeTotals(
-                      node.children,
-                      pendingEdits: pendingEdits,
-                    )
-                  : null,
-            );
-          },
-          onReorder: (oldIndex, newIndex) {
-            var adjustedNewIndex = newIndex;
-            if (oldIndex < newIndex) adjustedNewIndex -= 1;
-            final orderedIds = [for (final node in tree) node.item.id];
-            final movedId = orderedIds.removeAt(oldIndex);
-            orderedIds.insert(adjustedNewIndex, movedId);
-            ref
-                .read(expenseControlRepositoryProvider)
-                .reorderTopLevel(orderedIds);
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: DashedRectBorder(
-            color: theme.colorScheme.primary,
-            borderRadius: 6,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _openCreateDialog(context, ref, parentId: null),
-                borderRadius: BorderRadius.circular(6),
-                child: SizedBox(
-                  height: 48,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        LucideIcons.plus,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.expenseControlAddItemAction,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: tree.length,
+            itemBuilder: (context, index) {
+              final node = tree[index];
+              return ExpenseGroupCard(
+                key: ValueKey(node.item.id),
+                node: node,
+                index: index,
+                onEditItem: (item) => _openEditDialog(context, ref, item),
+                onDeleteLeaf: (item) =>
+                    ref.read(expenseControlRepositoryProvider).delete(item.id),
+                onDeleteGroup: (group) =>
+                    _confirmDeleteGroup(context, ref, group),
+                onAddChild: (parent) =>
+                    _openCreateDialog(context, ref, parentId: parent.id),
+                // A group carries no formula of its own (FR-003/FR-004) — its
+                // *effective* value is the sum of its children's formulas,
+                // computed live (including any pending inline edits) rather
+                // than stored, so it's always in sync with its children.
+                groupSubtotal: node.isGroup
+                    ? planService.computeTotals(
+                        node.children,
+                        pendingEdits: pendingEdits,
+                      )
+                    : null,
+              );
+            },
+            onReorder: (oldIndex, newIndex) {
+              var adjustedNewIndex = newIndex;
+              if (oldIndex < newIndex) adjustedNewIndex -= 1;
+              final orderedIds = [for (final node in tree) node.item.id];
+              final movedId = orderedIds.removeAt(oldIndex);
+              orderedIds.insert(adjustedNewIndex, movedId);
+              ref
+                  .read(expenseControlRepositoryProvider)
+                  .reorderTopLevel(orderedIds);
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: DashedRectBorder(
+              color: theme.colorScheme.primary,
+              borderRadius: 6,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _openCreateDialog(context, ref, parentId: null),
+                  borderRadius: BorderRadius.circular(6),
+                  child: SizedBox(
+                    height: 48,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          LucideIcons.plus,
+                          size: 16,
                           color: theme.colorScheme.primary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.expenseControlAddItemAction,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        if (totalsAsync.hasValue)
-          AllocationSummaryBanner(totals: totalsAsync.requireValue),
-        if (pendingEdits.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          if (validation != null && !validation.isValid)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                l10n.expenseControlSaveFormulaBlockedMessage(
-                  formatPercent(validation.violatingTotal ?? 0),
+          const SizedBox(height: 8),
+          if (totalsAsync.hasValue)
+            AllocationSummaryBanner(totals: totalsAsync.requireValue),
+          if (pendingEdits.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            if (validation != null && !validation.isValid)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  l10n.expenseControlSaveFormulaBlockedMessage(
+                    formatPercent(validation.violatingTotal ?? 0),
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
                 ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
+              ),
+            // A 900dp-wide Save bar is the same "stretched" defect as a giant
+            // input: on a wide window the button keeps a 360dp width, centered.
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: useInlineFormulaLabel(context)
+                      ? 360
+                      : double.infinity,
+                ),
+                child: SizedBox(
+                  height: 52,
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    onPressed: (validation?.isValid ?? true)
+                        ? () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            try {
+                              await ref
+                                  .read(expenseControlRepositoryProvider)
+                                  .saveFormulas(pendingEdits);
+                              ref
+                                      .read(pendingItemEditsProvider.notifier)
+                                      .state =
+                                  {};
+                              if (!context.mounted) return;
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.expenseControlSaveFormulaSuccessMessage,
+                                  ),
+                                ),
+                              );
+                            } catch (_) {
+                              // Pending edits are deliberately kept (not cleared)
+                              // so the user can retry without re-entering them —
+                              // clearing them here would silently discard staged
+                              // work on a failed save (FR-012's own "never a
+                              // silent, undocumented loss" bar, applied to this
+                              // save path too).
+                              if (!context.mounted) return;
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.expenseControlSaveFormulaErrorMessage,
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        : null,
+                    icon: const Icon(LucideIcons.check, size: 20),
+                    label: Text(
+                      l10n.expenseControlSaveFormulaAction,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          SizedBox(
-            height: 52,
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              onPressed: (validation?.isValid ?? true)
-                  ? () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      try {
-                        await ref
-                            .read(expenseControlRepositoryProvider)
-                            .saveFormulas(pendingEdits);
-                        ref.read(pendingItemEditsProvider.notifier).state = {};
-                        if (!context.mounted) return;
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n.expenseControlSaveFormulaSuccessMessage,
-                            ),
-                          ),
-                        );
-                      } catch (_) {
-                        // Pending edits are deliberately kept (not cleared)
-                        // so the user can retry without re-entering them —
-                        // clearing them here would silently discard staged
-                        // work on a failed save (FR-012's own "never a
-                        // silent, undocumented loss" bar, applied to this
-                        // save path too).
-                        if (!context.mounted) return;
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n.expenseControlSaveFormulaErrorMessage,
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  : null,
-              icon: const Icon(LucideIcons.check, size: 20),
-              label: Text(
-                l10n.expenseControlSaveFormulaAction,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-            ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -355,7 +376,10 @@ Future<void> _confirmDeleteGroup(
       title: Text(l10n.expenseControlDeleteGroupTitle(group.name)),
       content: Text(l10n.expenseControlDeleteGroupWarning),
       actions: [
+        // Deleting data is never the default: Cancel has the initial focus,
+        // so a stray Enter cancels (contracts/plan-screen-ui.md D4).
         TextButton(
+          autofocus: true,
           onPressed: () => Navigator.of(dialogContext).pop(false),
           child: Text(l10n.cancelAction),
         ),
@@ -370,6 +394,15 @@ Future<void> _confirmDeleteGroup(
     await ref.read(expenseControlRepositoryProvider).delete(group.id);
   }
 }
+
+/// Desktop platforms (including a desktop browser) have a hardware keyboard.
+bool _hasHardwareKeyboard(BuildContext context) =>
+    switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.linux => true,
+      _ => false,
+    };
 
 class _ItemFormDialog extends ConsumerStatefulWidget {
   const _ItemFormDialog({required this.params});
@@ -427,6 +460,17 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
         ? l10n.expenseControlEditItemTitle
         : l10n.expenseControlAddItemAction;
 
+    // Enter in the last field does what the Save button does, under the same
+    // rule (contracts/plan-screen-ui.md D3): nothing while the form is invalid.
+    void submit() {
+      if (controller.canSave && !state.isSubmitting) controller.save();
+    }
+
+    // Only where there is a hardware keyboard: on a phone the first field must
+    // not raise the on-screen keyboard by itself, and the keyboard's "done"
+    // key must keep just closing it instead of saving the form.
+    final hardwareKeyboard = _hasHardwareKeyboard(context);
+
     return AlertDialog(
       title: Text(title),
       content: SingleChildScrollView(
@@ -435,6 +479,8 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
+              autofocus: hardwareKeyboard,
+              textInputAction: hardwareKeyboard ? TextInputAction.next : null,
               decoration: InputDecoration(
                 labelText: l10n.expenseControlNameLabel,
               ),
@@ -455,6 +501,14 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
             ),
             const SizedBox(height: 12),
             TextField(
+              textInputAction: hardwareKeyboard
+                  ? (params.isFormulaEditable
+                        ? TextInputAction.next
+                        : TextInputAction.done)
+                  : null,
+              onSubmitted: hardwareKeyboard && !params.isFormulaEditable
+                  ? (_) => submit()
+                  : null,
               decoration: InputDecoration(
                 labelText: l10n.expenseControlDescriptionLabel,
               ),
@@ -474,6 +528,10 @@ class _ItemFormDialogState extends ConsumerState<_ItemFormDialog> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      textInputAction: hardwareKeyboard
+                          ? TextInputAction.done
+                          : null,
+                      onSubmitted: hardwareKeyboard ? (_) => submit() : null,
                       onChanged: (value) =>
                           controller.setValue(double.tryParse(value)),
                     ),

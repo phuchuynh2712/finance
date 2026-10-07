@@ -10,6 +10,8 @@ import 'app_semantic_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static const double _navLabelFontSize = 12;
+
   static final _lightColorScheme = const ColorScheme.light(
     primary: AppColors.lightPrimary,
     onPrimary: AppColors.lightOnPrimary,
@@ -44,6 +46,15 @@ class AppTheme {
     // (adaptive-layout-foundation FR-007, research.md Decision 6).
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // Every pop-up (item form, delete confirmation, language choice,
+    // biometric offer, discard prompt) is centered and at most 560dp wide on
+    // a wide window: Flutter's default only sets a 280dp minimum, so a
+    // dialog's width otherwise follows its content and the window
+    // (specs/20261007-100751-adaptive-web-remaining-screens/research.md,
+    // Decision 6).
+    dialogTheme: const DialogThemeData(
+      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+    ),
     // Unset, ColorScheme.light's ~30 other slots (scaffold background,
     // surfaceContainer*, etc.) fall back to Flutter's default Material You
     // purple-gray seed instead of the brand palette — visible as unwanted
@@ -63,6 +74,11 @@ class AppTheme {
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
+          // Material 3's label size. Without a size the label fell back to the
+          // 14sp body text, in which "Tổng quan" (73dp) wraps on a phone
+          // 360dp wide or narrower; at 12sp (63dp) it fits one line down to
+          // 320dp.
+          fontSize: _navLabelFontSize,
           color: states.contains(WidgetState.selected)
               ? AppColors.lightPrimary
               : _lightColorScheme.onSurfaceVariant,
@@ -78,6 +94,15 @@ class AppTheme {
     // See AppTheme.light's matching fields for why these are explicit.
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // Every pop-up (item form, delete confirmation, language choice,
+    // biometric offer, discard prompt) is centered and at most 560dp wide on
+    // a wide window: Flutter's default only sets a 280dp minimum, so a
+    // dialog's width otherwise follows its content and the window
+    // (specs/20261007-100751-adaptive-web-remaining-screens/research.md,
+    // Decision 6).
+    dialogTheme: const DialogThemeData(
+      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+    ),
     scaffoldBackgroundColor: AppColors.darkBgApp,
     colorScheme: _darkColorScheme,
     navigationBarTheme: NavigationBarThemeData(
@@ -91,6 +116,7 @@ class AppTheme {
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
+          fontSize: _navLabelFontSize,
           color: states.contains(WidgetState.selected)
               ? AppColors.darkPrimaryAccentText
               : _darkColorScheme.onSurfaceVariant,

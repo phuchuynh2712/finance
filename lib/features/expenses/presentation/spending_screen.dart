@@ -7,7 +7,9 @@ import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
+import 'package:finance/core/widgets/page_title.dart';
 import 'package:finance/features/expenses/application/balance_view_service.dart';
 import 'widgets/balance_group_card.dart';
 
@@ -30,91 +32,102 @@ class SpendingScreen extends ConsumerWidget {
     final balanceViewService = ref.watch(balanceViewServiceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.tabSpending)),
+      appBar: AppBar(
+        title: PageTitle(icon: LucideIcons.receipt, title: l10n.tabSpending),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActionButton(
-                          icon: LucideIcons.arrowUpCircle,
-                          label: l10n.spendingIncomeAction,
-                          background: semantic.successSoft,
-                          border: semantic.success,
-                          foreground: semantic.successFg,
-                          onPressed: () => context.push('/spending/income'),
+        // One bounded, centered column from 840dp (the shared content width,
+        // as Tổng quan and Bảo mật). The balance list is a scroll view that
+        // spans the whole viewport, so the wheel works over the margins.
+        child: AdaptiveGutters(
+          builder: (context, gutter) => Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(gutter, 18, gutter, 0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ActionButton(
+                            icon: LucideIcons.arrowUpCircle,
+                            label: l10n.spendingIncomeAction,
+                            background: semantic.successSoft,
+                            border: semantic.success,
+                            foreground: semantic.successFg,
+                            onPressed: () => context.push('/spending/income'),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _ActionButton(
-                          icon: LucideIcons.arrowDownCircle,
-                          label: l10n.spendingExpenseAction,
-                          background: semantic.dangerSoft,
-                          border: theme.colorScheme.error,
-                          foreground: semantic.dangerFg,
-                          onPressed: () => context.push('/spending/expense'),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: LucideIcons.arrowDownCircle,
+                            label: l10n.spendingExpenseAction,
+                            background: semantic.dangerSoft,
+                            border: theme.colorScheme.error,
+                            foreground: semantic.dangerFg,
+                            onPressed: () => context.push('/spending/expense'),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _HistoryRow(
-                    label: l10n.spendingHistoryAction,
-                    onPressed: () => context.push('/spending/history'),
-                  ),
-                  const SizedBox(height: 18),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _HistoryRow(
+                      label: l10n.spendingHistoryAction,
+                      onPressed: () => context.push('/spending/history'),
+                    ),
+                    const SizedBox(height: 18),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: treeAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text(error.toString())),
-                data: (tree) {
-                  if (tree.isEmpty) {
-                    return EmptyStateView(
-                      icon: LucideIcons.walletCards,
-                      message: l10n.spendingBalanceEmptyState,
+              Expanded(
+                child: treeAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text(error.toString())),
+                  data: (tree) {
+                    if (tree.isEmpty) {
+                      return EmptyStateView(
+                        icon: LucideIcons.walletCards,
+                        message: l10n.spendingBalanceEmptyState,
+                      );
+                    }
+                    return ListView(
+                      padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 20),
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.only(left: 9),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                color: semantic.border2,
+                                width: 3,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            l10n.spendingBalanceListLabel.toUpperCase(),
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                              color: semantic.fg2,
+                            ),
+                          ),
+                        ),
+                        for (final row in balanceViewService.prepare(tree))
+                          BalanceGroupCard(
+                            node: row.node,
+                            balance: row.balance,
+                            currency: currency,
+                          ),
+                      ],
                     );
-                  }
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.only(left: 9),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(color: semantic.border2, width: 3),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.spendingBalanceListLabel.toUpperCase(),
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: semantic.fg2,
-                          ),
-                        ),
-                      ),
-                      for (final row in balanceViewService.prepare(tree))
-                        BalanceGroupCard(
-                          node: row.node,
-                          balance: row.balance,
-                          currency: currency,
-                        ),
-                    ],
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

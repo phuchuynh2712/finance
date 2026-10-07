@@ -7,7 +7,8 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
-import 'package:finance/core/widgets/adaptive_body.dart';
+import 'package:finance/core/theme/app_layout.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
@@ -50,8 +51,12 @@ class TransactionHistoryScreen extends ConsumerWidget {
               iconColor: semantic.fg2,
             ),
             Expanded(
-              child: AdaptiveBody(
-                child: !pullComplete
+              // The list spans the whole viewport and pads itself by the
+              // gutter, so the wheel and the scroll bar work over the margins
+              // too (wrapping it in `AdaptiveBody` left them dead zones).
+              child: AdaptiveGutters(
+                maxWidth: AppLayoutTokens.paddedListMaxWidth,
+                builder: (context, gutter) => !pullComplete
                     ? const Center(child: CircularProgressIndicator())
                     : recordsAsync.when(
                         loading: () =>
@@ -73,10 +78,10 @@ class TransactionHistoryScreen extends ConsumerWidget {
                             slivers: [
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    18,
+                                  padding: EdgeInsets.fromLTRB(
+                                    gutter,
                                     14,
-                                    18,
+                                    gutter,
                                     0,
                                   ),
                                   child: _HistoryControls(
@@ -131,10 +136,10 @@ class TransactionHistoryScreen extends ConsumerWidget {
                                 for (final group in view.groups) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        18,
+                                      padding: EdgeInsets.fromLTRB(
+                                        gutter,
                                         14,
-                                        18,
+                                        gutter,
                                         6,
                                       ),
                                       child: Text(
@@ -152,8 +157,8 @@ class TransactionHistoryScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   SliverPadding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 18,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: gutter,
                                     ),
                                     sliver: SliverList.builder(
                                       itemCount: group.items.length,

@@ -34,7 +34,10 @@ Future<void> maybeShowBiometricEnablePrompt(
           onPressed: () => Navigator.of(dialogContext).pop(false),
           child: Text(l10n.biometricEnablePromptDeclineAction),
         ),
+        // The primary action has the initial focus, so Enter accepts and
+        // Escape (dismissal) is "not now" (contracts/plan-screen-ui.md D6).
         FilledButton(
+          autofocus: true,
           onPressed: () => Navigator.of(dialogContext).pop(true),
           child: Text(l10n.biometricEnablePromptAcceptAction),
         ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/theme/app_icons.dart';
+import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 
 void main() {
@@ -9,8 +11,9 @@ void main() {
     'renders an AppBar with the given title and the message via EmptyStateView',
     (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: NotAvailablePlaceholderScreen(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const NotAvailablePlaceholderScreen(
             icon: LucideIcons.history,
             title: 'Lịch sử giao dịch',
             message: 'Tính năng đang được phát triển.',
@@ -20,7 +23,21 @@ void main() {
 
       expect(find.widgetWithText(AppBar, 'Lịch sử giao dịch'), findsOneWidget);
       expect(find.text('Tính năng đang được phát triển.'), findsOneWidget);
-      expect(find.byIcon(LucideIcons.history), findsOneWidget);
+      // The icon shows twice: in the title chip and in the empty state.
+      expect(
+        find.descendant(
+          of: find.byType(EmptyStateView),
+          matching: find.byIcon(LucideIcons.history),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(LucideIcons.history),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -29,6 +46,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: AppTheme.light,
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(
@@ -67,8 +85,9 @@ void main() {
     'when rendered in-place (not pushed), it still renders correctly with no back button expected',
     (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: NotAvailablePlaceholderScreen(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const NotAvailablePlaceholderScreen(
             icon: LucideIcons.layoutDashboard,
             title: 'Tổng quan',
             message: 'Chưa có',

@@ -336,6 +336,14 @@ since a red test suite cannot be left behind at a phase checkpoint.*
   (confirmed empirically) — no widget change was needed, only relaxing
   `test/widget/core/router/app_shell_nav_bar_test.dart`'s assertion from
   "single line" to "renders fully, no overflow, no truncation."
+  *Update 2026-10-07 (`20261007-100751-adaptive-web-remaining-screens`)*:
+  the measurement above was most likely taken with the test engine's
+  placeholder font, which is about twice as wide as the app's Lexend. With
+  the real font "Tổng quan" is 73 dp at the 14 sp the theme had fallen back
+  to (it set a colour but no size) and 63 dp at Material 3's 12 sp label;
+  the slots are 82 / 72 / 64 dp at 412 / 360 / 320 dp. The theme now sets
+  12 sp and the bar draws its labels at no more than 110 % text scale, so
+  every label is on one line at those widths (`app_shell_nav_text_scale_test.dart`).
 
 ## Out of Scope & Follow-Up Work
 

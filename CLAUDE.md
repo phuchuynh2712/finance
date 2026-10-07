@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20261006-203324-security-screen-change-password/plan.md
+specs/20261007-100751-adaptive-web-remaining-screens/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

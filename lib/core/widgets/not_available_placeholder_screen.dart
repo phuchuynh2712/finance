@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'adaptive_body.dart';
 import 'empty_state_view.dart';
+import 'page_title.dart';
 
 /// Generalized "not yet available" placeholder, reused by every entry
 /// point whose real destination is a separate, unspecified future feature
@@ -26,8 +28,16 @@ class NotAvailablePlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: EmptyStateView(icon: icon, message: message),
+      appBar: AppBar(
+        title: PageTitle(icon: icon, title: title),
+      ),
+      // Bounded and centered from 840dp like every other page. The empty state
+      // scrolls on its own when it overflows, so there is no scroll view here
+      // that would need to span the window (hence `AdaptiveBody`, not
+      // `AdaptiveGutters`).
+      body: AdaptiveBody(
+        child: EmptyStateView(icon: icon, message: message),
+      ),
     );
   }
 }

@@ -6,8 +6,11 @@ import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/dashed_border.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'income_providers.dart';
 
@@ -91,98 +94,113 @@ class IncomeScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: !hasItems
-            ? EmptyStateView(
-                icon: LucideIcons.walletCards,
-                message: l10n.incomeEmptyStateMessage,
+            ? AdaptiveBody(
+                maxWidth: AppLayoutTokens.entryContentMaxWidth,
+                activatesAt: WindowSizeClass.medium,
+                child: EmptyStateView(
+                  icon: LucideIcons.walletCards,
+                  message: l10n.incomeEmptyStateMessage,
+                ),
               )
-            : Padding(
-                padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
-                child: Column(
+            // The list, its total and Save share one column of at most
+            // 520dp from 600dp. The scroll view spans the whole viewport (the
+            // wheel works over the margins) and pads itself by the gutter.
+            : AdaptiveGutters(
+                maxWidth: AppLayoutTokens.entryContentMaxWidth,
+                activatesAt: WindowSizeClass.medium,
+                builder: (context, gutter) => Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: ListView(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Column(
-                              children: [
-                                Text(
-                                  l10n.incomeTotalLabel,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: semantic.fg3,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: ListView(
+                          padding: EdgeInsets.symmetric(horizontal: gutter),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    l10n.incomeTotalLabel,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: semantic.fg3,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  currency.format(state.totalAmount),
-                                  style: theme.textTheme.headlineMedium
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Text(
-                              l10n.incomeSourcesEyebrow.toUpperCase(),
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: semantic.fg2,
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    currency.format(state.totalAmount),
+                                    style: theme.textTheme.headlineMedium
+                                        ?.copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          for (final row in state.rows)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
-                              child: _IncomeSourceRowWidget(
-                                row: row,
-                                // FR-002: removing the last row is allowed —
-                                // it leaves zero rows, which FR-004 then
-                                // blocks only at save time, not here.
-                                showDelete: true,
-                                isErrored: state.errorRowId == row.id,
-                                onNameChanged: (value) =>
-                                    controller.setRowName(row.id, value),
-                                onAmountChanged: (value) =>
-                                    controller.setRowAmount(row.id, value),
-                                onDelete: () => controller.removeRow(row.id),
-                              ),
-                            ),
-                          _AddSourceButton(
-                            label: l10n.incomeAddSourceAction,
-                            onPressed: controller.addRow,
-                          ),
-                          if (errorText != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
                               child: Text(
-                                errorText,
-                                style: TextStyle(
-                                  color: theme.colorScheme.error,
+                                l10n.incomeSourcesEyebrow.toUpperCase(),
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: semantic.fg2,
                                 ),
                               ),
                             ),
-                        ],
+                            for (final row in state.rows)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: _IncomeSourceRowWidget(
+                                  row: row,
+                                  // FR-002: removing the last row is allowed —
+                                  // it leaves zero rows, which FR-004 then
+                                  // blocks only at save time, not here.
+                                  showDelete: true,
+                                  isErrored: state.errorRowId == row.id,
+                                  onNameChanged: (value) =>
+                                      controller.setRowName(row.id, value),
+                                  onAmountChanged: (value) =>
+                                      controller.setRowAmount(row.id, value),
+                                  onDelete: () => controller.removeRow(row.id),
+                                ),
+                              ),
+                            _AddSourceButton(
+                              label: l10n.incomeAddSourceAction,
+                              onPressed: controller.addRow,
+                            ),
+                            if (errorText != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Text(
+                                  errorText,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(
-                      height: 52,
-                      child: FilledButton.icon(
-                        onPressed: state.isSubmitting
-                            ? null
-                            : () => controller.save(),
-                        icon: state.isSubmitting
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(LucideIcons.check),
-                        label: Text(l10n.incomeSaveAction),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 20),
+                      child: SizedBox(
+                        height: 52,
+                        child: FilledButton.icon(
+                          onPressed: state.isSubmitting
+                              ? null
+                              : () => controller.save(),
+                          icon: state.isSubmitting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(LucideIcons.check),
+                          label: Text(l10n.incomeSaveAction),
+                        ),
                       ),
                     ),
                   ],
