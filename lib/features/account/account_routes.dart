@@ -7,6 +7,8 @@ import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'presentation/account_screen.dart';
 import 'presentation/change_password_screen.dart';
 import 'presentation/forgot_password_screen.dart';
+import 'presentation/pin_flow_controller.dart';
+import 'presentation/pin_flow_screen.dart';
 import 'presentation/reset_password_screen.dart';
 import 'presentation/security_screen.dart';
 import 'presentation/sign_in_screen.dart';
@@ -50,6 +52,14 @@ Widget securityRoute(BuildContext context, GoRouterState state) =>
 /// `/account/security/change-password`, pushed from the Security screen.
 Widget changePasswordRoute(BuildContext context, GoRouterState state) =>
     const ChangePasswordScreen();
+
+/// `/account/security/pin/:mode` (`setUp`, `change` or `turnOff`), pushed from
+/// the Security screen and from the one-time PIN offer. An unknown mode falls
+/// back to the Security screen instead of failing.
+Widget pinFlowRoute(BuildContext context, GoRouterState state) {
+  final mode = PinFlowMode.values.asNameMap()[state.pathParameters['mode']];
+  return mode == null ? const SecurityScreen() : PinFlowScreen(mode: mode);
+}
 
 Widget signInRoute(BuildContext context, GoRouterState state) =>
     const SignInScreen();

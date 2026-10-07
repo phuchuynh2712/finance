@@ -11,6 +11,7 @@ import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/account/application/auth_error_mapper.dart';
 import 'biometric_enable_prompt.dart';
+import 'pin_offer_prompt.dart';
 import 'sign_up_validation.dart';
 
 /// Sign Up screen (FR-004). Signs the account in immediately on success —
@@ -120,7 +121,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     // the prompt can stay open awaiting the user's answer without the
     // button looking stuck.
     if (succeeded && mounted) {
+      // The router replaces this screen as soon as the account is signed in;
+      // the PIN offer after the biometric one needs what outlives it.
+      final navigator = Navigator.of(context, rootNavigator: true);
+      final container = ProviderScope.containerOf(context);
       await maybeShowBiometricEnablePrompt(context, ref);
+      await maybeShowPinOfferPrompt(navigator, container);
     }
   }
 

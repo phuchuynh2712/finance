@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:finance/core/l10n/app_localizations.dart';
-import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'change_password_controller.dart';
+import 'widgets/password_field.dart';
 
 /// "Đổi mật khẩu": current password, new password and its confirmation.
 ///
@@ -104,7 +104,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _PasswordField(
+                    PasswordField(
                       fieldKey: const ValueKey('change-password-current'),
                       controller: _currentController,
                       focusNode: _currentFocus,
@@ -119,7 +119,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       onSubmitted: (_) => _newFocus.requestFocus(),
                     ),
                     const SizedBox(height: 16),
-                    _PasswordField(
+                    PasswordField(
                       fieldKey: const ValueKey('change-password-new'),
                       controller: _newController,
                       focusNode: _newFocus,
@@ -134,7 +134,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       onSubmitted: (_) => _confirmFocus.requestFocus(),
                     ),
                     const SizedBox(height: 16),
-                    _PasswordField(
+                    PasswordField(
                       fieldKey: const ValueKey('change-password-confirm'),
                       controller: _confirmController,
                       focusNode: _confirmFocus,
@@ -187,73 +187,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A password input with a show/hide toggle. Autocorrect and suggestions are
-/// off so the keyboard never learns or echoes a password.
-class _PasswordField extends StatelessWidget {
-  const _PasswordField({
-    required this.fieldKey,
-    required this.controller,
-    required this.focusNode,
-    required this.label,
-    required this.autofillHint,
-    required this.obscure,
-    required this.onToggle,
-    required this.textInputAction,
-    required this.onChanged,
-    required this.onSubmitted,
-    this.helperText,
-    this.errorText,
-  });
-
-  final Key fieldKey;
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String label;
-  final String? helperText;
-  final String? errorText;
-  final String autofillHint;
-  final bool obscure;
-  final VoidCallback onToggle;
-  final TextInputAction textInputAction;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<String> onSubmitted;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final semantic = Theme.of(context).extension<AppSemanticColors>()!;
-
-    return TextField(
-      key: fieldKey,
-      controller: controller,
-      focusNode: focusNode,
-      obscureText: obscure,
-      autocorrect: false,
-      enableSuggestions: false,
-      autofillHints: [autofillHint],
-      textInputAction: textInputAction,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        labelText: label,
-        helperText: helperText,
-        errorText: errorText,
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscure ? LucideIcons.eye : LucideIcons.eyeOff,
-            size: 18,
-            color: semantic.fg3,
-          ),
-          tooltip: obscure
-              ? l10n.signInShowPasswordSemantic
-              : l10n.signInHidePasswordSemantic,
-          onPressed: onToggle,
         ),
       ),
     );

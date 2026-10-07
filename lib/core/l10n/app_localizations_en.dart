@@ -752,4 +752,89 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorMapperSessionExpired =>
       'Your session has expired. Please sign in again.';
+
+  @override
+  String get pinLockRow => 'Lock with a PIN';
+
+  @override
+  String get pinLockRowCaptionOff => 'Open the app quickly with 6 digits';
+
+  @override
+  String get pinLockRowCaptionOn => 'On';
+
+  @override
+  String get pinLockRowCaptionExpired => 'Your PIN has expired';
+
+  @override
+  String get pinChangeAction => 'Change PIN';
+
+  @override
+  String get pinEnterTitle => 'Enter your PIN';
+
+  @override
+  String pinDotsSemantic(int entered, int total) {
+    return '$entered of $total digits entered';
+  }
+
+  @override
+  String get pinKeypadDeleteSemantic => 'Delete last digit';
+
+  @override
+  String pinWrongTries(int count) {
+    return 'Wrong PIN. $count tries left.';
+  }
+
+  @override
+  String get pinInvalidated =>
+      'Wrong 5 times. The PIN is now off; sign in with your password.';
+
+  @override
+  String get pinExpired =>
+      'Your PIN expired after 12 months. Sign in with your password to set a new one.';
+
+  @override
+  String get pinUsePasswordAction => 'Use password';
+
+  @override
+  String get pinForgotAction => 'Forgot PIN';
+
+  @override
+  String get pinSetupConfirmPasswordTitle => 'Enter your password to continue';
+
+  @override
+  String get pinSetupNewTitle => 'Choose a 6-digit PIN';
+
+  @override
+  String get pinSetupRepeatTitle => 'Enter the PIN again';
+
+  @override
+  String get pinChangeCurrentTitle => 'Enter your current PIN';
+
+  @override
+  String get pinTurnOffTitle => 'Enter your PIN to turn it off';
+
+  @override
+  String get pinTooEasy => 'That PIN is too easy to guess. Choose another.';
+
+  @override
+  String get pinMismatch => 'The two entries do not match';
+
+  @override
+  String get pinSetDone => 'PIN set';
+
+  @override
+  String get pinOfferTitle => 'Set a PIN?';
+
+  @override
+  String get pinOfferMessage =>
+      'This device cannot use fingerprint or face. Next time you can open the app faster with a 6-digit PIN.';
+
+  @override
+  String get pinOfferAcceptAction => 'Set PIN';
+
+  @override
+  String get pinOfferDeclineAction => 'Not now';
+
+  @override
+  String get pinSetupContinueAction => 'Continue';
 }

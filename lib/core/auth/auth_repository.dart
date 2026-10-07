@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/config/app_environment.dart';
 import 'password_change_gateway.dart';
+import 'pin_lock_repository.dart';
 import 'temporary_password_session.dart';
 
 /// FR-004/FR-005/FR-006: picks which password-reset redirect to use.
@@ -51,13 +52,19 @@ class AuthRepository implements AccountAuthActions, PasswordChangeGateway {
     String? publishableKey,
     http.Client? httpClient,
     Duration? sessionCheckTimeout,
-  }) : _supabaseUrl = supabaseUrl ?? AppEnvironment.supabaseUrl,
+    PinLockRepository? pinLock,
+  }) : _pinLock = pinLock,
+       _supabaseUrl = supabaseUrl ?? AppEnvironment.supabaseUrl,
        _publishableKey =
            publishableKey ?? AppEnvironment.supabasePublishableKey,
        _httpClient = httpClient,
        _sessionCheckTimeout = sessionCheckTimeout ?? const Duration(seconds: 8);
 
   final SupabaseClient _client;
+
+  /// The PIN of this device (a phone or tablet); `null` where there is none, so
+  /// a sign-out has nothing extra to clear.
+  final PinLockRepository? _pinLock;
   final String _supabaseUrl;
   final String _publishableKey;
   final http.Client? _httpClient;
@@ -191,6 +198,7 @@ class AuthRepository implements AccountAuthActions, PasswordChangeGateway {
   Future<void> signOut({SignOutScope scope = SignOutScope.local}) async {
     if (scope == SignOutScope.local) {
       await clearBiometricLoginState();
+      await _clearPin();
     }
     await _client.auth.signOut(scope: scope);
   }
@@ -304,5 +312,16 @@ class AuthRepository implements AccountAuthActions, PasswordChangeGateway {
     if (userId == null) return;
     await _secureStorage.delete(key: '$_biometricEnabledKeyPrefix$userId');
     await _secureStorage.delete(key: '$_biometricPromptShownKeyPrefix$userId');
+  }
+
+  /// FR-018: a local sign-out takes the account's PIN (record and wrong-tries
+  /// count) off this device, before the session goes away. The one-time offer
+  /// marker stays. A storage failure here never stops the sign-out.
+  Future<void> _clearPin() async {
+    try {
+      await _pinLock?.clear();
+    } catch (_) {
+      // Signing out matters more than tidying the PIN.
+    }
   }
 }
