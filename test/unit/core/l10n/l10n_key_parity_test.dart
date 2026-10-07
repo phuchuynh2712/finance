@@ -37,6 +37,38 @@ const _securityFeatureKeys = [
 /// [_securityFeatureKeys].
 const _adaptiveWebFeatureKeys = ['expenseKeypadDeleteSemantic'];
 
+/// Keys added by the PIN lock feature (the lock screen's PIN mode, the set-up,
+/// change and turn-off flow, the Security row and the one-time offer). Checked
+/// exactly like [_securityFeatureKeys].
+const _pinLockKeys = [
+  'pinLockRow',
+  'pinLockRowCaptionOff',
+  'pinLockRowCaptionOn',
+  'pinLockRowCaptionExpired',
+  'pinChangeAction',
+  'pinEnterTitle',
+  'pinDotsSemantic',
+  'pinKeypadDeleteSemantic',
+  'pinWrongTries',
+  'pinInvalidated',
+  'pinExpired',
+  'pinUsePasswordAction',
+  'pinForgotAction',
+  'pinSetupConfirmPasswordTitle',
+  'pinSetupNewTitle',
+  'pinSetupRepeatTitle',
+  'pinChangeCurrentTitle',
+  'pinTurnOffTitle',
+  'pinTooEasy',
+  'pinMismatch',
+  'pinSetDone',
+  'pinOfferTitle',
+  'pinOfferMessage',
+  'pinOfferAcceptAction',
+  'pinOfferDeclineAction',
+  'pinSetupContinueAction',
+];
+
 Map<String, dynamic> _readArb(String name) {
   final file = File('lib/core/l10n/$name');
   return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -76,7 +108,11 @@ void main() {
   });
 
   test('the feature keys exist and have a template description', () {
-    for (final key in [..._securityFeatureKeys, ..._adaptiveWebFeatureKeys]) {
+    for (final key in [
+      ..._securityFeatureKeys,
+      ..._adaptiveWebFeatureKeys,
+      ..._pinLockKeys,
+    ]) {
       expect(vi.containsKey(key), isTrue, reason: 'app_vi.arb is missing $key');
       expect(en.containsKey(key), isTrue, reason: 'app_en.arb is missing $key');
       final meta = vi['@$key'];

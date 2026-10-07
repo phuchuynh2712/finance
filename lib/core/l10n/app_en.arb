@@ -247,5 +247,48 @@
   "changePasswordSameAsCurrentError": "The new password must differ from the current one.",
   "changePasswordWrongCurrentError": "The current password is incorrect.",
   "changePasswordSubmit": "Change password",
-  "errorMapperSessionExpired": "Your session has expired. Please sign in again."
+  "errorMapperSessionExpired": "Your session has expired. Please sign in again.",
+  "pinLockRow": "Lock with a PIN",
+  "pinLockRowCaptionOff": "Open the app quickly with 6 digits",
+  "pinLockRowCaptionOn": "On",
+  "pinLockRowCaptionExpired": "Your PIN has expired",
+  "pinChangeAction": "Change PIN",
+  "pinEnterTitle": "Enter your PIN",
+  "pinDotsSemantic": "{entered} of {total} digits entered",
+  "@pinDotsSemantic": {
+    "placeholders": {
+      "entered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pinKeypadDeleteSemantic": "Delete last digit",
+  "pinWrongTries": "Wrong PIN. {count} tries left.",
+  "@pinWrongTries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinInvalidated": "Wrong 5 times. The PIN is now off; sign in with your password.",
+  "pinExpired": "Your PIN expired after 12 months. Sign in with your password to set a new one.",
+  "pinUsePasswordAction": "Use password",
+  "pinForgotAction": "Forgot PIN",
+  "pinSetupConfirmPasswordTitle": "Enter your password to continue",
+  "pinSetupNewTitle": "Choose a 6-digit PIN",
+  "pinSetupRepeatTitle": "Enter the PIN again",
+  "pinChangeCurrentTitle": "Enter your current PIN",
+  "pinTurnOffTitle": "Enter your PIN to turn it off",
+  "pinTooEasy": "That PIN is too easy to guess. Choose another.",
+  "pinMismatch": "The two entries do not match",
+  "pinSetDone": "PIN set",
+  "pinOfferTitle": "Set a PIN?",
+  "pinOfferMessage": "This device cannot use fingerprint or face. Next time you can open the app faster with a 6-digit PIN.",
+  "pinOfferAcceptAction": "Set PIN",
+  "pinOfferDeclineAction": "Not now",
+  "pinSetupContinueAction": "Continue"
 }

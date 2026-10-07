@@ -163,6 +163,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'change-password',
                         builder: changePasswordRoute,
                       ),
+                      GoRoute(path: 'pin/:mode', builder: pinFlowRoute),
                     ],
                   ),
                 ],

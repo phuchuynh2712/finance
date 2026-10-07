@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,9 +10,14 @@ import 'auth_repository.dart';
 import 'biometric_login_repository.dart';
 import 'lock_channel.dart';
 import 'password_change_gateway.dart';
+import 'pin_lock_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(ref.watch(supabaseClientProvider));
+  return AuthRepository(
+    ref.watch(supabaseClientProvider),
+    // A PIN exists only on phones and tablets, never on the web.
+    pinLock: kIsWeb ? null : ref.watch(pinLockRepositoryProvider),
+  );
 });
 
 /// The seam the change-password flow depends on; overridden with a fake in
@@ -23,6 +30,49 @@ final biometricLoginRepositoryProvider = Provider<BiometricLoginRepository>((
   ref,
 ) {
   return BiometricLoginRepository(LocalAuthentication());
+});
+
+/// The PIN of the signed-in account on this device. Reads the account from the
+/// client at call time, so it follows a sign-in or sign-out.
+final pinLockRepositoryProvider = Provider<PinLockRepository>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return SecurePinLockRepository(
+    storage: const FlutterSecureStorage(),
+    userId: () => client.auth.currentUser?.id,
+  );
+});
+
+/// Whether a PIN may be created here: a phone or tablet whose biometrics are
+/// unusable (`noHardware` or `notEnrolled`). Never on the web, and never where
+/// biometrics work (FR-006). Detected at run time, not assumed from the
+/// platform. Read again each time it is needed (it is not kept), because
+/// enrolling a fingerprint in system settings changes the answer.
+final pinAvailableProvider = FutureProvider.autoDispose<bool>((ref) async {
+  if (kIsWeb) return false;
+  final availability = await ref
+      .watch(biometricLoginRepositoryProvider)
+      .availability();
+  return availability == BiometricAvailability.noHardware ||
+      availability == BiometricAvailability.notEnrolled;
+});
+
+/// The PIN status of the signed-in account, read again whenever the account or
+/// the lock changes (so an expired or used-up PIN shows up on the lock screen).
+/// After the PIN itself changes (set, clear, a wrong try), the caller
+/// invalidates this.
+final pinStatusProvider = FutureProvider<PinStatus>((ref) async {
+  if (kIsWeb) return PinStatus.none;
+  ref.watch(isSignedInProvider);
+  ref.watch(appLockProvider);
+  return ref.watch(pinLockRepositoryProvider).status();
+});
+
+/// `true` when this device holds a PIN (active or expired) for the signed-in
+/// account; `false` on the web and while the status is still being read.
+final pinInUseProvider = Provider<bool>((ref) {
+  if (kIsWeb) return false;
+  final status = ref.watch(pinStatusProvider).valueOrNull ?? PinStatus.none;
+  return status != PinStatus.none;
 });
 
 /// Streams Supabase auth state changes for the router's redirect guard

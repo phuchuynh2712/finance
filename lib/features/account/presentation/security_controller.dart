@@ -4,6 +4,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/auth/biometric_login_repository.dart';
+import 'package:finance/core/auth/pin_lock_repository.dart';
 import 'account_controller.dart';
 
 /// What the biometric switch shows (data-model.md §4): the stored preference
@@ -164,3 +165,31 @@ final securityControllerProvider =
         account: ref.watch(accountAuthActionsProvider),
       );
     });
+
+/// What the PIN row of the Security screen shows (`contracts/pin-ui.md` §4).
+enum PinRowState {
+  /// No row: the web, or biometrics work and no PIN exists.
+  hidden,
+
+  /// A PIN may be created and none is set.
+  off,
+
+  /// A PIN is set and still counts.
+  active,
+
+  /// A PIN is set but older than 12 months.
+  expired,
+}
+
+/// The row's state from the PIN status and whether a PIN may be created. A row
+/// is shown whenever a PIN exists, even on a device that has since gained
+/// biometrics, so the person can still turn it off.
+final pinRowStateProvider = Provider.autoDispose<PinRowState>((ref) {
+  final status = ref.watch(pinStatusProvider).valueOrNull ?? PinStatus.none;
+  final available = ref.watch(pinAvailableProvider).valueOrNull ?? false;
+  return switch (status) {
+    PinStatus.active => PinRowState.active,
+    PinStatus.expired => PinRowState.expired,
+    PinStatus.none => available ? PinRowState.off : PinRowState.hidden,
+  };
+});

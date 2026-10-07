@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/auth/biometric_login_repository.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/account/application/change_password_service.dart';
 import 'other_devices_notice_controller.dart';
+import 'pin_flow_controller.dart';
 import 'security_controller.dart';
 import 'widgets/account_menu.dart';
 
@@ -33,7 +35,12 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     // Removing a fingerprint (or adding one) happens in system settings, so the
     // switch must be re-evaluated whenever the person comes back to the app.
     _lifecycleListener = AppLifecycleListener(
-      onResume: () => ref.read(securityControllerProvider.notifier).refresh(),
+      onResume: () {
+        ref.read(securityControllerProvider.notifier).refresh();
+        // A PIN may now (or no longer) be offered: the same change decides it.
+        ref.invalidate(pinAvailableProvider);
+        ref.invalidate(pinStatusProvider);
+      },
     );
   }
 
@@ -91,6 +98,17 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
         );
   }
 
+  /// The PIN switch (or its row): turning it on sets a PIN, turning it off asks
+  /// for the current one.
+  void _togglePin(PinRowState state) => _openPinFlow(
+    state == PinRowState.active ? PinFlowMode.turnOff : PinFlowMode.setUp,
+  );
+
+  /// Opens the PIN flow for [mode]; the flow itself refreshes the status and
+  /// confirms with a snack bar when it saved a PIN.
+  Future<void> _openPinFlow(PinFlowMode mode) =>
+      context.push<bool>('/account/security/pin/${mode.name}');
+
   String? _biometricCaption(AppLocalizations l10n, SecuritySettings? settings) {
     return switch (settings?.availability) {
       BiometricAvailability.webUnsupported => l10n.securityBiometricReasonWeb,
@@ -110,6 +128,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     final notice = ref.watch(otherDevicesNoticeControllerProvider);
     final security = ref.watch(securityControllerProvider);
     final settings = security.settings;
+    final pinRow = ref.watch(pinRowStateProvider);
 
     ref.listen<SecurityNotice?>(
       securityControllerProvider.select((state) => state.notice),
@@ -181,7 +200,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                       icon: LucideIcons.fingerprint,
                       label: l10n.securityBiometricRow,
                       semantic: semantic,
-                      showDivider: false,
+                      showDivider: pinRow != PinRowState.hidden,
                       caption: _biometricCaption(l10n, settings),
                       captionKey: const ValueKey('security-biometric-caption'),
                       onTap: canToggle
@@ -193,6 +212,38 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                         onChanged: canToggle ? _setBiometric : null,
                       ),
                     ),
+                    if (pinRow != PinRowState.hidden)
+                      AccountMenuRow(
+                        key: const ValueKey('security-pin-row'),
+                        icon: LucideIcons.lockKeyhole,
+                        label: l10n.pinLockRow,
+                        semantic: semantic,
+                        showDivider: pinRow == PinRowState.active,
+                        caption: switch (pinRow) {
+                          PinRowState.off => l10n.pinLockRowCaptionOff,
+                          PinRowState.active => l10n.pinLockRowCaptionOn,
+                          PinRowState.expired => l10n.pinLockRowCaptionExpired,
+                          PinRowState.hidden => null,
+                        },
+                        captionKey: const ValueKey('security-pin-caption'),
+                        // Off or expired: the switch (or the row) sets a new
+                        // PIN. On: switching it off asks for the current PIN.
+                        onTap: () => _togglePin(pinRow),
+                        trailing: Switch(
+                          key: const ValueKey('security-pin-switch'),
+                          value: pinRow == PinRowState.active,
+                          onChanged: (_) => _togglePin(pinRow),
+                        ),
+                      ),
+                    if (pinRow == PinRowState.active)
+                      AccountMenuRow(
+                        key: const ValueKey('security-pin-change-row'),
+                        icon: LucideIcons.refreshCw,
+                        label: l10n.pinChangeAction,
+                        semantic: semantic,
+                        showDivider: false,
+                        onTap: () => _openPinFlow(PinFlowMode.change),
+                      ),
                   ],
                 ),
               ],

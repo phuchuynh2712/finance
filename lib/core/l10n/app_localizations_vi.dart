@@ -748,4 +748,89 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get errorMapperSessionExpired =>
       'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+
+  @override
+  String get pinLockRow => 'Khóa bằng mã PIN';
+
+  @override
+  String get pinLockRowCaptionOff => 'Mở app nhanh bằng 6 số';
+
+  @override
+  String get pinLockRowCaptionOn => 'Đang bật';
+
+  @override
+  String get pinLockRowCaptionExpired => 'Mã PIN đã hết hạn';
+
+  @override
+  String get pinChangeAction => 'Đổi mã';
+
+  @override
+  String get pinEnterTitle => 'Nhập mã PIN';
+
+  @override
+  String pinDotsSemantic(int entered, int total) {
+    return 'Đã nhập $entered trên $total chữ số';
+  }
+
+  @override
+  String get pinKeypadDeleteSemantic => 'Xóa số cuối';
+
+  @override
+  String pinWrongTries(int count) {
+    return 'Mã PIN không đúng. Còn $count lần thử.';
+  }
+
+  @override
+  String get pinInvalidated =>
+      'Đã nhập sai 5 lần. Mã PIN đã bị tắt, hãy đăng nhập bằng mật khẩu.';
+
+  @override
+  String get pinExpired =>
+      'Mã PIN đã hết hạn sau 12 tháng. Hãy đăng nhập bằng mật khẩu để đặt mã mới.';
+
+  @override
+  String get pinUsePasswordAction => 'Dùng mật khẩu';
+
+  @override
+  String get pinForgotAction => 'Quên mã PIN';
+
+  @override
+  String get pinSetupConfirmPasswordTitle => 'Nhập mật khẩu để tiếp tục';
+
+  @override
+  String get pinSetupNewTitle => 'Chọn mã PIN gồm 6 số';
+
+  @override
+  String get pinSetupRepeatTitle => 'Nhập lại mã PIN';
+
+  @override
+  String get pinChangeCurrentTitle => 'Nhập mã PIN hiện tại';
+
+  @override
+  String get pinTurnOffTitle => 'Nhập mã PIN để tắt';
+
+  @override
+  String get pinTooEasy => 'Mã PIN quá dễ đoán, hãy chọn mã khác';
+
+  @override
+  String get pinMismatch => 'Hai lần nhập chưa khớp';
+
+  @override
+  String get pinSetDone => 'Đã đặt mã PIN';
+
+  @override
+  String get pinOfferTitle => 'Đặt mã PIN?';
+
+  @override
+  String get pinOfferMessage =>
+      'Máy này không dùng được vân tay hoặc khuôn mặt. Lần sau bạn có thể vào ứng dụng nhanh hơn bằng mã PIN 6 số.';
+
+  @override
+  String get pinOfferAcceptAction => 'Đặt mã PIN';
+
+  @override
+  String get pinOfferDeclineAction => 'Để sau';
+
+  @override
+  String get pinSetupContinueAction => 'Tiếp tục';
 }

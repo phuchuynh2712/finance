@@ -1399,6 +1399,162 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'**
   String get errorMapperSessionExpired;
+
+  /// Label of the Security screen row that turns the 6-digit PIN lock on or off (shown only where biometrics are unusable)
+  ///
+  /// In vi, this message translates to:
+  /// **'Khóa bằng mã PIN'**
+  String get pinLockRow;
+
+  /// Caption of the PIN row while no PIN is set
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở app nhanh bằng 6 số'**
+  String get pinLockRowCaptionOff;
+
+  /// Caption of the PIN row while a PIN is active
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang bật'**
+  String get pinLockRowCaptionOn;
+
+  /// Caption of the PIN row when the PIN is older than 12 months
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã PIN đã hết hạn'**
+  String get pinLockRowCaptionExpired;
+
+  /// Action on the PIN row that starts changing the PIN
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mã'**
+  String get pinChangeAction;
+
+  /// Title above the PIN dots on the lock screen
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập mã PIN'**
+  String get pinEnterTitle;
+
+  /// Screen-reader label of the PIN dots; never reads the digits
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã nhập {entered} trên {total} chữ số'**
+  String pinDotsSemantic(int entered, int total);
+
+  /// Tooltip and screen-reader label of the delete key on the PIN keypad
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa số cuối'**
+  String get pinKeypadDeleteSemantic;
+
+  /// Live message after a wrong PIN; count is the tries left (1 to 4)
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã PIN không đúng. Còn {count} lần thử.'**
+  String pinWrongTries(int count);
+
+  /// Message after the fifth wrong PIN, which turns the PIN off
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã nhập sai 5 lần. Mã PIN đã bị tắt, hãy đăng nhập bằng mật khẩu.'**
+  String get pinInvalidated;
+
+  /// Message on the lock screen when the PIN is older than 12 months
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã PIN đã hết hạn sau 12 tháng. Hãy đăng nhập bằng mật khẩu để đặt mã mới.'**
+  String get pinExpired;
+
+  /// Text button on the PIN lock screen that shows the password form
+  ///
+  /// In vi, this message translates to:
+  /// **'Dùng mật khẩu'**
+  String get pinUsePasswordAction;
+
+  /// Text button on the PIN lock screen for a forgotten PIN; leads to the password form
+  ///
+  /// In vi, this message translates to:
+  /// **'Quên mã PIN'**
+  String get pinForgotAction;
+
+  /// Title of the first step of setting up a PIN, which asks for the account password
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập mật khẩu để tiếp tục'**
+  String get pinSetupConfirmPasswordTitle;
+
+  /// Title of the step where the new PIN is entered
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn mã PIN gồm 6 số'**
+  String get pinSetupNewTitle;
+
+  /// Title of the step where the new PIN is repeated
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập lại mã PIN'**
+  String get pinSetupRepeatTitle;
+
+  /// Title of the step that checks the current PIN before changing it
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập mã PIN hiện tại'**
+  String get pinChangeCurrentTitle;
+
+  /// Title of the step that checks the current PIN before turning it off
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập mã PIN để tắt'**
+  String get pinTurnOffTitle;
+
+  /// Message when the new PIN is all one digit or a straight run such as 123456
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã PIN quá dễ đoán, hãy chọn mã khác'**
+  String get pinTooEasy;
+
+  /// Message when the repeated PIN differs from the first
+  ///
+  /// In vi, this message translates to:
+  /// **'Hai lần nhập chưa khớp'**
+  String get pinMismatch;
+
+  /// Confirmation shown after the PIN was saved
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đặt mã PIN'**
+  String get pinSetDone;
+
+  /// Title of the one-time offer to set a PIN
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt mã PIN?'**
+  String get pinOfferTitle;
+
+  /// Body of the one-time offer to set a PIN
+  ///
+  /// In vi, this message translates to:
+  /// **'Máy này không dùng được vân tay hoặc khuôn mặt. Lần sau bạn có thể vào ứng dụng nhanh hơn bằng mã PIN 6 số.'**
+  String get pinOfferMessage;
+
+  /// Primary button of the PIN offer
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt mã PIN'**
+  String get pinOfferAcceptAction;
+
+  /// Decline button of the PIN offer
+  ///
+  /// In vi, this message translates to:
+  /// **'Để sau'**
+  String get pinOfferDeclineAction;
+
+  /// Button of the password step of the PIN set-up flow
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục'**
+  String get pinSetupContinueAction;
 }
 
 class _AppLocalizationsDelegate

@@ -794,5 +794,122 @@
   "errorMapperSessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
   "@errorMapperSessionExpired": {
     "description": "Message for an expired or revoked session"
+  },
+  "pinLockRow": "Khóa bằng mã PIN",
+  "@pinLockRow": {
+    "description": "Label of the Security screen row that turns the 6-digit PIN lock on or off (shown only where biometrics are unusable)"
+  },
+  "pinLockRowCaptionOff": "Mở app nhanh bằng 6 số",
+  "@pinLockRowCaptionOff": {
+    "description": "Caption of the PIN row while no PIN is set"
+  },
+  "pinLockRowCaptionOn": "Đang bật",
+  "@pinLockRowCaptionOn": {
+    "description": "Caption of the PIN row while a PIN is active"
+  },
+  "pinLockRowCaptionExpired": "Mã PIN đã hết hạn",
+  "@pinLockRowCaptionExpired": {
+    "description": "Caption of the PIN row when the PIN is older than 12 months"
+  },
+  "pinChangeAction": "Đổi mã",
+  "@pinChangeAction": {
+    "description": "Action on the PIN row that starts changing the PIN"
+  },
+  "pinEnterTitle": "Nhập mã PIN",
+  "@pinEnterTitle": {
+    "description": "Title above the PIN dots on the lock screen"
+  },
+  "pinDotsSemantic": "Đã nhập {entered} trên {total} chữ số",
+  "@pinDotsSemantic": {
+    "description": "Screen-reader label of the PIN dots; never reads the digits",
+    "placeholders": {
+      "entered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pinKeypadDeleteSemantic": "Xóa số cuối",
+  "@pinKeypadDeleteSemantic": {
+    "description": "Tooltip and screen-reader label of the delete key on the PIN keypad"
+  },
+  "pinWrongTries": "Mã PIN không đúng. Còn {count} lần thử.",
+  "@pinWrongTries": {
+    "description": "Live message after a wrong PIN; count is the tries left (1 to 4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinInvalidated": "Đã nhập sai 5 lần. Mã PIN đã bị tắt, hãy đăng nhập bằng mật khẩu.",
+  "@pinInvalidated": {
+    "description": "Message after the fifth wrong PIN, which turns the PIN off"
+  },
+  "pinExpired": "Mã PIN đã hết hạn sau 12 tháng. Hãy đăng nhập bằng mật khẩu để đặt mã mới.",
+  "@pinExpired": {
+    "description": "Message on the lock screen when the PIN is older than 12 months"
+  },
+  "pinUsePasswordAction": "Dùng mật khẩu",
+  "@pinUsePasswordAction": {
+    "description": "Text button on the PIN lock screen that shows the password form"
+  },
+  "pinForgotAction": "Quên mã PIN",
+  "@pinForgotAction": {
+    "description": "Text button on the PIN lock screen for a forgotten PIN; leads to the password form"
+  },
+  "pinSetupConfirmPasswordTitle": "Nhập mật khẩu để tiếp tục",
+  "@pinSetupConfirmPasswordTitle": {
+    "description": "Title of the first step of setting up a PIN, which asks for the account password"
+  },
+  "pinSetupNewTitle": "Chọn mã PIN gồm 6 số",
+  "@pinSetupNewTitle": {
+    "description": "Title of the step where the new PIN is entered"
+  },
+  "pinSetupRepeatTitle": "Nhập lại mã PIN",
+  "@pinSetupRepeatTitle": {
+    "description": "Title of the step where the new PIN is repeated"
+  },
+  "pinChangeCurrentTitle": "Nhập mã PIN hiện tại",
+  "@pinChangeCurrentTitle": {
+    "description": "Title of the step that checks the current PIN before changing it"
+  },
+  "pinTurnOffTitle": "Nhập mã PIN để tắt",
+  "@pinTurnOffTitle": {
+    "description": "Title of the step that checks the current PIN before turning it off"
+  },
+  "pinTooEasy": "Mã PIN quá dễ đoán, hãy chọn mã khác",
+  "@pinTooEasy": {
+    "description": "Message when the new PIN is all one digit or a straight run such as 123456"
+  },
+  "pinMismatch": "Hai lần nhập chưa khớp",
+  "@pinMismatch": {
+    "description": "Message when the repeated PIN differs from the first"
+  },
+  "pinSetDone": "Đã đặt mã PIN",
+  "@pinSetDone": {
+    "description": "Confirmation shown after the PIN was saved"
+  },
+  "pinOfferTitle": "Đặt mã PIN?",
+  "@pinOfferTitle": {
+    "description": "Title of the one-time offer to set a PIN"
+  },
+  "pinOfferMessage": "Máy này không dùng được vân tay hoặc khuôn mặt. Lần sau bạn có thể vào ứng dụng nhanh hơn bằng mã PIN 6 số.",
+  "@pinOfferMessage": {
+    "description": "Body of the one-time offer to set a PIN"
+  },
+  "pinOfferAcceptAction": "Đặt mã PIN",
+  "@pinOfferAcceptAction": {
+    "description": "Primary button of the PIN offer"
+  },
+  "pinOfferDeclineAction": "Để sau",
+  "@pinOfferDeclineAction": {
+    "description": "Decline button of the PIN offer"
+  },
+  "pinSetupContinueAction": "Tiếp tục",
+  "@pinSetupContinueAction": {
+    "description": "Button of the password step of the PIN set-up flow"
   }
 }

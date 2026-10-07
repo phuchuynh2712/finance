@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/auth/pin_lock_repository.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
@@ -11,6 +13,8 @@ import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'biometric_enable_prompt.dart';
+import 'pin_entry_panel.dart';
+import 'pin_offer_prompt.dart';
 
 /// Login screen (FR-003) — also reused, unchanged, as the app's cold-start
 /// / background-resume re-entry gate (FR-020/FR-021): when the router
@@ -33,6 +37,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
   bool _biometricButtonVisible = false;
+
+  /// The lock screen shows the PIN panel first; these remember how the person
+  /// left it (`contracts/pin-ui.md` §2).
+  bool _passwordMode = false;
+  bool _forgotPin = false;
+  bool _pinInvalidated = false;
 
   bool get _canSubmit => !_isSubmitting;
 
@@ -72,6 +82,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final l10n = AppLocalizations.of(context);
+    // What the PIN follow-up needs, taken now: by the time a dialog after the
+    // sign-in is answered, the router has already replaced this screen.
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final container = ProviderScope.containerOf(context);
+    final wasLocked = ref.read(isSignedInProvider) && ref.read(appLockProvider);
+    // A forgotten, expired or used-up PIN: the password sign-in replaces it.
+    final pinLost =
+        wasLocked &&
+        (_forgotPin ||
+            _pinInvalidated ||
+            ref.read(pinStatusProvider).valueOrNull == PinStatus.expired);
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
@@ -95,8 +116,44 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     // FR-009: offered after the submit spinner has already cleared, not
     // while it's still spinning — the prompt can stay open awaiting the
     // user's answer without the button looking stuck.
-    if (succeeded && mounted) {
-      await maybeShowBiometricEnablePrompt(context, ref);
+    if (succeeded) {
+      final offerNewPin = await _settlePinAfterPasswordSignIn(
+        container,
+        wasLocked: wasLocked,
+        pinLost: pinLost,
+      );
+      if (mounted) await maybeShowBiometricEnablePrompt(context, ref);
+      if (offerNewPin) {
+        // The new-PIN offer after a forgotten, expired or used-up PIN is this
+        // account's one-time offer: no second dialog follows it.
+        await offerPinSetUp(navigator);
+      } else {
+        await maybeShowPinOfferPrompt(navigator, container);
+      }
+    }
+  }
+
+  /// What a successful password sign-in does to the PIN (`contracts/pin-ui.md`
+  /// §2): a forgotten, expired or used-up PIN is cleared and a new one offered
+  /// (that offer is the account's one-time offer); a sign-in made from the
+  /// ordinary screen clears any PIN left over from an earlier session; "Dùng
+  /// mật khẩu" at the lock screen leaves a live PIN alone. Returns whether to
+  /// offer a new PIN. Never fails the sign-in.
+  Future<bool> _settlePinAfterPasswordSignIn(
+    ProviderContainer container, {
+    required bool wasLocked,
+    required bool pinLost,
+  }) async {
+    if (kIsWeb || (wasLocked && !pinLost)) return false;
+    try {
+      final pins = container.read(pinLockRepositoryProvider);
+      await pins.clear();
+      container.invalidate(pinStatusProvider);
+      if (!pinLost) return false;
+      await pins.markOfferShown();
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -150,6 +207,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final colors = Theme.of(context).colorScheme;
     final semantic = Theme.of(context).extension<AppSemanticColors>()!;
 
+    // The lock screen (signed in, locked) reads the PIN status; the ordinary
+    // sign-in screen never touches it.
+    final locked = ref.watch(isSignedInProvider) && ref.watch(appLockProvider);
+    final pinStatus = locked ? ref.watch(pinStatusProvider) : null;
+    final readingPin =
+        pinStatus != null && !pinStatus.hasValue && !pinStatus.hasError;
+    final status = pinStatus?.valueOrNull ?? PinStatus.none;
+    final showPinPanel = locked && status == PinStatus.active && !_passwordMode;
+    final pinNotice = !locked
+        ? null
+        : _pinInvalidated
+        ? l10n.pinInvalidated
+        : status == PinStatus.expired
+        ? l10n.pinExpired
+        : null;
+
     return Scaffold(
       backgroundColor: semantic.bgApp,
       body: SafeArea(
@@ -165,166 +238,39 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 children: [
                   _LogoBlock(l10n: l10n, semantic: semantic, colors: colors),
                   const SizedBox(height: 36),
-                  Text(
-                    l10n.signInIdentifierLabel,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: semantic.fg2,
+                  if (readingPin)
+                    const Center(child: CircularProgressIndicator())
+                  else if (showPinPanel) ...[
+                    PinEntryPanel(
+                      onUnlocked: () =>
+                          ref.read(appLockProvider.notifier).unlock(),
+                      onInvalidated: () => setState(() {
+                        _pinInvalidated = true;
+                        _passwordMode = true;
+                      }),
+                      onUsePassword: () => setState(() => _passwordMode = true),
+                      onForgot: () => setState(() {
+                        _passwordMode = true;
+                        _forgotPin = true;
+                      }),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  _InputField(
-                    controller: _identifierController,
-                    focusNode: _identifierFocusNode,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (_) =>
-                        FocusScope.of(context).requestFocus(_passwordFocusNode),
-                    semantic: semantic,
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    l10n.signInPasswordLabel,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: semantic.fg2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  _InputField(
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    obscureText: _obscurePassword,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) {
-                      if (_canSubmit) _submit();
-                    },
-                    semantic: semantic,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
-                        size: 18,
-                        color: semantic.fg3,
-                      ),
-                      tooltip: _obscurePassword
-                          ? l10n.signInShowPasswordSemantic
-                          : l10n.signInHidePasswordSemantic,
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => context.go('/forgot-password'),
-                      child: Text(
-                        l10n.signInForgotPasswordAction,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(color: colors.error, fontSize: 13),
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 52,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      onPressed: _canSubmit ? _submit : null,
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              l10n.signInSubmit,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                    ),
-                  ),
-                  if (_biometricButtonVisible) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Divider(color: semantic.border1, height: 1),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              l10n.signInOrDivider,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: semantic.fg3,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(color: semantic.border1, height: 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(width: 1.5, color: semantic.border2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        onPressed: _isSubmitting ? null : _signInWithBiometric,
-                        icon: Icon(
-                          LucideIcons.fingerprint,
-                          size: 18,
-                          color: semantic.fg2,
-                        ),
-                        label: Text(
-                          l10n.signInWithBiometricAction,
+                    ..._biometricSection(l10n, semantic),
+                  ] else ...[
+                    if (pinNotice != null) ...[
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          pinNotice,
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: semantic.fg2,
+                            color: semantic.warningFg,
+                            fontSize: 13,
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                    ],
+                    ..._formChildren(l10n, colors, semantic),
                   ],
-                  const SizedBox(height: 24),
-                  Center(
-                    child: TextButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => context.go('/sign-up'),
-                      child: Text(
-                        l10n.signInNavigateToSignUp,
-                        style: TextStyle(fontSize: 13, color: semantic.fg3),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -332,6 +278,169 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ),
       ),
     );
+  }
+
+  /// The password form, exactly as it was before the PIN existed.
+  List<Widget> _formChildren(
+    AppLocalizations l10n,
+    ColorScheme colors,
+    AppSemanticColors semantic,
+  ) {
+    return [
+      Text(
+        l10n.signInIdentifierLabel,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: semantic.fg2,
+        ),
+      ),
+      const SizedBox(height: 6),
+      _InputField(
+        controller: _identifierController,
+        focusNode: _identifierFocusNode,
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        onSubmitted: (_) =>
+            FocusScope.of(context).requestFocus(_passwordFocusNode),
+        semantic: semantic,
+      ),
+      const SizedBox(height: 14),
+      Text(
+        l10n.signInPasswordLabel,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: semantic.fg2,
+        ),
+      ),
+      const SizedBox(height: 6),
+      _InputField(
+        controller: _passwordController,
+        focusNode: _passwordFocusNode,
+        obscureText: _obscurePassword,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) {
+          if (_canSubmit) _submit();
+        },
+        semantic: semantic,
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+            size: 18,
+            color: semantic.fg3,
+          ),
+          tooltip: _obscurePassword
+              ? l10n.signInShowPasswordSemantic
+              : l10n.signInHidePasswordSemantic,
+          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: _isSubmitting
+              ? null
+              : () => context.go('/forgot-password'),
+          child: Text(
+            l10n.signInForgotPasswordAction,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+      if (_errorMessage != null) ...[
+        const SizedBox(height: 8),
+        Text(
+          _errorMessage!,
+          style: TextStyle(color: colors.error, fontSize: 13),
+        ),
+      ],
+      const SizedBox(height: 14),
+      SizedBox(
+        height: 52,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          onPressed: _canSubmit ? _submit : null,
+          child: _isSubmitting
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(
+                  l10n.signInSubmit,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+        ),
+      ),
+      ..._biometricSection(l10n, semantic),
+      const SizedBox(height: 24),
+      Center(
+        child: TextButton(
+          onPressed: _isSubmitting ? null : () => context.go('/sign-up'),
+          child: Text(
+            l10n.signInNavigateToSignUp,
+            style: TextStyle(fontSize: 13, color: semantic.fg3),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// The "or" divider and the fingerprint button, when biometric sign-in is on
+  /// (empty otherwise).
+  List<Widget> _biometricSection(
+    AppLocalizations l10n,
+    AppSemanticColors semantic,
+  ) {
+    if (!_biometricButtonVisible) return const [];
+    return [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          children: [
+            Expanded(child: Divider(color: semantic.border1, height: 1)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                l10n.signInOrDivider,
+                style: TextStyle(fontSize: 12, color: semantic.fg3),
+              ),
+            ),
+            Expanded(child: Divider(color: semantic.border1, height: 1)),
+          ],
+        ),
+      ),
+      SizedBox(
+        height: 50,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(width: 1.5, color: semantic.border2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          onPressed: _isSubmitting ? null : _signInWithBiometric,
+          icon: Icon(LucideIcons.fingerprint, size: 18, color: semantic.fg2),
+          label: Text(
+            l10n.signInWithBiometricAction,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: semantic.fg2,
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 }
 
