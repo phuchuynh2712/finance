@@ -3,8 +3,10 @@ import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/network/supabase_client_provider.dart';
+import 'activity_tracker.dart';
 import 'auth_repository.dart';
 import 'biometric_login_repository.dart';
+import 'lock_channel.dart';
 import 'password_change_gateway.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -78,6 +80,10 @@ class AppLockNotifier extends StateNotifier<bool> {
   AppLockNotifier(Ref ref) : super(false) {
     _subscription = ref.listen(authStateChangesProvider, (previous, next) {
       if (_initialCheckDone) return;
+      // The stream is still loading (this notifier is created at start-up, by
+      // the activity tracker, before the first auth event arrives): the first
+      // real event is the one that says whether a session was restored.
+      if (!next.hasValue) return;
       _initialCheckDone = true;
       if (next.valueOrNull?.session != null) {
         state = true;
@@ -100,6 +106,41 @@ class AppLockNotifier extends StateNotifier<bool> {
 
 final appLockProvider = StateNotifierProvider<AppLockNotifier, bool>((ref) {
   return AppLockNotifier(ref);
+});
+
+/// The channel that lets the windows (browser tabs) of the web app share the
+/// inactivity timer and the lock; a no-op on every other platform.
+final lockChannelProvider = Provider<LockChannel>((ref) {
+  final channel = createLockChannel();
+  ref.onDispose(channel.close);
+  return channel;
+});
+
+/// Locks the app after [AppLockPolicy.inactivityPeriod] without interaction
+/// (FR-001) and keeps the windows of the web app in step (FR-001a).
+/// Instantiated once, for the app's lifetime, by `FinanceApp` watching it, like
+/// `appLifecycleObserverProvider`.
+final activityTrackerProvider = Provider<ActivityTracker>((ref) {
+  final tracker = ActivityTracker(
+    now: DateTime.now,
+    isSignedIn: () => ref.read(isSignedInProvider),
+    isLocked: () => ref.read(appLockProvider),
+    lock: () => ref.read(appLockProvider.notifier).lock(),
+    unlock: () => ref.read(appLockProvider.notifier).unlock(),
+    channel: ref.watch(lockChannelProvider),
+  );
+  ref.listen<bool>(
+    isSignedInProvider,
+    (previous, next) => tracker.onSignedInChanged(next),
+    fireImmediately: true,
+  );
+  ref.listen<bool>(
+    appLockProvider,
+    (previous, next) => tracker.onLockChanged(next),
+  );
+  tracker.attachSystemHooks();
+  ref.onDispose(tracker.dispose);
+  return tracker;
 });
 
 /// `true` only while the most recent auth event is

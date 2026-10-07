@@ -6,6 +6,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/auth/app_lifecycle_observer.dart';
+import 'core/auth/auth_state_provider.dart';
 import 'core/database/app_database_provider.dart';
 import 'core/l10n/app_localizations.dart';
 import 'core/l10n/locale_notifier.dart';
@@ -82,8 +83,12 @@ class FinanceApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Instantiates the observer once and keeps it alive for the app's
-    // lifetime (FR-020's background-resume threshold).
+    // lifetime: it asks the tracker below to check as soon as the app is back
+    // in front.
     ref.watch(appLifecycleObserverProvider);
+    // The inactivity lock (FR-001): one tracker, kept alive for the app's
+    // lifetime, on every platform.
+    ref.watch(activityTrackerProvider);
     // Starts the periodic outbox-drain sync worker once, kept alive for
     // the app's lifetime — same pattern as the lifecycle observer above.
     ref.watch(syncWorkerProvider);
