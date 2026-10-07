@@ -7,7 +7,6 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_theme.dart';
-import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
@@ -285,14 +284,15 @@ void main() {
       final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
       expect(find.text(l10n.transactionHistoryEmpty), findsOneWidget);
 
-      // EmptyStateView centers its own content regardless of AdaptiveBody
-      // (it wraps itself in Center), so asserting the text's position
-      // alone would pass even if the cap were not applied — instead,
-      // assert on the width available to the CustomScrollView carrying
-      // the empty-state sliver, which IS constrained by AdaptiveBody once
-      // it activates.
+      // The scroll view now spans the whole viewport (so the mouse wheel works
+      // over the margins) and EmptyStateView centers its own content, so the
+      // message stays centered in the 1024dp window.
       final scrollViewSize = tester.getSize(find.byType(CustomScrollView));
-      expect(scrollViewSize.width, AppLayoutTokens.contentMaxWidth);
+      expect(scrollViewSize.width, 1024);
+      expect(
+        tester.getCenter(find.text(l10n.transactionHistoryEmpty)).dx,
+        closeTo(512, 1),
+      );
     },
   );
 
@@ -328,21 +328,13 @@ void main() {
       final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
       expect(find.text(l10n.transactionHistoryLoadError), findsOneWidget);
 
-      // Same reasoning as T007: EmptyStateView (also used for the error
-      // state) self-centers regardless of AdaptiveBody, so assert on the
-      // actually-constrained widget's width, not the error text's
-      // position. AdaptiveBody itself always reports its parent's full
-      // width (it doesn't constrain itself, only its child) — the real
-      // cap is enforced by the ConstrainedBox it renders internally.
-      final constrainedBoxSize = tester.getSize(
-        find
-            .descendant(
-              of: find.byType(AdaptiveBody),
-              matching: find.byType(ConstrainedBox),
-            )
-            .first,
+      // EmptyStateView (also the error state) centers its own content, and the
+      // page no longer wraps it in a width cap: the message is centered in the
+      // 1024dp window.
+      expect(
+        tester.getCenter(find.text(l10n.transactionHistoryLoadError)).dx,
+        closeTo(512, 1),
       );
-      expect(constrainedBoxSize.width, AppLayoutTokens.contentMaxWidth);
     },
   );
 

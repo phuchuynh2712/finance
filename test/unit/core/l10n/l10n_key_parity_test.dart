@@ -32,6 +32,11 @@ const _securityFeatureKeys = [
   'errorMapperSessionExpired',
 ];
 
+/// Keys added by the adaptive web layout feature (the Chi tiêu number pad's
+/// delete key tooltip and screen-reader label). Checked exactly like
+/// [_securityFeatureKeys].
+const _adaptiveWebFeatureKeys = ['expenseKeypadDeleteSemantic'];
+
 Map<String, dynamic> _readArb(String name) {
   final file = File('lib/core/l10n/$name');
   return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -70,8 +75,8 @@ void main() {
     }
   });
 
-  test('the security feature keys exist and have a template description', () {
-    for (final key in _securityFeatureKeys) {
+  test('the feature keys exist and have a template description', () {
+    for (final key in [..._securityFeatureKeys, ..._adaptiveWebFeatureKeys]) {
       expect(vi.containsKey(key), isTrue, reason: 'app_vi.arb is missing $key');
       expect(en.containsKey(key), isTrue, reason: 'app_en.arb is missing $key');
       final meta = vi['@$key'];

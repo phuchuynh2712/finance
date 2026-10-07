@@ -455,10 +455,17 @@ void main() {
         await tester.pumpWidget(_harness());
         await tester.pumpAndSettle();
 
+        // The list now spans the whole viewport (so the mouse wheel works over
+        // the margins) and pads itself by the gutter: the intent is unchanged,
+        // content capped at 960dp (924dp of cards inside the 18dp inner
+        // padding the screen always had) and centered.
+        final list = tester.widget<ListView>(find.byType(ListView));
+        final padding = list.padding! as EdgeInsets;
         final size = tester.getSize(find.byType(ListView));
-        final topLeft = tester.getTopLeft(find.byType(ListView));
-        expect(size.width, 960);
-        expect(topLeft.dx, (1200 - 960) / 2);
+        expect(size.width, 1200);
+        expect(size.width - padding.horizontal, 960 - 2 * 18);
+        expect(padding.left, padding.right);
+        expect(padding.left, (1200 - (960 - 2 * 18)) / 2);
       },
     );
   });

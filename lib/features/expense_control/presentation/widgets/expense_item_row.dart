@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/formatting/percent_formatter.dart';
 import 'package:finance/core/theme/app_icons.dart';
+import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/expense_control_icons.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
@@ -38,10 +39,15 @@ class ExpenseItemRow extends StatelessWidget {
     final theme = Theme.of(context);
     final semantic = theme.extension<AppSemanticColors>()!;
 
+    final inline = useInlineFormulaLabel(context);
+
     if (!showHeader) {
+      // On a wide window the owning card's header already shows the box
+      // beside the name, so there is nothing to render here.
+      if (inline) return const SizedBox.shrink();
       return Padding(
         padding: const EdgeInsets.only(top: 10),
-        child: _FormulaLabel(item: item),
+        child: ExpenseFormulaLabel(item: item),
       );
     }
 
@@ -76,6 +82,10 @@ class ExpenseItemRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (inline) ...[
+                const SizedBox(width: 8),
+                ExpenseFormulaLabel(item: item, bounded: true),
+              ],
               if (onEdit != null)
                 Semantics(
                   button: true,
@@ -114,26 +124,45 @@ class ExpenseItemRow extends StatelessWidget {
                 ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30, top: 8),
-            child: _FormulaLabel(item: item),
-          ),
+          if (!inline)
+            Padding(
+              padding: const EdgeInsets.only(left: 30, top: 8),
+              child: ExpenseFormulaLabel(item: item),
+            ),
         ],
       ),
     );
   }
 }
 
+/// Whether the window is wide enough (≥ 600dp, [WindowSizeClass.medium]) for
+/// the allocation box to sit next to the item's name instead of below it.
+bool useInlineFormulaLabel(BuildContext context) =>
+    windowSizeClassFor(MediaQuery.sizeOf(context).width).index >=
+    WindowSizeClass.medium.index;
+
 /// FR-001/FR-002: a non-interactive display of the item's allocation
-/// mode/value — sized to its content (no fixed width) so both a short
-/// percentage ("24%") and a long fixed amount ("4.000.000 ₫") stay fully
-/// visible, matching the design mockup's own side-by-side examples of both.
-/// Tapping it does nothing; the only way to change the value is the item's
-/// edit dialog (FR-003/FR-004).
-class _FormulaLabel extends StatelessWidget {
-  const _FormulaLabel({required this.item});
+/// mode/value. Tapping it does nothing; the only way to change the value is
+/// the item's edit dialog (FR-003/FR-004).
+///
+/// Below 600dp it spans the row beneath the item's name, exactly as before.
+/// On a wide window ([bounded]) it sits beside the name and is sized to its
+/// text, between 96 and 200dp, so a short percentage ("24%") and a long fixed
+/// amount ("4.000.000 ₫") both stay fully visible without the box stretching
+/// across a 900dp row like an input (specs/20261007-100751-adaptive-web-
+/// remaining-screens/research.md, Decision 9).
+class ExpenseFormulaLabel extends StatelessWidget {
+  const ExpenseFormulaLabel({
+    super.key,
+    required this.item,
+    this.bounded = false,
+  });
 
   final ExpenseControlItem item;
+  final bool bounded;
+
+  static const double minWidth = 96;
+  static const double maxWidth = 200;
 
   @override
   Widget build(BuildContext context) {
@@ -150,15 +179,36 @@ class _FormulaLabel extends StatelessWidget {
       ),
       _ => '',
     };
+    final decoration = BoxDecoration(
+      border: Border.all(color: semantic.border2, width: 1.5),
+      borderRadius: BorderRadius.circular(4),
+    );
 
+    if (bounded) {
+      return Container(
+        height: 40,
+        constraints: const BoxConstraints(
+          minWidth: minWidth,
+          maxWidth: maxWidth,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: decoration,
+        child: Center(
+          widthFactor: 1,
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall,
+          ),
+        ),
+      );
+    }
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        border: Border.all(color: semantic.border2, width: 1.5),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      decoration: decoration,
       child: Text(text, style: theme.textTheme.titleSmall),
     );
   }

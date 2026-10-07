@@ -200,6 +200,10 @@ String _spendingLabel(AppLocalizations l10n) => l10n.tabSpending;
 String _historyLabel(AppLocalizations l10n) => l10n.tabHistory;
 String _accountLabel(AppLocalizations l10n) => l10n.tabAccount;
 
+/// The largest text scale the bottom bar's labels are drawn at (the rest of
+/// the app keeps scaling with the system setting).
+const _navLabelMaxTextScale = 1.1;
+
 const _navDestinations = <_NavDestinationSpec>[
   (icon: LucideIcons.layoutDashboard, label: _overviewLabel, branchIndex: 0),
   (
@@ -311,13 +315,24 @@ class _AppShellState extends ConsumerState<_AppShell> {
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: semantic.border1)),
           ),
-          child: NavigationBar(
-            selectedIndex: currentIndex,
-            onDestinationSelected: _handleDestinationSelected,
-            destinations: [
-              for (final d in _navDestinations)
-                NavigationDestination(icon: Icon(d.icon), label: d.label(l10n)),
-            ],
+          // The labels share one fifth of the width each: past
+          // `_navLabelMaxTextScale` "Tổng quan" and "Kế hoạch" wrap onto a
+          // second line and push their icons up out of line with the others.
+          // (On a 360dp-wide phone or narrower "Tổng quan" already wraps at the
+          // default size; that is the bar's own width, not the text scale.)
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: _navLabelMaxTextScale,
+            child: NavigationBar(
+              selectedIndex: currentIndex,
+              onDestinationSelected: _handleDestinationSelected,
+              destinations: [
+                for (final d in _navDestinations)
+                  NavigationDestination(
+                    icon: Icon(d.icon),
+                    label: d.label(l10n),
+                  ),
+              ],
+            ),
           ),
         ),
       );
@@ -348,7 +363,18 @@ class _AppShellState extends ConsumerState<_AppShell> {
               ],
             ),
           ),
-          Expanded(child: shellContent),
+          Expanded(
+            // The rail pads itself by the display's left inset (a camera
+            // cutout on a phone held sideways), so the content beside it must
+            // not apply that inset a second time: it would indent each
+            // screen's header and `SafeArea` by it, and a screen without a
+            // `SafeArea` would then not line up with its own header.
+            child: MediaQuery.removePadding(
+              context: context,
+              removeLeft: true,
+              child: shellContent,
+            ),
+          ),
         ],
       ),
     );
@@ -418,7 +444,11 @@ class _DiscardPromptDialogState extends ConsumerState<_DiscardPromptDialog> {
         ],
       ),
       actions: [
+        // "Keep editing" is the safe option: it has the initial focus, so
+        // Enter (like Escape) leaves the staged edits alone
+        // (contracts/plan-screen-ui.md D7).
         TextButton(
+          autofocus: true,
           onPressed: _isSaving
               ? null
               : () => Navigator.of(context).pop(_DiscardPromptChoice.cancel),

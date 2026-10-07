@@ -135,6 +135,7 @@
   "expenseAmountLabel": "Amount",
   "expensePickItemEyebrow": "DEDUCT FROM WHICH ITEM",
   "expenseSaveAction": "Save transaction",
+  "expenseKeypadDeleteSemantic": "Delete last digit",
   "expenseEmptyStateMessage": "No items yet. Set them up in Expense Control first.",
   "expenseErrorInvalidAmount": "Please enter an amount greater than 0.",
   "expenseErrorMissingItem": "Please pick which item to deduct from.",

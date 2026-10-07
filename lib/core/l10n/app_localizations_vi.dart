@@ -468,6 +468,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get expenseSaveAction => 'Lưu giao dịch';
 
   @override
+  String get expenseKeypadDeleteSemantic => 'Xóa số cuối';
+
+  @override
   String get expenseEmptyStateMessage =>
       'Chưa có khoản nào. Hãy thiết lập ở Kiểm soát chi tiêu trước.';
 

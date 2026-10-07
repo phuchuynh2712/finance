@@ -9,7 +9,8 @@ import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_colors.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
-import 'package:finance/core/widgets/adaptive_body.dart';
+import 'package:finance/core/theme/app_layout.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expenses/application/overview_recent_transactions.dart';
@@ -41,11 +42,15 @@ class OverviewScreen extends ConsumerWidget {
           children: [
             const _Header(),
             Expanded(
-              child: AdaptiveBody(
-                child: !pullComplete
+              // The list spans the whole viewport and pads itself by the
+              // gutter, so the wheel and the scroll bar work over the margins
+              // too (wrapping it in `AdaptiveBody` left them dead zones).
+              child: AdaptiveGutters(
+                maxWidth: AppLayoutTokens.paddedListMaxWidth,
+                builder: (context, gutter) => !pullComplete
                     ? const Center(child: CircularProgressIndicator())
                     : ListView(
-                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                        padding: EdgeInsets.fromLTRB(gutter, 18, gutter, 20),
                         children: [
                           summaryAsync.when(
                             loading: () => const _SummaryLoading(),

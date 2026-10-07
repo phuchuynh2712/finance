@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/l10n/locale_notifier.dart';
 import 'package:finance/core/theme/app_icons.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
+import 'package:finance/core/widgets/page_title.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
 import 'account_controller.dart';
@@ -24,44 +26,30 @@ class AccountScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: PageTitle(icon: LucideIcons.user, title: l10n.accountTitle),
+      ),
+      // The same column as Bảo mật (960dp, from 840dp), so the content does not
+      // jump when moving between the two. The list spans the viewport: the
+      // wheel works over the margins too.
+      body: AdaptiveGutters(
+        builder: (context, gutter) => ListView(
+          padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 20),
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: semantic.primarySoft,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                LucideIcons.user,
-                size: 17,
-                color: theme.colorScheme.primary,
-              ),
+            _AccountIdentityHeader(semantic: semantic),
+            const SizedBox(height: 22),
+            _AppearanceCard(semantic: semantic),
+            const SizedBox(height: 16),
+            _LanguageRow(semantic: semantic),
+            const SizedBox(height: 16),
+            _MenuCard(semantic: semantic),
+            const SizedBox(height: 16),
+            _SignOutRow(
+              semantic: semantic,
+              isLoading: isSigningOut,
+              onTap: controller.signOut,
             ),
-            const SizedBox(width: 12),
-            Text(l10n.accountTitle),
           ],
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
-        children: [
-          _AccountIdentityHeader(semantic: semantic),
-          const SizedBox(height: 22),
-          _AppearanceCard(semantic: semantic),
-          const SizedBox(height: 16),
-          _LanguageRow(semantic: semantic),
-          const SizedBox(height: 16),
-          _MenuCard(semantic: semantic),
-          const SizedBox(height: 16),
-          _SignOutRow(
-            semantic: semantic,
-            isLoading: isSigningOut,
-            onTap: controller.signOut,
-          ),
-        ],
       ),
     );
   }
@@ -396,16 +384,30 @@ Future<void> _showLanguagePicker(
       title: Text(l10n.accountLanguageDialogTitle),
       children: [
         for (final locale in AppLocalizations.supportedLocales)
-          SimpleDialogOption(
-            onPressed: () {
+          // Same look and 48dp height as SimpleDialogOption, but the selected
+          // language takes the initial focus, so Enter confirms it and the
+          // arrow keys / Tab move from there (contracts/plan-screen-ui.md D5).
+          InkWell(
+            autofocus: locale == current,
+            onTap: () {
               Navigator.of(dialogContext).pop();
               onSelected(locale);
             },
-            child: Row(
-              children: [
-                Expanded(child: Text(_languageLabel(l10n, locale))),
-                if (locale == current) const Icon(LucideIcons.check, size: 18),
-              ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(_languageLabel(l10n, locale))),
+                    if (locale == current)
+                      const Icon(LucideIcons.check, size: 18),
+                  ],
+                ),
+              ),
             ),
           ),
       ],

@@ -908,6 +908,12 @@ abstract class AppLocalizations {
   /// **'Lưu giao dịch'**
   String get expenseSaveAction;
 
+  /// Tooltip and screen-reader label of the delete key on the Chi tiêu number pad (removes the last digit of the amount)
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa số cuối'**
+  String get expenseKeypadDeleteSemantic;
+
   /// No description provided for @expenseEmptyStateMessage.
   ///
   /// In vi, this message translates to:

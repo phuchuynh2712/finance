@@ -52,6 +52,7 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
     final semantic = theme.extension<AppSemanticColors>()!;
     final item = widget.node.item;
     final isGroup = widget.node.isGroup;
+    final inline = useInlineFormulaLabel(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -79,12 +80,28 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
               children: [
                 ReorderableDragStartListener(
                   index: widget.index,
-                  child: Semantics(
-                    label: l10n.expenseControlReorderSemantic(item.name),
-                    child: Icon(
-                      LucideIcons.gripVertical,
-                      size: 15,
-                      color: semantic.fg3,
+                  // Icon-only: a tooltip for the mouse (its screen-reader
+                  // label is the Semantics below, so it is not announced
+                  // twice). On a wide window the grab area grows to the
+                  // 48dp touch-target minimum.
+                  child: Tooltip(
+                    message: l10n.expenseControlReorderSemantic(item.name),
+                    excludeFromSemantics: true,
+                    child: Semantics(
+                      label: l10n.expenseControlReorderSemantic(item.name),
+                      child: SizedBox(
+                        width: inline ? 40 : null,
+                        height: inline ? 48 : null,
+                        child: Center(
+                          widthFactor: inline ? null : 1,
+                          heightFactor: inline ? null : 1,
+                          child: Icon(
+                            LucideIcons.gripVertical,
+                            size: 15,
+                            color: semantic.fg3,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -135,6 +152,10 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
                     ],
                   ),
                 ),
+                if (!isGroup && inline) ...[
+                  const SizedBox(width: 8),
+                  ExpenseFormulaLabel(item: item, bounded: true),
+                ],
                 Semantics(
                   button: true,
                   label: l10n.expenseControlEditSemantic(item.name),
@@ -213,7 +234,8 @@ class _ExpenseGroupCardState extends State<ExpenseGroupCard> {
               ),
             ),
           ] else if (!isGroup) ...[
-            ExpenseItemRow(item: item, showHeader: false),
+            // On a wide window the header above already shows the box.
+            if (!inline) ExpenseItemRow(item: item, showHeader: false),
             // FR-002: a leaf becomes a group the moment it gets its first
             // child — this affordance must be available on every leaf, not
             // only after it's already a group (that would make the
@@ -240,6 +262,9 @@ class _AddChildButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
 
+  /// 48dp (the touch-target minimum) on a wide window; the compact 34dp
+  /// height is unchanged.
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -252,7 +277,7 @@ class _AddChildButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(4),
           child: Container(
-            height: 34,
+            height: useInlineFormulaLabel(context) ? 48 : 34,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             alignment: Alignment.center,
             child: Row(
@@ -264,11 +289,17 @@ class _AddChildButton extends StatelessWidget {
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+                // Flexible + ellipsis: a long group name used to push this
+                // row past the card's edge on a narrow window.
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
               ],

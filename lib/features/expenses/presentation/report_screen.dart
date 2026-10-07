@@ -8,7 +8,8 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
-import 'package:finance/core/widgets/adaptive_body.dart';
+import 'package:finance/core/theme/app_layout.dart';
+import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expenses/application/report_summary.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
@@ -43,9 +44,13 @@ class ReportScreen extends ConsumerWidget {
           children: [
             const _Header(),
             Expanded(
-              child: AdaptiveBody(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+              // The list spans the whole viewport and pads itself by the
+              // gutter, so the wheel and the scroll bar work over the margins
+              // too (wrapping it in `AdaptiveBody` left them dead zones).
+              child: AdaptiveGutters(
+                maxWidth: AppLayoutTokens.paddedListMaxWidth,
+                builder: (context, gutter) => ListView(
+                  padding: EdgeInsets.fromLTRB(gutter, 18, gutter, 20),
                   children: [
                     const _MonthSelector(),
                     const SizedBox(height: 16),
