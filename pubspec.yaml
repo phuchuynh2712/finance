@@ -164,7 +164,11 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#FAF8F5"
   color_dark: "#1A1714"
-  image: "assets/icon/appicon.png"
+  # The iOS launch screen and the Android 11 and older splash show this image
+  # as it is, so it has the same rounded corners as the logo on the sign-in
+  # screen (generated from assets/icon/appicon_splash.svg; the plain square
+  # looked sharp-cornered next to the rounded icon).
+  image: "assets/icon/appicon_splash.png"
   android: true
   ios: true
   # Web/desktop are out of scope for this feature (spec.md Assumptions);
