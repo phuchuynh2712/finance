@@ -74,10 +74,14 @@ dependencies:
   local_auth: ^3.0.2
   shared_preferences: ^2.5.5
   http: ^1.6.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Time-dependent tests (the inactivity lock) run on a fake clock instead of
+  # waiting; already in the lock file through flutter_test.
+  fake_async: ^1.3.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

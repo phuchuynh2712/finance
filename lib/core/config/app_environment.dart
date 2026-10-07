@@ -12,6 +12,9 @@ class AppEnvironment {
     'SUPABASE_URL',
     'SUPABASE_PUBLISHABLE_KEY',
     'WEB_PASSWORD_RESET_REDIRECT_URL',
+    // Development only, read by `AppLockPolicy` (core/auth/app_lock_policy.dart):
+    // shortens the inactivity lock for manual verification; ignored in release.
+    'INACTIVITY_LOCK_SECONDS',
   ];
 
   static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');

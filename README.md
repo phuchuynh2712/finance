@@ -102,6 +102,7 @@ JSON (no comments), so this table is where each key is explained:
 | `SUPABASE_URL` | The project URL, `https://<project-ref>.supabase.co`. | Web, Android, iOS |
 | `SUPABASE_PUBLISHABLE_KEY` | The project's public (publishable) API key, `sb_publishable_…`. Safe to ship; never use the service-role key. | Web, Android, iOS |
 | `WEB_PASSWORD_RESET_REDIRECT_URL` | The fixed URL a web password-reset email links to. Must be `https://`, or `http://localhost` / `127.0.0.1` for local development, and must be on the Supabase project's allowed redirect list. The example value matches `--web-port=5000` below. | Web (required there; ignored on Android and iOS, which use their own deep link) |
+| `INACTIVITY_LOCK_SECONDS` | Optional, for manual verification only: seconds of inactivity before the app locks itself. `0` or absent means the product's 5 minutes. Ignored in release builds, so a shipped app can never use a shorter period. | Web, Android, iOS (debug and profile builds) |
 
 If a required value is missing or invalid, the app shows a localized
 configuration screen instead of failing during Supabase startup.

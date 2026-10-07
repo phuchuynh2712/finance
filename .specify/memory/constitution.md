@@ -1,5 +1,48 @@
 <!--
 Sync Impact Report
+Version change: 1.7.0 → 1.8.0 (MINOR: materially expanded Security guidance —
+  an inactivity lock on every platform — and a narrowed, reasoned PIN
+  requirement; no principle removed)
+Modified sections (this amendment):
+  - Security → "Local device security" bullet: the app-level lock now has an
+    explicit inactivity trigger on every platform, Web included (one named
+    period, default 5 minutes), kept the launch/resume triggers; the PIN is
+    now required on phones and tablets without usable biometrics (6+ digits,
+    never shown in clear, device-only, limited wrong tries of at most 10,
+    expiry within 12 months, password as the way back) and no longer on Web,
+    where the inactivity lock plus the account password is the app-level
+    lock; the guarantee that no platform is left without a lock is kept
+  - Multi-Platform Support → "Capability detection over platform assumption":
+    examples updated to match (PIN on a phone or tablet; inactivity lock plus
+    password on Web); the rule itself is unchanged
+Rationale: owner decision of 2026-10-07 (feature
+  specs/20261007-170025-pin-lock-fallback). Vietnamese banking apps end their
+  web sessions after inactivity and use a PIN on the phone, not on the web; a
+  PIN on Web would sit in the same browser storage as the session, so it adds
+  convenience, not protection; and the previous wording left Web with no
+  inactivity control at all (observed: the "5 minutes in the background" rule
+  never fires in a browser, because a hidden tab does not report that state).
+Reference standard: State Bank of Vietnam Circular 50/2024/TT-NHNN (in force
+  2025-01-01): Art. 7 cl. 6(c) session end after inactivity, 6(d) masked
+  secrets, 6(đ) no automatic sign-in, 6(e) and Art. 11 attempt limit (at most
+  10), PIN of at least 6 characters valid at most 12 months. Its Articles 1-2
+  apply to credit institutions, payment intermediaries and similar, so it is
+  a non-binding baseline for this app; whether other law applies is a legal
+  question this amendment does not settle.
+Deferred (not added): the circular's password rules (digits, upper and lower
+  case; 12-month validity) — the first release is mostly local use; revisit
+  when server-side accounts become the main way the app is used.
+Templates requiring updates (this amendment):
+  - .specify/templates/plan-template.md: ✅ compatible (Constitution Check is
+    generated per feature from this file)
+  - .specify/templates/spec-template.md: ✅ compatible (no lock-specific text)
+  - .specify/templates/tasks-template.md: ✅ compatible (generic phases)
+  - .specify/templates/commands/*.md: not present in this project
+Follow-up TODOs: implement the lock — specs/20261007-170025-pin-lock-fallback
+  (spec written, plan and tasks pending). The earlier web-platform-enablement
+  spec still lists "PIN fallback for Web" as deferred work; it is historical
+  and is not edited.
+Previous amendment (1.6.0 → 1.7.0) Sync Impact Report below, kept for history:
 Version change: 1.6.0 → 1.7.0 (MINOR: new Development Workflow bullet —
   materially expanded governance guidance requiring root-cause fixes for
   bugs found in shared/`core/` code during an unrelated feature, rather
@@ -404,11 +447,12 @@ change, per the window-size-driven adaptive design rules in Principle III:
   source of truth" just because it lacks a native filesystem.
 - **Capability detection over platform assumption**: where a platform
   genuinely lacks a capability another platform has (e.g. no biometric
-  hardware/API on Web), the app MUST detect that capability at runtime and
-  fall back to another still-secure option already required elsewhere in
-  this constitution (e.g. the PIN fallback required by the Security
-  section's app-level-lock rule) — it MUST NOT silently drop the
-  requirement for that platform.
+  hardware/API on Web, or on a phone with nothing enrolled), the app MUST
+  detect that capability at runtime and fall back to another still-secure
+  option already required elsewhere in this constitution (e.g. the PIN on a
+  phone or tablet, or the inactivity lock plus account password on Web, per
+  the Security section's app-level-lock rule) — it MUST NOT silently drop
+  the requirement for that platform.
 - **Platform-specific integration points** (OAuth/password-reset redirect
   URLs, deep-link schemes, secure-storage backends) MUST be resolved behind
   the `core/auth/` and `core/storage/` abstractions per the Recommended
@@ -477,12 +521,26 @@ non-optional concern, not an afterthought bolted on before release:
 - **Local device security**: the local Drift database SHOULD be encrypted
   at rest (e.g. via SQLCipher-backed Drift) on platforms where the OS does
   not already provide full-disk encryption guarantees equivalent to it, and
-  the app MUST support an app-level lock (biometric/PIN) gating access to
-  financial data after launch or resume from background. On a platform
-  where biometric hardware/APIs are unavailable (e.g. Web), the PIN path
-  MUST still be offered — the app MUST NOT leave that platform with no
+  the app MUST support an app-level lock gating access to financial data:
+  (a) on every platform, Web included, the app MUST lock on launch with a
+  stored session and on resume from background, and MUST also lock after a
+  period of inactivity (no interaction; a hidden or unfocused window counts
+  as inactive), the period being one named product setting (default 5
+  minutes) — locking MUST demand authentication again before any financial
+  data is shown and MUST NOT stop background sync; (b) on a phone or tablet
+  where biometric hardware/APIs are unavailable (or nothing is enrolled), a
+  PIN MUST be offered as the quick unlock: at least 6 digits, never shown in
+  clear (screen, logs, analytics, network), kept on the device only in a
+  form that cannot be read back, invalidated after a limited number of
+  consecutive wrong entries (at most 10), expiring within 12 months, with
+  the account password always available as the way back; (c) on Web no PIN
+  is required — the inactivity lock plus the account password is the
+  app-level lock; (d) the app MUST NOT leave any platform with no
   app-level lock at all (Multi-Platform Support's capability-detection
-  rule).
+  rule). The State Bank of Vietnam's Circular 50/2024/TT-NHNN (Articles 7
+  and 11) is the baseline these parameters follow; it does not bind this
+  app, which is not a credit institution or payment intermediary, so a
+  deviation from it MUST be justified in the plan.
 - **Dependency hygiene**: third-party packages MUST be reviewed before
   addition (maintenance status, license, permissions requested) and kept
   up to date; `flutter pub outdated` MUST be checked as part of routine
@@ -548,4 +606,4 @@ for backward-incompatible governance/principle removals or redefinitions,
 MINOR for new principles or materially expanded guidance, PATCH for wording
 clarifications and non-semantic refinements.
 
-**Version**: 1.7.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-09-28
+**Version**: 1.8.0 | **Ratified**: 2026-07-24 | **Last Amended**: 2026-10-07

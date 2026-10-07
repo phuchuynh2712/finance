@@ -1,83 +1,60 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/auth/app_lifecycle_observer.dart';
 
+/// The observer's only job is to ask the tracker to check as soon as the app is
+/// back in front. It replaced `shouldRelockOnResume`, whose "time since the app
+/// was backgrounded" rule never fired on the web (a hidden tab does not reach
+/// `paused`); the decision now rests on the last interaction.
 void main() {
-  group('shouldRelockOnResume', () {
-    final now = DateTime(2026, 9, 4, 12, 0, 0);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    test('not signed in → never relocks, regardless of elapsed time', () {
-      expect(
-        shouldRelockOnResume(
-          lastBackgroundedAt: now.subtract(const Duration(hours: 1)),
-          now: now,
-          isSignedIn: false,
-        ),
-        isFalse,
-      );
-    });
+  late int resumed;
+  late AppLifecycleObserver observer;
 
-    test('no recorded background timestamp → does not relock', () {
-      expect(
-        shouldRelockOnResume(
-          lastBackgroundedAt: null,
-          now: now,
-          isSignedIn: true,
-        ),
-        isFalse,
-      );
-    });
+  setUp(() {
+    resumed = 0;
+    observer = AppLifecycleObserver(onResumed: () => resumed++);
+  });
 
-    test(
-      'backgrounded under 5 minutes → does not relock (quick app-switch)',
-      () {
-        expect(
-          shouldRelockOnResume(
-            lastBackgroundedAt: now.subtract(const Duration(minutes: 4)),
-            now: now,
-            isSignedIn: true,
-          ),
-          isFalse,
-        );
-      },
+  tearDown(() => observer.dispose());
+
+  test('resumed asks the tracker to check at once', () {
+    observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    expect(resumed, 1);
+  });
+
+  test('hidden, paused and inactive do nothing', () {
+    for (final state in [
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.inactive,
+    ]) {
+      observer.didChangeAppLifecycleState(state);
+    }
+    expect(resumed, 0);
+  });
+
+  test('a web tab (hidden, then visible) is checked on return like a phone '
+      'app (inactive, hidden, paused, then resumed)', () {
+    observer
+      ..didChangeAppLifecycleState(AppLifecycleState.hidden)
+      ..didChangeAppLifecycleState(AppLifecycleState.resumed);
+    expect(resumed, 1);
+    observer
+      ..didChangeAppLifecycleState(AppLifecycleState.inactive)
+      ..didChangeAppLifecycleState(AppLifecycleState.hidden)
+      ..didChangeAppLifecycleState(AppLifecycleState.paused)
+      ..didChangeAppLifecycleState(AppLifecycleState.resumed);
+    expect(resumed, 2);
+  });
+
+  test('after dispose it no longer listens to the binding', () {
+    observer.dispose();
+    WidgetsBinding.instance.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
     );
-
-    test(
-      'backgrounded exactly 5 minutes → does not relock (boundary is exclusive)',
-      () {
-        expect(
-          shouldRelockOnResume(
-            lastBackgroundedAt: now.subtract(const Duration(minutes: 5)),
-            now: now,
-            isSignedIn: true,
-          ),
-          isFalse,
-        );
-      },
-    );
-
-    test('backgrounded over 5 minutes, signed in → relocks', () {
-      expect(
-        shouldRelockOnResume(
-          lastBackgroundedAt: now.subtract(
-            const Duration(minutes: 5, seconds: 1),
-          ),
-          now: now,
-          isSignedIn: true,
-        ),
-        isTrue,
-      );
-    });
-
-    test('backgrounded a long time (hours), signed in → relocks', () {
-      expect(
-        shouldRelockOnResume(
-          lastBackgroundedAt: now.subtract(const Duration(hours: 2)),
-          now: now,
-          isSignedIn: true,
-        ),
-        isTrue,
-      );
-    });
+    expect(resumed, 0);
   });
 }
