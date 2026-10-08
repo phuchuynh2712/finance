@@ -16,6 +16,15 @@ class SyncOutbox extends Table {
   DateTimeColumn get syncedAt => dateTime().nullable()();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
 
+  /// Set when the server refused this change for good (a guard of the
+  /// transaction ledger): the entry is never retried, and its notice stays
+  /// here, surviving a restart, until the person has been shown it.
+  DateTimeColumn get rejectedAt => dateTime().nullable()();
+
+  /// Why it was refused: `invalid_reversal`, `reversal_immutable`,
+  /// `transaction_reversed`, `already_reversed` or `check_violation`.
+  TextColumn get rejectReason => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

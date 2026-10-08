@@ -18,7 +18,22 @@ class ExpenseControlItems extends Table {
   TextColumn get allocationMethod =>
       textEnum<ExpenseAllocationMethod>().nullable()();
   RealColumn get allocationValue => real().nullable()();
+
+  /// Derived: [balanceBase] plus the effect of the item's live transactions
+  /// (`BalanceLedger.recomputeBalances`). Never written by hand, never
+  /// pushed: every device and the server derive it from the same rows.
   IntColumn get balance => integer().withDefault(const Constant(0))();
+
+  /// The part of the balance that no transaction explains: what the item had
+  /// before transactions were the source of the balance. Synced, but changed
+  /// by nobody on a device.
+  IntColumn get balanceBase => integer().withDefault(const Constant(0))();
+
+  /// The balance the server last reported for this item (a pulled, live or
+  /// push-returned row). **Local only**: never pushed and never displayed; it
+  /// exists so the device can reconcile its derived [balance] against the
+  /// server's (research.md Decision 10).
+  IntColumn get serverBalance => integer().nullable()();
   BoolColumn get isSavingsReceiver =>
       boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

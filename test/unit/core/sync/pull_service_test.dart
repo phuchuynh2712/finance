@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart' as drift;
+import 'package:drift/drift.dart' show QueryExecutor, QueryInterceptor;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/sync/pull_service.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 
 const _userId = 'test-user';
 
@@ -19,6 +21,7 @@ Map<String, dynamic> _itemJson(
     'icon_key': 'utensils',
     'sort_order': 0,
     'balance': 0,
+    'balance_base': 0,
     'is_savings_receiver': false,
     'created_at': updatedAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
@@ -399,4 +402,247 @@ void main() {
       expect(rows, hasLength(1));
     });
   });
+
+  group('derived balances and reconciliation hooks', () {
+    Map<String, dynamic> txJson(
+      String id,
+      String itemId,
+      int amount,
+      DateTime at,
+    ) {
+      return {
+        'id': id,
+        'user_id': _userId,
+        'expense_control_item_id': itemId,
+        'direction': 'expense',
+        'amount': amount,
+        'occurred_at': at.toIso8601String(),
+        'created_at': at.toIso8601String(),
+        'updated_at': at.toIso8601String(),
+      };
+    }
+
+    test('a batch of 600 transactions over 3 items recomputes each touched '
+        'item once per batch, not once per row', () async {
+      // A second database (the counting one) next to setUp's is deliberate.
+      drift.driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final counter = _RecomputeCounter();
+      final countingDb = AppDatabase.forTesting(
+        NativeDatabase.memory().interceptWith(counter),
+      );
+      addTearDown(countingDb.close);
+      final base = DateTime.utc(2026, 1, 1);
+
+      final service = PullService(
+        countingDb,
+        userId: _userId,
+        batchSize: 1000,
+        subscribe: _noopSubscribe,
+        fetchBatch: (table, userId, cursor) async {
+          if (cursor != null) return const [];
+          if (table == 'expense_control_items') {
+            return [
+              for (final id in ['a', 'b', 'c']) _itemJson(id, updatedAt: base),
+            ];
+          }
+          return [
+            for (var i = 0; i < 600; i++)
+              txJson(
+                'tx$i',
+                ['a', 'b', 'c'][i % 3],
+                10,
+                base.add(Duration(seconds: i + 1)),
+              ),
+          ];
+        },
+      );
+
+      await service.runInitialPull();
+
+      final items = await countingDb
+          .select(countingDb.expenseControlItems)
+          .get();
+      expect(items.map((i) => i.balance), everyElement(-2000));
+      // Three items in the item batch plus three in the transaction batch.
+      expect(counter.recomputeStatements, 6);
+      // The cursor still moved only because the batches committed.
+      final cursor =
+          await (countingDb.select(
+                countingDb.pullCursor,
+              )..where((t) => t.syncTableName.equals('financial_transactions')))
+              .getSingle();
+      expect(cursor.initialPullCompleted, isTrue);
+    });
+
+    test('a live event applies and recomputes', () async {
+      void Function(String table, Map<String, dynamic> row)? deliverEvent;
+      final service = PullService(
+        db,
+        userId: _userId,
+        subscribe: (tables, onEvent, onReady) {
+          deliverEvent = onEvent;
+          return () async {};
+        },
+        fetchBatch: (table, userId, cursor) async => const [],
+      );
+      await service.start();
+      final base = DateTime.utc(2026, 1, 1);
+
+      deliverEvent!('expense_control_items', _itemJson('a', updatedAt: base));
+      deliverEvent!(
+        'financial_transactions',
+        txJson('t', 'a', 70, base.add(const Duration(seconds: 1))),
+      );
+      await service.drainLiveWrites();
+
+      final item = await (db.select(
+        db.expenseControlItems,
+      )..where((t) => t.id.equals('a'))).getSingle();
+      expect(item.balance, -70);
+    });
+
+    test('onCaughtUp is called once after a catch-up pull completes', () async {
+      var calls = 0;
+      final service = PullService(
+        db,
+        userId: _userId,
+        subscribe: _noopSubscribe,
+        fetchBatch: (table, userId, cursor) async => const [],
+        onCaughtUp: () => calls++,
+      );
+
+      await service.runInitialPull();
+
+      expect(calls, 1);
+    });
+
+    test('resync replaces a stale local row (even one stamped in the future) '
+        'but not a row that has a change waiting in the outbox', () async {
+      final server = DateTime.utc(2026, 1, 1);
+      final future = DateTime.utc(2099, 1, 1);
+      for (final id in ['stale', 'pending']) {
+        await db
+            .into(db.expenseControlItems)
+            .insert(
+              ExpenseControlItemsCompanion.insert(
+                id: id,
+                userId: _userId,
+                name: 'Local $id',
+                iconKey: 'utensils',
+                updatedAt: drift.Value(future),
+              ),
+            );
+      }
+      await db
+          .into(db.syncOutbox)
+          .insert(
+            SyncOutboxCompanion.insert(
+              id: 'o1',
+              entityTable: 'expense_control_items',
+              rowId: 'pending',
+              operation: SyncOperation.update,
+              payload: '{}',
+            ),
+          );
+      final service = PullService(
+        db,
+        userId: _userId,
+        subscribe: _noopSubscribe,
+        fetchBatch: (table, userId, cursor) async {
+          if (table != 'expense_control_items' || cursor != null) {
+            return const [];
+          }
+          return [
+            _itemJson('stale', name: 'Server stale', updatedAt: server),
+            _itemJson('pending', name: 'Server pending', updatedAt: server),
+          ];
+        },
+      );
+
+      await service.resync();
+
+      final byId = {
+        for (final i in await db.select(db.expenseControlItems).get()) i.id: i,
+      };
+      expect(byId['stale']!.name, 'Server stale');
+      expect(byId['stale']!.updatedAt, server);
+      expect(byId['pending']!.name, 'Local pending');
+    });
+
+    test('resync re-fetches both tables from the beginning in batches and '
+        'leaves the stored cursors and the completed flag untouched', () async {
+      final base = DateTime.utc(2026, 1, 1);
+      final cursorsSeen = <String, List<Map<String, dynamic>?>>{};
+      final service = PullService(
+        db,
+        userId: _userId,
+        batchSize: 2,
+        subscribe: _noopSubscribe,
+        fetchBatch: (table, userId, cursor) async {
+          (cursorsSeen[table] ??= []).add(cursor);
+          if (table == 'financial_transactions') return const [];
+          if (cursor == null) {
+            return [
+              _itemJson('a', updatedAt: base),
+              _itemJson('b', updatedAt: base.add(const Duration(seconds: 1))),
+            ];
+          }
+          return [
+            _itemJson('c', updatedAt: base.add(const Duration(seconds: 2))),
+          ];
+        },
+      );
+      await service.runInitialPull();
+      final cursorBefore = await db.select(db.pullCursor).get();
+      cursorsSeen.clear();
+
+      await service.resync();
+
+      // It started over: the first fetch of every table had no cursor.
+      expect(cursorsSeen['expense_control_items']!.first, isNull);
+      expect(cursorsSeen['financial_transactions']!.first, isNull);
+      expect(await db.select(db.expenseControlItems).get(), hasLength(3));
+      final cursorAfter = await db.select(db.pullCursor).get();
+      expect(
+        cursorAfter.map(
+          (c) => '${c.syncTableName}:${c.lastId}:${c.initialPullCompleted}',
+        ),
+        cursorBefore.map(
+          (c) => '${c.syncTableName}:${c.lastId}:${c.initialPullCompleted}',
+        ),
+      );
+    });
+  });
+}
+
+/// Counts the `UPDATE expense_control_items SET balance` statements the
+/// ledger issues, whichever executor entry point carries them.
+class _RecomputeCounter extends QueryInterceptor {
+  int recomputeStatements = 0;
+
+  void _count(String statement) {
+    if (statement.contains('UPDATE expense_control_items SET balance')) {
+      recomputeStatements++;
+    }
+  }
+
+  @override
+  Future<int> runUpdate(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    _count(statement);
+    return executor.runUpdate(statement, args);
+  }
+
+  @override
+  Future<void> runCustom(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    _count(statement);
+    return executor.runCustom(statement, args);
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'balance_ledger.dart';
 import 'tables/expense_control_items_table.dart';
 import 'tables/financial_transactions_table.dart';
 import 'tables/pull_cursor_table.dart';
@@ -32,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -143,6 +144,17 @@ class AppDatabase extends _$AppDatabase {
         // table. Iterating this fixed, explicit list of the two tables
         // actually being migrated sidesteps that risk entirely, and stays
         // safe even after future migration blocks are added above this one.
+        //
+        // v8 added columns to both tables: the current definition used here
+        // already contains them, but a v6 table does not, so they are named
+        // as `newColumns` (not copied from the old table, which lacks them).
+        final newColumnsOf = <TableInfo, List<GeneratedColumn>>{
+          expenseControlItems: [
+            expenseControlItems.balanceBase,
+            expenseControlItems.serverBalance,
+          ],
+          financialTransactions: [financialTransactions.reversesId],
+        };
         for (final table in <TableInfo>[
           expenseControlItems,
           financialTransactions,
@@ -168,14 +180,68 @@ class AppDatabase extends _$AppDatabase {
                       column.dartCast<int>(),
                     ),
                 },
+                newColumns: newColumnsOf[table] ?? const [],
               ),
             );
           }
         }
+      }
+      if (from <= 7) {
+        // research.md Decision 1: an item's balance becomes derived from its
+        // transactions. Every column is added only when it is missing:
+        // blocks above create or recreate tables from the CURRENT
+        // definition, which already has them, and an old fixture may have no
+        // `sync_outbox` at all.
+        await _addColumnIfMissing(
+          m,
+          financialTransactions,
+          financialTransactions.reversesId,
+        );
+        await _addColumnIfMissing(
+          m,
+          expenseControlItems,
+          expenseControlItems.balanceBase,
+        );
+        await _addColumnIfMissing(
+          m,
+          expenseControlItems,
+          expenseControlItems.serverBalance,
+        );
+        await _addColumnIfMissing(m, syncOutbox, syncOutbox.rejectedAt);
+        await _addColumnIfMissing(m, syncOutbox, syncOutbox.rejectReason);
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS financial_transactions_item_idx '
+          'ON financial_transactions (expense_control_item_id)',
+        );
+        await customStatement(
+          'CREATE UNIQUE INDEX IF NOT EXISTS '
+          'financial_transactions_reverses_id_uidx '
+          'ON financial_transactions (reverses_id) '
+          'WHERE reverses_id IS NOT NULL',
+        );
+        // After the columns exist: balance_base = balance − Σ effects, so the
+        // derived balance equals the stored one at the moment of the upgrade
+        // (SC-006) and no balance changes.
+        await BalanceLedger.backfillBalanceBase(this);
       }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  /// `ALTER TABLE … ADD COLUMN`, skipped when [table] does not exist or
+  /// already has [column] (see the v8 block of [migration]).
+  Future<void> _addColumnIfMissing(
+    Migrator m,
+    TableInfo table,
+    GeneratedColumn column,
+  ) async {
+    final info = await customSelect(
+      'PRAGMA table_info(${table.actualTableName})',
+    ).get();
+    if (info.isEmpty) return;
+    if (info.any((row) => row.read<String>('name') == column.name)) return;
+    await m.addColumn(table, column);
+  }
 }

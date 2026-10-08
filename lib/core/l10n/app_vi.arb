@@ -911,5 +911,14 @@
   "pinSetupContinueAction": "Tiếp tục",
   "@pinSetupContinueAction": {
     "description": "Button of the password step of the PIN set-up flow"
+  },
+  "syncBalanceMismatchNotice": "Số dư của \"{item}\" chưa khớp với máy chủ. Hãy kết nối mạng và mở lại ứng dụng để đồng bộ.",
+  "@syncBalanceMismatchNotice": {
+    "description": "Snack bar shown once when, after synchronising and trying once more, an item's balance on this device still differs from the server's (the figure is never silently replaced)",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
   }
 }

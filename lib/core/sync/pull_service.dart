@@ -25,6 +25,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/balance_ledger.dart';
 import 'remote_row_writer.dart';
 
 /// The two syncable tables this feature pulls (spec.md Assumptions — scope
@@ -90,6 +91,7 @@ class PullService {
     Subscribe? subscribe,
     FetchBatch? fetchBatch,
     int batchSize = 500,
+    void Function()? onCaughtUp,
   }) {
     assert(
       client != null || (subscribe != null && fetchBatch != null),
@@ -102,6 +104,7 @@ class PullService {
       subscribe: subscribe ?? _defaultSubscribe(client!),
       fetchBatch: fetchBatch ?? _defaultFetchBatch(client!, batchSize),
       batchSize: batchSize,
+      onCaughtUp: onCaughtUp,
     );
   }
 
@@ -111,16 +114,23 @@ class PullService {
     required Subscribe subscribe,
     required FetchBatch fetchBatch,
     required int batchSize,
+    required void Function()? onCaughtUp,
   }) : _userId = userId,
        _subscribe = subscribe,
        _fetchBatch = fetchBatch,
-       _batchSize = batchSize;
+       _batchSize = batchSize,
+       _onCaughtUp = onCaughtUp;
 
   final AppDatabase _db;
   final String _userId;
   final Subscribe _subscribe;
   final FetchBatch _fetchBatch;
   final int _batchSize;
+
+  /// Called once each time a catch-up pull has run to its end — a settled
+  /// point at which the reconciliation of the derived balances against the
+  /// server's can look (FR-018). Never called by [resync].
+  final void Function()? _onCaughtUp;
 
   /// Real subscription: `RealtimeChannelConfig(replicationReady: true)`,
   /// firing [onReady] every time `onSystemEvents` reports "ok" — including
@@ -278,10 +288,29 @@ class PullService {
     for (final table in syncableTables) {
       await _pullTable(table);
     }
+    _onCaughtUp?.call();
   }
 
-  Future<void> _pullTable(String table) async {
-    var cursor = await _loadCursor(table);
+  /// Fetches both tables again from the very beginning, without saving or
+  /// moving the stored cursors and without touching `initial_pull_completed`
+  /// (the screens must not fall back to their loading state). A row replaces
+  /// the local one whatever the two `updated_at` say — the point is to
+  /// refresh what the device holds — except a row with a change still waiting
+  /// in the outbox, which keeps the usual strictly-newer rule so that change
+  /// is not rolled back before it is pushed. The remedy the reconciliation
+  /// tries once before it tells the person that a balance does not match the
+  /// server's (research.md Decision 10).
+  Future<void> resync() async {
+    for (final table in syncableTables) {
+      await _pullTable(table, fromTheBeginning: true);
+    }
+  }
+
+  Future<void> _pullTable(String table, {bool fromTheBeginning = false}) async {
+    var cursor = fromTheBeginning ? null : await _loadCursor(table);
+    final waiting = fromTheBeginning
+        ? await _rowIdsWaitingInOutbox(table)
+        : const <String>{};
     while (true) {
       final batch = await _fetchBatch(table, _userId, cursor?.toKeyset());
       if (batch.isEmpty) {
@@ -300,14 +329,25 @@ class PullService {
         // insertOnConflictUpdate would otherwise overwrite a real,
         // already-recorded keyset position with null, corrupting the
         // resume state FR-002a's reconnect depends on.
-        await _markCompleted(table, cursor: cursor);
+        if (!fromTheBeginning) await _markCompleted(table, cursor: cursor);
         return;
       }
 
+      // Each touched item is recomputed once per batch, not once per row
+      // (the balance is derived from the transactions; research.md
+      // Decision 1).
       await _db.transaction(() async {
+        final touchedItemIds = <String>{};
         for (final row in batch) {
-          await applyRemoteRowJson(_db, table, row);
+          await applyRemoteRowJson(
+            _db,
+            table,
+            row,
+            touchedItemIds: touchedItemIds,
+            overwrite: fromTheBeginning && !waiting.contains(row['id']),
+          );
         }
+        await BalanceLedger.recomputeBalances(_db, touchedItemIds);
       });
 
       final isLastPage = batch.length < _batchSize;
@@ -316,9 +356,25 @@ class PullService {
         updatedAt: DateTime.parse(lastRow['updated_at'] as String),
         id: lastRow['id'] as String,
       );
-      await _advanceCursor(table, cursor: cursor, completed: isLastPage);
+      if (!fromTheBeginning) {
+        await _advanceCursor(table, cursor: cursor, completed: isLastPage);
+      }
       if (isLastPage) return;
     }
+  }
+
+  /// Ids of the rows of [table] that have a change waiting to be pushed
+  /// (unsynced and not refused).
+  Future<Set<String>> _rowIdsWaitingInOutbox(String table) async {
+    final rows =
+        await (_db.select(_db.syncOutbox)..where(
+              (o) =>
+                  o.entityTable.equals(table) &
+                  o.syncedAt.isNull() &
+                  o.rejectedAt.isNull(),
+            ))
+            .get();
+    return {for (final row in rows) row.rowId};
   }
 
   Future<_Cursor?> _loadCursor(String table) async {

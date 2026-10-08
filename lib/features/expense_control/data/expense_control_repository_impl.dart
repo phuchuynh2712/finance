@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/balance_ledger.dart';
 import 'package:finance/core/database/tables/expense_control_items_table.dart'
     as tables;
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
@@ -12,6 +11,7 @@ import 'package:finance/features/expense_control/domain/expense_control_item.dar
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
+import 'ledger_writes.dart';
 
 class ExpenseControlRepositoryImpl
     implements ExpenseControlRepository, TransactionHistoryRepository {
@@ -54,24 +54,7 @@ class ExpenseControlRepositoryImpl
     };
   }
 
-  Future<void> _appendOutbox(
-    String rowId,
-    SyncOperation operation,
-    Map<String, dynamic> payload, {
-    String entityTable = 'expense_control_items',
-  }) async {
-    await _db
-        .into(_db.syncOutbox)
-        .insert(
-          SyncOutboxCompanion.insert(
-            id: _uuid.v4(),
-            entityTable: entityTable,
-            rowId: rowId,
-            operation: operation,
-            payload: jsonEncode(payload),
-          ),
-        );
-  }
+  late final LedgerWrites _writes = LedgerWrites(_db);
 
   Map<String, dynamic> _payloadOf(
     ExpenseControlItem item, {
@@ -86,39 +69,14 @@ class ExpenseControlRepositoryImpl
     'sort_order': item.sortOrder,
     'allocation_method': item.allocationMethod?.name,
     'allocation_value': item.allocationValue,
-    'balance': item.balance,
     'is_savings_receiver': item.isSavingsReceiver,
     'deleted_at': deletedAt?.toIso8601String(),
   };
 
-  /// Snake_case payload for a `financial_transactions` outbox row, matching
-  /// the Supabase migration's column names exactly. Distinct from
-  /// [_payloadOf] — that method's shape is for `expense_control_items` rows
-  /// only and MUST NOT be reused here (research.md/tasks.md's explicit
-  /// warning against payload-shape confusion between the two tables).
-  ///
-  /// Every `timestamptz` field is sent as an ISO 8601 string
-  /// ([DateTime.toIso8601String]), not a raw epoch integer — PostgREST's
-  /// JSON-to-`timestamptz` coercion only accepts date-time strings; a bare
-  /// integer triggers Postgres error 22008
-  /// ("date/time field value out of range") because it's parsed as
-  /// malformed date-time text, not interpreted as Unix epoch seconds.
-  Map<String, dynamic> _payloadOfTransaction(FinancialTransactionRow row) => {
-    'id': row.id,
-    'user_id': row.userId,
-    'expense_control_item_id': row.expenseControlItemId,
-    'direction': row.direction.name,
-    'amount': row.amount,
-    'occurred_at': row.occurredAt.toIso8601String(),
-    'created_at': row.createdAt.toIso8601String(),
-    'display_name': row.displayName,
-    'display_group_name': row.displayGroupName,
-    'display_icon_key': row.displayIconKey,
-    'updated_at': row.updatedAt.toIso8601String(),
-    'deleted_at': row.deletedAt?.toIso8601String(),
-  };
-
-  TransactionHistoryRecord _toHistoryRecord(FinancialTransactionRow row) {
+  TransactionHistoryRecord _toHistoryRecord(
+    FinancialTransactionRow row, {
+    required bool isReversed,
+  }) {
     return TransactionHistoryRecord(
       id: row.id,
       sourceItemId: row.expenseControlItemId,
@@ -131,6 +89,46 @@ class ExpenseControlRepositoryImpl
       displayName: row.displayName ?? 'Archived Item',
       displayGroupName: row.displayGroupName,
       displayIconKey: row.displayIconKey,
+      reversesId: row.reversesId,
+      isReversed: isReversed,
+    );
+  }
+
+  /// A history query over this user's live transactions that also tells, per
+  /// row, whether a live reversing entry cancels it — in any month, so the
+  /// stream re-emits when a reversal appears or is deleted. [filter] adds the
+  /// caller's own conditions; [limit] caps the rows.
+  Stream<List<TransactionHistoryRecord>> _watchHistory(
+    Expression<bool> Function($FinancialTransactionsTable row) filter, {
+    int? limit,
+  }) {
+    final transactions = _db.financialTransactions;
+    final reversal = _db.alias(_db.financialTransactions, 'reversal');
+    final isReversed = existsQuery(
+      _db.select(reversal)..where(
+        (r) => r.reversesId.equalsExp(transactions.id) & r.deletedAt.isNull(),
+      ),
+    );
+    final query = _db.select(transactions).join([])
+      ..addColumns([isReversed])
+      ..where(
+        transactions.userId.equals(_userId) &
+            transactions.deletedAt.isNull() &
+            filter(transactions),
+      )
+      ..orderBy([
+        OrderingTerm.desc(transactions.occurredAt),
+        OrderingTerm.desc(transactions.createdAt),
+      ]);
+    if (limit != null) query.limit(limit);
+    return query.watch().map(
+      (rows) => [
+        for (final r in rows)
+          _toHistoryRecord(
+            r.readTable(transactions),
+            isReversed: r.read(isReversed) ?? false,
+          ),
+      ],
     );
   }
 
@@ -157,33 +155,16 @@ class ExpenseControlRepositoryImpl
     required DateTime start,
     required DateTime end,
   }) {
-    return (_db.select(_db.financialTransactions)
-          ..where(
-            (row) =>
-                row.userId.equals(_userId) &
-                row.occurredAt.isBiggerOrEqualValue(start) &
-                row.occurredAt.isSmallerThanValue(end) &
-                row.deletedAt.isNull(),
-          )
-          ..orderBy([
-            (row) => OrderingTerm.desc(row.occurredAt),
-            (row) => OrderingTerm.desc(row.createdAt),
-          ]))
-        .watch()
-        .map((rows) => rows.map(_toHistoryRecord).toList());
+    return _watchHistory(
+      (row) =>
+          row.occurredAt.isBiggerOrEqualValue(start) &
+          row.occurredAt.isSmallerThanValue(end),
+    );
   }
 
   @override
   Stream<List<TransactionHistoryRecord>> watchRecent({required int limit}) {
-    return (_db.select(_db.financialTransactions)
-          ..where((row) => row.userId.equals(_userId) & row.deletedAt.isNull())
-          ..orderBy([
-            (row) => OrderingTerm.desc(row.occurredAt),
-            (row) => OrderingTerm.desc(row.createdAt),
-          ])
-          ..limit(limit))
-        .watch()
-        .map((rows) => rows.map(_toHistoryRecord).toList());
+    return _watchHistory((row) => const Constant(true), limit: limit);
   }
 
   Future<int> _childCount(String parentId) async {
@@ -213,7 +194,7 @@ class ExpenseControlRepositoryImpl
             isSavingsReceiver: Value(false),
           ),
         );
-        await _appendOutbox(
+        await _writes.appendOutbox(
           parentId,
           SyncOperation.update,
           _payloadOf(_toDomain(parentRow).clearFormula()),
@@ -236,7 +217,11 @@ class ExpenseControlRepositoryImpl
               isSavingsReceiver: Value(item.isSavingsReceiver),
             ),
           );
-      await _appendOutbox(item.id, SyncOperation.insert, _payloadOf(item));
+      await _writes.appendOutbox(
+        item.id,
+        SyncOperation.insert,
+        _payloadOf(item),
+      );
     });
   }
 
@@ -253,7 +238,11 @@ class ExpenseControlRepositoryImpl
           updatedAt: Value(DateTime.now()),
         ),
       );
-      await _appendOutbox(item.id, SyncOperation.update, _payloadOf(item));
+      await _writes.appendOutbox(
+        item.id,
+        SyncOperation.update,
+        _payloadOf(item),
+      );
     });
   }
 
@@ -272,7 +261,7 @@ class ExpenseControlRepositoryImpl
       final deletedRow = await (_db.select(
         _db.expenseControlItems,
       )..where((row) => row.id.equals(id))).getSingle();
-      await _appendOutbox(
+      await _writes.appendOutbox(
         id,
         SyncOperation.delete,
         _payloadOf(_toDomain(deletedRow), deletedAt: now),
@@ -281,7 +270,7 @@ class ExpenseControlRepositoryImpl
         await (_db.update(_db.expenseControlItems)
               ..where((row) => row.id.equals(child.id)))
             .write(ExpenseControlItemsCompanion(deletedAt: Value(now)));
-        await _appendOutbox(
+        await _writes.appendOutbox(
           child.id,
           SyncOperation.delete,
           _payloadOf(_toDomain(child), deletedAt: now),
@@ -318,7 +307,7 @@ class ExpenseControlRepositoryImpl
         final row = await (_db.select(
           _db.expenseControlItems,
         )..where((r) => r.id.equals(orderedIds[i]))).getSingle();
-        await _appendOutbox(
+        await _writes.appendOutbox(
           orderedIds[i],
           SyncOperation.update,
           _payloadOf(_toDomain(row)),
@@ -367,7 +356,7 @@ class ExpenseControlRepositoryImpl
         final row = await (_db.select(
           _db.expenseControlItems,
         )..where((r) => r.id.equals(id))).getSingle();
-        await _appendOutbox(
+        await _writes.appendOutbox(
           id,
           SyncOperation.update,
           _payloadOf(_toDomain(row)),
@@ -383,56 +372,27 @@ class ExpenseControlRepositoryImpl
       // this call produces — every row created by one "Lưu thu nhập"
       // action represents the same user-facing event, not several events
       // that happened to occur at slightly different microseconds
-      // (research.md Decision 4 of the expense-transaction feature).
+      // (research.md Decision 4 of the expense-transaction feature; also
+      // how the corrections of this feature recognise an income event).
       final now = DateTime.now();
+      final touchedItemIds = <String>{};
       for (final entry in balanceDeltas.entries) {
         final itemId = entry.key;
         final delta = entry.value;
         if (delta <= 0) continue;
-        // A single atomic `balance = balance + delta` statement — not a
-        // read-then-write pair — so a concurrent write to the same row
-        // within this transaction window can never be silently lost
-        // (Constitution Principle II: money-math correctness).
-        //
-        // `customUpdate` (not `customStatement`) is required here: a raw
-        // `customStatement` writes to SQLite correctly but does NOT notify
-        // Drift's reactive `.watch()` streams, since Drift can't infer
-        // which table a raw statement touches — `watchAll()`'s stream
-        // would silently never re-emit after this write, even though the
-        // data itself is correct (caught during T036's manual walkthrough:
-        // "Thu chi" balances stayed at 0 on screen despite the DB holding
-        // the right values). `updates: {expenseControlItems}` tells Drift
-        // exactly which table changed so dependent streams refresh.
-        await _db.customUpdate(
-          'UPDATE expense_control_items SET balance = balance + ?, '
-          'updated_at = ? WHERE id = ?',
-          variables: [
-            Variable(delta),
-            // ISO-8601 text, matching store_date_time_values_as_text
-            // (build.yaml) — a raw INTEGER write here would silently
-            // corrupt this TEXT-typed column (research.md Decision 10).
-            Variable(now.toIso8601String()),
-            Variable(itemId),
-          ],
-          updates: {_db.expenseControlItems},
-          updateKind: UpdateKind.update,
-        );
+        // Read the item first: a missing id throws here and rolls back
+        // every row this call produced (atomicity guardrail, FR-013).
         final row = await (_db.select(
           _db.expenseControlItems,
         )..where((r) => r.id.equals(itemId))).getSingle();
-        await _appendOutbox(
-          itemId,
-          SyncOperation.update,
-          _payloadOf(_toDomain(row)),
-        );
 
-        // FR-013: one income Financial Transaction row per non-zero delta,
-        // atomic with the balance increment above — both are inside this
-        // same `_db.transaction()`, so a failure anywhere in this loop
-        // rolls back every balance change AND every history row from this
-        // call, never leaving one without the other. Do NOT move this
-        // insert out of this transaction in any future refactor — see
-        // research.md Decision 6's guardrail.
+        // FR-013: one income Financial Transaction row per non-zero delta.
+        // The balance is derived from the transactions, so inserting the row
+        // IS the balance change; it is recomputed below, in this same
+        // `_db.transaction()`, so a failure anywhere in this loop rolls back
+        // every history row and leaves every balance as it was. Do NOT move
+        // the recompute or this insert out of this transaction (research.md
+        // Decision 6 of the expense-transaction feature).
         final transactionId = _uuid.v4();
         await _db
             .into(_db.financialTransactions)
@@ -452,13 +412,15 @@ class ExpenseControlRepositoryImpl
         final transactionRow = await (_db.select(
           _db.financialTransactions,
         )..where((r) => r.id.equals(transactionId))).getSingle();
-        await _appendOutbox(
+        await _writes.appendOutbox(
           transactionId,
           SyncOperation.insert,
-          _payloadOfTransaction(transactionRow),
+          _writes.transactionPayload(transactionRow),
           entityTable: 'financial_transactions',
         );
+        touchedItemIds.add(itemId);
       }
+      await BalanceLedger.recomputeBalances(_db, touchedItemIds);
     });
   }
 
@@ -469,37 +431,15 @@ class ExpenseControlRepositoryImpl
   }) async {
     await _db.transaction(() async {
       final now = DateTime.now();
-      // Same atomic-decrement requirement as applyIncomeAllocation's
-      // increment: a single `balance = balance - amount` statement, and
-      // `customUpdate` (not `customStatement`) so Drift's `.watch()`
-      // streams are notified (research.md Decision 5).
-      await _db.customUpdate(
-        'UPDATE expense_control_items SET balance = balance - ?, '
-        'updated_at = ? WHERE id = ?',
-        variables: [
-          Variable(amount),
-          // ISO-8601 text, matching store_date_time_values_as_text
-          // (build.yaml) — a raw INTEGER write here would silently
-          // corrupt this TEXT-typed column (research.md Decision 10).
-          Variable(now.toIso8601String()),
-          Variable(itemId),
-        ],
-        updates: {_db.expenseControlItems},
-        updateKind: UpdateKind.update,
-      );
+      // Read first: a missing item throws and rolls everything back.
       final row = await (_db.select(
         _db.expenseControlItems,
       )..where((r) => r.id.equals(itemId))).getSingle();
-      await _appendOutbox(
-        itemId,
-        SyncOperation.update,
-        _payloadOf(_toDomain(row)),
-      );
 
-      // FR-009: the expense Financial Transaction row is inside the same
-      // transaction as the balance decrement above — a failure here rolls
-      // back the decrement too, never leaving one without the other
-      // (SC-002).
+      // FR-009: the expense row and the recompute of the balance share this
+      // transaction — a failure rolls back both, never leaving one without
+      // the other (SC-002). The balance is derived, so there is no item
+      // write and no item outbox entry.
       final transactionId = _uuid.v4();
       await _db
           .into(_db.financialTransactions)
@@ -520,12 +460,13 @@ class ExpenseControlRepositoryImpl
       final transactionRow = await (_db.select(
         _db.financialTransactions,
       )..where((r) => r.id.equals(transactionId))).getSingle();
-      await _appendOutbox(
+      await _writes.appendOutbox(
         transactionId,
         SyncOperation.insert,
-        _payloadOfTransaction(transactionRow),
+        _writes.transactionPayload(transactionRow),
         entityTable: 'financial_transactions',
       );
+      await BalanceLedger.recomputeBalances(_db, [itemId]);
     });
   }
 
