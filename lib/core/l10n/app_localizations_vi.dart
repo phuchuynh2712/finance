@@ -833,4 +833,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get pinSetupContinueAction => 'Tiếp tục';
+
+  @override
+  String syncBalanceMismatchNotice(String item) {
+    return 'Số dư của \"$item\" chưa khớp với máy chủ. Hãy kết nối mạng và mở lại ứng dụng để đồng bộ.';
+  }
 }

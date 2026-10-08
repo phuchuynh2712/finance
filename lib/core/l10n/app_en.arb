@@ -290,5 +290,6 @@
   "pinOfferMessage": "This device cannot use fingerprint or face. Next time you can open the app faster with a 6-digit PIN.",
   "pinOfferAcceptAction": "Set PIN",
   "pinOfferDeclineAction": "Not now",
-  "pinSetupContinueAction": "Continue"
+  "pinSetupContinueAction": "Continue",
+  "syncBalanceMismatchNotice": "The balance of \"{item}\" does not match the server's. Connect to the internet and reopen the app to synchronise."
 }

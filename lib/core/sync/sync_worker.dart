@@ -16,11 +16,15 @@ import 'sync_outbox_table.dart';
 /// that must be correct from day one; drain scheduling can iterate later
 /// without changing that contract.
 ///
-/// FR-019: this worker previously also reconciled `Envelope` balances
-/// against the Supabase `envelope_balances` view; that logic is deleted
-/// outright (not stubbed) along with the view and its backing tables
-/// (research.md Decision 9) — a future feature redesigns reconciliation
-/// for `ExpenseControlItem.balance` if and when that becomes necessary.
+/// Balances are not pushed: an item's `balance` is derived from its
+/// transactions on every device and, by Postgres triggers, on the server
+/// (`BalanceLedger`, research.md Decision 1 of the transaction-corrections
+/// feature), so the outbox carries rows, never a balance. The device checks
+/// its derived balance against the server's in the `ReconciliationMonitor`,
+/// which this worker triggers through [onIdle] whenever a drain leaves
+/// nothing waiting. (FR-019 deleted the older `envelope_balances`
+/// reconciliation outright; this is its replacement.)
+///
 /// Pushes one row's payload to Supabase and returns the row Postgres
 /// actually stored (post-trigger, e.g. FR-005a's server-issued
 /// `updated_at`) as snake_case JSON. Injectable so tests can substitute a
@@ -40,12 +44,20 @@ class SyncWorker {
     SupabaseClient client, {
     Duration interval = const Duration(seconds: 30),
     PushRow? push,
+    FutureOr<void> Function()? onIdle,
   }) : _interval = interval,
-       _push = push ?? _defaultPush(client);
+       _push = push ?? _defaultPush(client),
+       _onIdle = onIdle;
 
   final AppDatabase _db;
   final Duration _interval;
   final PushRow _push;
+
+  /// Called at the end of every drain that leaves no entry waiting (even a
+  /// drain of an empty outbox): a settled point for the reconciliation of the
+  /// derived balances against the server's (FR-018). A failure in it never
+  /// breaks the drain.
+  final FutureOr<void> Function()? _onIdle;
   Timer? _timer;
 
   static PushRow _defaultPush(SupabaseClient client) {
@@ -66,7 +78,7 @@ class SyncWorker {
   Future<void> drainOutbox() async {
     final pending = await (_db.select(
       _db.syncOutbox,
-    )..where((row) => row.syncedAt.isNull())).get();
+    )..where((row) => row.syncedAt.isNull() & row.rejectedAt.isNull())).get();
 
     for (final row in pending) {
       try {
@@ -90,8 +102,25 @@ class SyncWorker {
             // to match goes through the same remote-row write helper pulled
             // rows use (research.md Decision 7) — never a second, separate
             // local-write mechanism.
+            //
+            // The response is applied unconditionally (research.md
+            // Decision 6): the strictly-newer check is for rows that arrive
+            // from elsewhere, and it ignores the server's answer whenever
+            // this device's clock runs ahead of the server's — so "delete
+            // wins" and the normalised reversal would never reach the device
+            // that acted. The one exception is a change to the same row that
+            // is still waiting in the outbox: it will push and its own
+            // response settles the row, so the newer local edit is not
+            // rolled back in between.
             final response = await _push(row.entityTable, payload);
-            await applyRemoteRowJson(_db, row.entityTable, response);
+            if (!await _hasOtherEntryWaiting(row)) {
+              await applyRemoteRowJson(
+                _db,
+                row.entityTable,
+                response,
+                overwrite: true,
+              );
+            }
         }
         await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id)))
             .write(SyncOutboxCompanion(syncedAt: Value(DateTime.now())));
@@ -101,6 +130,41 @@ class SyncWorker {
         await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id)))
             .write(SyncOutboxCompanion(retryCount: Value(row.retryCount + 1)));
       }
+    }
+
+    await _notifyIfIdle();
+  }
+
+  /// Whether another entry for the same row (any operation) is still waiting
+  /// to be pushed: unsynced and not refused.
+  Future<bool> _hasOtherEntryWaiting(SyncOutboxRow row) async {
+    final others =
+        await (_db.select(_db.syncOutbox)..where(
+              (o) =>
+                  o.entityTable.equals(row.entityTable) &
+                  o.rowId.equals(row.rowId) &
+                  o.id.equals(row.id).not() &
+                  o.syncedAt.isNull() &
+                  o.rejectedAt.isNull(),
+            ))
+            .get();
+    return others.isNotEmpty;
+  }
+
+  Future<void> _notifyIfIdle() async {
+    final onIdle = _onIdle;
+    if (onIdle == null) return;
+    final waiting =
+        await (_db.select(_db.syncOutbox)
+              ..where((o) => o.syncedAt.isNull() & o.rejectedAt.isNull())
+              ..limit(1))
+            .get();
+    if (waiting.isNotEmpty) return;
+    try {
+      await onIdle();
+    } catch (_) {
+      // A check that fails must not stop the worker; the next idle drain
+      // runs it again.
     }
   }
 

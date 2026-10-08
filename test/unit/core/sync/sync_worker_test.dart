@@ -72,6 +72,7 @@ void main() {
       'icon_key': 'utensils',
       'sort_order': 0,
       'balance': 0,
+      'balance_base': 0,
       'is_savings_receiver': false,
       'created_at': staleUpdatedAt.toIso8601String(),
       // Client sends a stale value; the fake `push` below simulates the
@@ -114,6 +115,7 @@ void main() {
       'icon_key': 'utensils',
       'sort_order': 0,
       'balance': 0,
+      'balance_base': 0,
       'is_savings_receiver': false,
       'created_at': updatedAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),

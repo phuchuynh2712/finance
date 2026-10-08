@@ -837,4 +837,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pinSetupContinueAction => 'Continue';
+
+  @override
+  String syncBalanceMismatchNotice(String item) {
+    return 'The balance of \"$item\" does not match the server\'s. Connect to the internet and reopen the app to synchronise.';
+  }
 }

@@ -116,6 +116,29 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _balanceBaseMeta = const VerificationMeta(
+    'balanceBase',
+  );
+  @override
+  late final GeneratedColumn<int> balanceBase = GeneratedColumn<int>(
+    'balance_base',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _serverBalanceMeta = const VerificationMeta(
+    'serverBalance',
+  );
+  @override
+  late final GeneratedColumn<int> serverBalance = GeneratedColumn<int>(
+    'server_balance',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isSavingsReceiverMeta = const VerificationMeta(
     'isSavingsReceiver',
   );
@@ -178,6 +201,8 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
     allocationMethod,
     allocationValue,
     balance,
+    balanceBase,
+    serverBalance,
     isSavingsReceiver,
     createdAt,
     updatedAt,
@@ -260,6 +285,24 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
         balance.isAcceptableOrUnknown(data['balance']!, _balanceMeta),
       );
     }
+    if (data.containsKey('balance_base')) {
+      context.handle(
+        _balanceBaseMeta,
+        balanceBase.isAcceptableOrUnknown(
+          data['balance_base']!,
+          _balanceBaseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('server_balance')) {
+      context.handle(
+        _serverBalanceMeta,
+        serverBalance.isAcceptableOrUnknown(
+          data['server_balance']!,
+          _serverBalanceMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_savings_receiver')) {
       context.handle(
         _isSavingsReceiverMeta,
@@ -339,6 +382,14 @@ class $ExpenseControlItemsTable extends ExpenseControlItems
         DriftSqlType.int,
         data['${effectivePrefix}balance'],
       )!,
+      balanceBase: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}balance_base'],
+      )!,
+      serverBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}server_balance'],
+      ),
       isSavingsReceiver: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_savings_receiver'],
@@ -384,7 +435,22 @@ class ExpenseControlItemRow extends DataClass
   final int sortOrder;
   final ExpenseAllocationMethod? allocationMethod;
   final double? allocationValue;
+
+  /// Derived: [balanceBase] plus the effect of the item's live transactions
+  /// (`BalanceLedger.recomputeBalances`). Never written by hand, never
+  /// pushed: every device and the server derive it from the same rows.
   final int balance;
+
+  /// The part of the balance that no transaction explains: what the item had
+  /// before transactions were the source of the balance. Synced, but changed
+  /// by nobody on a device.
+  final int balanceBase;
+
+  /// The balance the server last reported for this item (a pulled, live or
+  /// push-returned row). **Local only**: never pushed and never displayed; it
+  /// exists so the device can reconcile its derived [balance] against the
+  /// server's (research.md Decision 10).
+  final int? serverBalance;
   final bool isSavingsReceiver;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -400,6 +466,8 @@ class ExpenseControlItemRow extends DataClass
     this.allocationMethod,
     this.allocationValue,
     required this.balance,
+    required this.balanceBase,
+    this.serverBalance,
     required this.isSavingsReceiver,
     required this.createdAt,
     required this.updatedAt,
@@ -430,6 +498,10 @@ class ExpenseControlItemRow extends DataClass
       map['allocation_value'] = Variable<double>(allocationValue);
     }
     map['balance'] = Variable<int>(balance);
+    map['balance_base'] = Variable<int>(balanceBase);
+    if (!nullToAbsent || serverBalance != null) {
+      map['server_balance'] = Variable<int>(serverBalance);
+    }
     map['is_savings_receiver'] = Variable<bool>(isSavingsReceiver);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -459,6 +531,10 @@ class ExpenseControlItemRow extends DataClass
           ? const Value.absent()
           : Value(allocationValue),
       balance: Value(balance),
+      balanceBase: Value(balanceBase),
+      serverBalance: serverBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverBalance),
       isSavingsReceiver: Value(isSavingsReceiver),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -485,6 +561,8 @@ class ExpenseControlItemRow extends DataClass
           .fromJson(serializer.fromJson<String?>(json['allocationMethod'])),
       allocationValue: serializer.fromJson<double?>(json['allocationValue']),
       balance: serializer.fromJson<int>(json['balance']),
+      balanceBase: serializer.fromJson<int>(json['balanceBase']),
+      serverBalance: serializer.fromJson<int?>(json['serverBalance']),
       isSavingsReceiver: serializer.fromJson<bool>(json['isSavingsReceiver']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -509,6 +587,8 @@ class ExpenseControlItemRow extends DataClass
       ),
       'allocationValue': serializer.toJson<double?>(allocationValue),
       'balance': serializer.toJson<int>(balance),
+      'balanceBase': serializer.toJson<int>(balanceBase),
+      'serverBalance': serializer.toJson<int?>(serverBalance),
       'isSavingsReceiver': serializer.toJson<bool>(isSavingsReceiver),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -527,6 +607,8 @@ class ExpenseControlItemRow extends DataClass
     Value<ExpenseAllocationMethod?> allocationMethod = const Value.absent(),
     Value<double?> allocationValue = const Value.absent(),
     int? balance,
+    int? balanceBase,
+    Value<int?> serverBalance = const Value.absent(),
     bool? isSavingsReceiver,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -546,6 +628,10 @@ class ExpenseControlItemRow extends DataClass
         ? allocationValue.value
         : this.allocationValue,
     balance: balance ?? this.balance,
+    balanceBase: balanceBase ?? this.balanceBase,
+    serverBalance: serverBalance.present
+        ? serverBalance.value
+        : this.serverBalance,
     isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -569,6 +655,12 @@ class ExpenseControlItemRow extends DataClass
           ? data.allocationValue.value
           : this.allocationValue,
       balance: data.balance.present ? data.balance.value : this.balance,
+      balanceBase: data.balanceBase.present
+          ? data.balanceBase.value
+          : this.balanceBase,
+      serverBalance: data.serverBalance.present
+          ? data.serverBalance.value
+          : this.serverBalance,
       isSavingsReceiver: data.isSavingsReceiver.present
           ? data.isSavingsReceiver.value
           : this.isSavingsReceiver,
@@ -591,6 +683,8 @@ class ExpenseControlItemRow extends DataClass
           ..write('allocationMethod: $allocationMethod, ')
           ..write('allocationValue: $allocationValue, ')
           ..write('balance: $balance, ')
+          ..write('balanceBase: $balanceBase, ')
+          ..write('serverBalance: $serverBalance, ')
           ..write('isSavingsReceiver: $isSavingsReceiver, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -611,6 +705,8 @@ class ExpenseControlItemRow extends DataClass
     allocationMethod,
     allocationValue,
     balance,
+    balanceBase,
+    serverBalance,
     isSavingsReceiver,
     createdAt,
     updatedAt,
@@ -630,6 +726,8 @@ class ExpenseControlItemRow extends DataClass
           other.allocationMethod == this.allocationMethod &&
           other.allocationValue == this.allocationValue &&
           other.balance == this.balance &&
+          other.balanceBase == this.balanceBase &&
+          other.serverBalance == this.serverBalance &&
           other.isSavingsReceiver == this.isSavingsReceiver &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -648,6 +746,8 @@ class ExpenseControlItemsCompanion
   final Value<ExpenseAllocationMethod?> allocationMethod;
   final Value<double?> allocationValue;
   final Value<int> balance;
+  final Value<int> balanceBase;
+  final Value<int?> serverBalance;
   final Value<bool> isSavingsReceiver;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -664,6 +764,8 @@ class ExpenseControlItemsCompanion
     this.allocationMethod = const Value.absent(),
     this.allocationValue = const Value.absent(),
     this.balance = const Value.absent(),
+    this.balanceBase = const Value.absent(),
+    this.serverBalance = const Value.absent(),
     this.isSavingsReceiver = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -681,6 +783,8 @@ class ExpenseControlItemsCompanion
     this.allocationMethod = const Value.absent(),
     this.allocationValue = const Value.absent(),
     this.balance = const Value.absent(),
+    this.balanceBase = const Value.absent(),
+    this.serverBalance = const Value.absent(),
     this.isSavingsReceiver = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -701,6 +805,8 @@ class ExpenseControlItemsCompanion
     Expression<String>? allocationMethod,
     Expression<double>? allocationValue,
     Expression<int>? balance,
+    Expression<int>? balanceBase,
+    Expression<int>? serverBalance,
     Expression<bool>? isSavingsReceiver,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -718,6 +824,8 @@ class ExpenseControlItemsCompanion
       if (allocationMethod != null) 'allocation_method': allocationMethod,
       if (allocationValue != null) 'allocation_value': allocationValue,
       if (balance != null) 'balance': balance,
+      if (balanceBase != null) 'balance_base': balanceBase,
+      if (serverBalance != null) 'server_balance': serverBalance,
       if (isSavingsReceiver != null) 'is_savings_receiver': isSavingsReceiver,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -737,6 +845,8 @@ class ExpenseControlItemsCompanion
     Value<ExpenseAllocationMethod?>? allocationMethod,
     Value<double?>? allocationValue,
     Value<int>? balance,
+    Value<int>? balanceBase,
+    Value<int?>? serverBalance,
     Value<bool>? isSavingsReceiver,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -754,6 +864,8 @@ class ExpenseControlItemsCompanion
       allocationMethod: allocationMethod ?? this.allocationMethod,
       allocationValue: allocationValue ?? this.allocationValue,
       balance: balance ?? this.balance,
+      balanceBase: balanceBase ?? this.balanceBase,
+      serverBalance: serverBalance ?? this.serverBalance,
       isSavingsReceiver: isSavingsReceiver ?? this.isSavingsReceiver,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -799,6 +911,12 @@ class ExpenseControlItemsCompanion
     if (balance.present) {
       map['balance'] = Variable<int>(balance.value);
     }
+    if (balanceBase.present) {
+      map['balance_base'] = Variable<int>(balanceBase.value);
+    }
+    if (serverBalance.present) {
+      map['server_balance'] = Variable<int>(serverBalance.value);
+    }
     if (isSavingsReceiver.present) {
       map['is_savings_receiver'] = Variable<bool>(isSavingsReceiver.value);
     }
@@ -830,6 +948,8 @@ class ExpenseControlItemsCompanion
           ..write('allocationMethod: $allocationMethod, ')
           ..write('allocationValue: $allocationValue, ')
           ..write('balance: $balance, ')
+          ..write('balanceBase: $balanceBase, ')
+          ..write('serverBalance: $serverBalance, ')
           ..write('isSavingsReceiver: $isSavingsReceiver, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -975,6 +1095,17 @@ class $FinancialTransactionsTable extends FinancialTransactions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reversesIdMeta = const VerificationMeta(
+    'reversesId',
+  );
+  @override
+  late final GeneratedColumn<String> reversesId = GeneratedColumn<String>(
+    'reverses_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -989,6 +1120,7 @@ class $FinancialTransactionsTable extends FinancialTransactions
     createdAt,
     updatedAt,
     deletedAt,
+    reversesId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1087,6 +1219,12 @@ class $FinancialTransactionsTable extends FinancialTransactions
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
+    if (data.containsKey('reverses_id')) {
+      context.handle(
+        _reversesIdMeta,
+        reversesId.isAcceptableOrUnknown(data['reverses_id']!, _reversesIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1149,6 +1287,10 @@ class $FinancialTransactionsTable extends FinancialTransactions
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
+      reversesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reverses_id'],
+      ),
     );
   }
 
@@ -1177,6 +1319,11 @@ class FinancialTransactionRow extends DataClass
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
+
+  /// Set only on a reversing entry: the id of the transaction it cancels
+  /// (research.md Decision 2). A reversal has the same direction, amount and
+  /// item as the original, and its effect on the balance is the opposite.
+  final String? reversesId;
   const FinancialTransactionRow({
     required this.id,
     required this.userId,
@@ -1190,6 +1337,7 @@ class FinancialTransactionRow extends DataClass
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
+    this.reversesId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1218,6 +1366,9 @@ class FinancialTransactionRow extends DataClass
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    if (!nullToAbsent || reversesId != null) {
+      map['reverses_id'] = Variable<String>(reversesId);
+    }
     return map;
   }
 
@@ -1243,6 +1394,9 @@ class FinancialTransactionRow extends DataClass
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      reversesId: reversesId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reversesId),
     );
   }
 
@@ -1268,6 +1422,7 @@ class FinancialTransactionRow extends DataClass
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      reversesId: serializer.fromJson<String?>(json['reversesId']),
     );
   }
   @override
@@ -1288,6 +1443,7 @@ class FinancialTransactionRow extends DataClass
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'reversesId': serializer.toJson<String?>(reversesId),
     };
   }
 
@@ -1304,6 +1460,7 @@ class FinancialTransactionRow extends DataClass
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> reversesId = const Value.absent(),
   }) => FinancialTransactionRow(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -1321,6 +1478,7 @@ class FinancialTransactionRow extends DataClass
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    reversesId: reversesId.present ? reversesId.value : this.reversesId,
   );
   FinancialTransactionRow copyWithCompanion(
     FinancialTransactionsCompanion data,
@@ -1348,6 +1506,9 @@ class FinancialTransactionRow extends DataClass
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      reversesId: data.reversesId.present
+          ? data.reversesId.value
+          : this.reversesId,
     );
   }
 
@@ -1365,7 +1526,8 @@ class FinancialTransactionRow extends DataClass
           ..write('displayIconKey: $displayIconKey, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('reversesId: $reversesId')
           ..write(')'))
         .toString();
   }
@@ -1384,6 +1546,7 @@ class FinancialTransactionRow extends DataClass
     createdAt,
     updatedAt,
     deletedAt,
+    reversesId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1400,7 +1563,8 @@ class FinancialTransactionRow extends DataClass
           other.displayIconKey == this.displayIconKey &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.reversesId == this.reversesId);
 }
 
 class FinancialTransactionsCompanion
@@ -1417,6 +1581,7 @@ class FinancialTransactionsCompanion
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
+  final Value<String?> reversesId;
   final Value<int> rowid;
   const FinancialTransactionsCompanion({
     this.id = const Value.absent(),
@@ -1431,6 +1596,7 @@ class FinancialTransactionsCompanion
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.reversesId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FinancialTransactionsCompanion.insert({
@@ -1446,6 +1612,7 @@ class FinancialTransactionsCompanion
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.reversesId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1466,6 +1633,7 @@ class FinancialTransactionsCompanion
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
+    Expression<String>? reversesId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1482,6 +1650,7 @@ class FinancialTransactionsCompanion
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (reversesId != null) 'reverses_id': reversesId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1499,6 +1668,7 @@ class FinancialTransactionsCompanion
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
+    Value<String?>? reversesId,
     Value<int>? rowid,
   }) {
     return FinancialTransactionsCompanion(
@@ -1514,6 +1684,7 @@ class FinancialTransactionsCompanion
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      reversesId: reversesId ?? this.reversesId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1561,6 +1732,9 @@ class FinancialTransactionsCompanion
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
+    if (reversesId.present) {
+      map['reverses_id'] = Variable<String>(reversesId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1582,6 +1756,7 @@ class FinancialTransactionsCompanion
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('reversesId: $reversesId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1666,6 +1841,28 @@ class $SyncOutboxTable extends SyncOutbox
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _rejectedAtMeta = const VerificationMeta(
+    'rejectedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> rejectedAt = GeneratedColumn<DateTime>(
+    'rejected_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rejectReasonMeta = const VerificationMeta(
+    'rejectReason',
+  );
+  @override
+  late final GeneratedColumn<String> rejectReason = GeneratedColumn<String>(
+    'reject_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1675,6 +1872,8 @@ class $SyncOutboxTable extends SyncOutbox
     payload,
     syncedAt,
     retryCount,
+    rejectedAt,
+    rejectReason,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1732,6 +1931,21 @@ class $SyncOutboxTable extends SyncOutbox
         retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
       );
     }
+    if (data.containsKey('rejected_at')) {
+      context.handle(
+        _rejectedAtMeta,
+        rejectedAt.isAcceptableOrUnknown(data['rejected_at']!, _rejectedAtMeta),
+      );
+    }
+    if (data.containsKey('reject_reason')) {
+      context.handle(
+        _rejectReasonMeta,
+        rejectReason.isAcceptableOrUnknown(
+          data['reject_reason']!,
+          _rejectReasonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1771,6 +1985,14 @@ class $SyncOutboxTable extends SyncOutbox
         DriftSqlType.int,
         data['${effectivePrefix}retry_count'],
       )!,
+      rejectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}rejected_at'],
+      ),
+      rejectReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reject_reason'],
+      ),
     );
   }
 
@@ -1791,6 +2013,15 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
   final String payload;
   final DateTime? syncedAt;
   final int retryCount;
+
+  /// Set when the server refused this change for good (a guard of the
+  /// transaction ledger): the entry is never retried, and its notice stays
+  /// here, surviving a restart, until the person has been shown it.
+  final DateTime? rejectedAt;
+
+  /// Why it was refused: `invalid_reversal`, `reversal_immutable`,
+  /// `transaction_reversed`, `already_reversed` or `check_violation`.
+  final String? rejectReason;
   const SyncOutboxRow({
     required this.id,
     required this.entityTable,
@@ -1799,6 +2030,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
     required this.payload,
     this.syncedAt,
     required this.retryCount,
+    this.rejectedAt,
+    this.rejectReason,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1816,6 +2049,12 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
       map['synced_at'] = Variable<DateTime>(syncedAt);
     }
     map['retry_count'] = Variable<int>(retryCount);
+    if (!nullToAbsent || rejectedAt != null) {
+      map['rejected_at'] = Variable<DateTime>(rejectedAt);
+    }
+    if (!nullToAbsent || rejectReason != null) {
+      map['reject_reason'] = Variable<String>(rejectReason);
+    }
     return map;
   }
 
@@ -1830,6 +2069,12 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
           ? const Value.absent()
           : Value(syncedAt),
       retryCount: Value(retryCount),
+      rejectedAt: rejectedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rejectedAt),
+      rejectReason: rejectReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rejectReason),
     );
   }
 
@@ -1848,6 +2093,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
       payload: serializer.fromJson<String>(json['payload']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       retryCount: serializer.fromJson<int>(json['retryCount']),
+      rejectedAt: serializer.fromJson<DateTime?>(json['rejectedAt']),
+      rejectReason: serializer.fromJson<String?>(json['rejectReason']),
     );
   }
   @override
@@ -1863,6 +2110,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
       'payload': serializer.toJson<String>(payload),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'retryCount': serializer.toJson<int>(retryCount),
+      'rejectedAt': serializer.toJson<DateTime?>(rejectedAt),
+      'rejectReason': serializer.toJson<String?>(rejectReason),
     };
   }
 
@@ -1874,6 +2123,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
     String? payload,
     Value<DateTime?> syncedAt = const Value.absent(),
     int? retryCount,
+    Value<DateTime?> rejectedAt = const Value.absent(),
+    Value<String?> rejectReason = const Value.absent(),
   }) => SyncOutboxRow(
     id: id ?? this.id,
     entityTable: entityTable ?? this.entityTable,
@@ -1882,6 +2133,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
     payload: payload ?? this.payload,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     retryCount: retryCount ?? this.retryCount,
+    rejectedAt: rejectedAt.present ? rejectedAt.value : this.rejectedAt,
+    rejectReason: rejectReason.present ? rejectReason.value : this.rejectReason,
   );
   SyncOutboxRow copyWithCompanion(SyncOutboxCompanion data) {
     return SyncOutboxRow(
@@ -1896,6 +2149,12 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
       retryCount: data.retryCount.present
           ? data.retryCount.value
           : this.retryCount,
+      rejectedAt: data.rejectedAt.present
+          ? data.rejectedAt.value
+          : this.rejectedAt,
+      rejectReason: data.rejectReason.present
+          ? data.rejectReason.value
+          : this.rejectReason,
     );
   }
 
@@ -1908,7 +2167,9 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
           ..write('operation: $operation, ')
           ..write('payload: $payload, ')
           ..write('syncedAt: $syncedAt, ')
-          ..write('retryCount: $retryCount')
+          ..write('retryCount: $retryCount, ')
+          ..write('rejectedAt: $rejectedAt, ')
+          ..write('rejectReason: $rejectReason')
           ..write(')'))
         .toString();
   }
@@ -1922,6 +2183,8 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
     payload,
     syncedAt,
     retryCount,
+    rejectedAt,
+    rejectReason,
   );
   @override
   bool operator ==(Object other) =>
@@ -1933,7 +2196,9 @@ class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
           other.operation == this.operation &&
           other.payload == this.payload &&
           other.syncedAt == this.syncedAt &&
-          other.retryCount == this.retryCount);
+          other.retryCount == this.retryCount &&
+          other.rejectedAt == this.rejectedAt &&
+          other.rejectReason == this.rejectReason);
 }
 
 class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
@@ -1944,6 +2209,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
   final Value<String> payload;
   final Value<DateTime?> syncedAt;
   final Value<int> retryCount;
+  final Value<DateTime?> rejectedAt;
+  final Value<String?> rejectReason;
   final Value<int> rowid;
   const SyncOutboxCompanion({
     this.id = const Value.absent(),
@@ -1953,6 +2220,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
     this.payload = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.retryCount = const Value.absent(),
+    this.rejectedAt = const Value.absent(),
+    this.rejectReason = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SyncOutboxCompanion.insert({
@@ -1963,6 +2232,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
     required String payload,
     this.syncedAt = const Value.absent(),
     this.retryCount = const Value.absent(),
+    this.rejectedAt = const Value.absent(),
+    this.rejectReason = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        entityTable = Value(entityTable),
@@ -1977,6 +2248,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
     Expression<String>? payload,
     Expression<DateTime>? syncedAt,
     Expression<int>? retryCount,
+    Expression<DateTime>? rejectedAt,
+    Expression<String>? rejectReason,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1987,6 +2260,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
       if (payload != null) 'payload': payload,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (retryCount != null) 'retry_count': retryCount,
+      if (rejectedAt != null) 'rejected_at': rejectedAt,
+      if (rejectReason != null) 'reject_reason': rejectReason,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1999,6 +2274,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
     Value<String>? payload,
     Value<DateTime?>? syncedAt,
     Value<int>? retryCount,
+    Value<DateTime?>? rejectedAt,
+    Value<String?>? rejectReason,
     Value<int>? rowid,
   }) {
     return SyncOutboxCompanion(
@@ -2009,6 +2286,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
       payload: payload ?? this.payload,
       syncedAt: syncedAt ?? this.syncedAt,
       retryCount: retryCount ?? this.retryCount,
+      rejectedAt: rejectedAt ?? this.rejectedAt,
+      rejectReason: rejectReason ?? this.rejectReason,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2039,6 +2318,12 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
     if (retryCount.present) {
       map['retry_count'] = Variable<int>(retryCount.value);
     }
+    if (rejectedAt.present) {
+      map['rejected_at'] = Variable<DateTime>(rejectedAt.value);
+    }
+    if (rejectReason.present) {
+      map['reject_reason'] = Variable<String>(rejectReason.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2055,6 +2340,8 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
           ..write('payload: $payload, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('retryCount: $retryCount, ')
+          ..write('rejectedAt: $rejectedAt, ')
+          ..write('rejectReason: $rejectReason, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2472,6 +2759,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'financial_transactions_user_id_occurred_at_idx',
     'CREATE INDEX financial_transactions_user_id_occurred_at_idx ON financial_transactions (user_id, occurred_at)',
   );
+  late final Index financialTransactionsItemIdx = Index(
+    'financial_transactions_item_idx',
+    'CREATE INDEX financial_transactions_item_idx ON financial_transactions (expense_control_item_id)',
+  );
+  late final Index financialTransactionsReversesIdUidx = Index(
+    'financial_transactions_reverses_id_uidx',
+    'CREATE UNIQUE INDEX financial_transactions_reverses_id_uidx ON financial_transactions (reverses_id) WHERE reverses_id IS NOT NULL',
+  );
   late final Index syncOutboxUnsyncedIdx = Index(
     'sync_outbox_unsynced_idx',
     'CREATE INDEX sync_outbox_unsynced_idx ON sync_outbox (synced_at) WHERE synced_at IS NULL',
@@ -2487,6 +2782,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pullCursor,
     expenseControlItemsUserIdIdx,
     financialTransactionsUserIdOccurredAtIdx,
+    financialTransactionsItemIdx,
+    financialTransactionsReversesIdUidx,
     syncOutboxUnsyncedIdx,
   ];
   @override
@@ -2506,6 +2803,8 @@ typedef $$ExpenseControlItemsTableCreateCompanionBuilder =
       Value<ExpenseAllocationMethod?> allocationMethod,
       Value<double?> allocationValue,
       Value<int> balance,
+      Value<int> balanceBase,
+      Value<int?> serverBalance,
       Value<bool> isSavingsReceiver,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -2524,6 +2823,8 @@ typedef $$ExpenseControlItemsTableUpdateCompanionBuilder =
       Value<ExpenseAllocationMethod?> allocationMethod,
       Value<double?> allocationValue,
       Value<int> balance,
+      Value<int> balanceBase,
+      Value<int?> serverBalance,
       Value<bool> isSavingsReceiver,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -2592,6 +2893,16 @@ class $$ExpenseControlItemsTableFilterComposer
 
   ColumnFilters<int> get balance => $composableBuilder(
     column: $table.balance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get balanceBase => $composableBuilder(
+    column: $table.balanceBase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get serverBalance => $composableBuilder(
+    column: $table.serverBalance,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2675,6 +2986,16 @@ class $$ExpenseControlItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get balanceBase => $composableBuilder(
+    column: $table.balanceBase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get serverBalance => $composableBuilder(
+    column: $table.serverBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isSavingsReceiver => $composableBuilder(
     column: $table.isSavingsReceiver,
     builder: (column) => ColumnOrderings(column),
@@ -2741,6 +3062,16 @@ class $$ExpenseControlItemsTableAnnotationComposer
 
   GeneratedColumn<int> get balance =>
       $composableBuilder(column: $table.balance, builder: (column) => column);
+
+  GeneratedColumn<int> get balanceBase => $composableBuilder(
+    column: $table.balanceBase,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get serverBalance => $composableBuilder(
+    column: $table.serverBalance,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isSavingsReceiver => $composableBuilder(
     column: $table.isSavingsReceiver,
@@ -2811,6 +3142,8 @@ class $$ExpenseControlItemsTableTableManager
                     const Value.absent(),
                 Value<double?> allocationValue = const Value.absent(),
                 Value<int> balance = const Value.absent(),
+                Value<int> balanceBase = const Value.absent(),
+                Value<int?> serverBalance = const Value.absent(),
                 Value<bool> isSavingsReceiver = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -2827,6 +3160,8 @@ class $$ExpenseControlItemsTableTableManager
                 allocationMethod: allocationMethod,
                 allocationValue: allocationValue,
                 balance: balance,
+                balanceBase: balanceBase,
+                serverBalance: serverBalance,
                 isSavingsReceiver: isSavingsReceiver,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -2846,6 +3181,8 @@ class $$ExpenseControlItemsTableTableManager
                     const Value.absent(),
                 Value<double?> allocationValue = const Value.absent(),
                 Value<int> balance = const Value.absent(),
+                Value<int> balanceBase = const Value.absent(),
+                Value<int?> serverBalance = const Value.absent(),
                 Value<bool> isSavingsReceiver = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -2862,6 +3199,8 @@ class $$ExpenseControlItemsTableTableManager
                 allocationMethod: allocationMethod,
                 allocationValue: allocationValue,
                 balance: balance,
+                balanceBase: balanceBase,
+                serverBalance: serverBalance,
                 isSavingsReceiver: isSavingsReceiver,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -2911,6 +3250,7 @@ typedef $$FinancialTransactionsTableCreateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
+      Value<String?> reversesId,
       Value<int> rowid,
     });
 typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
@@ -2927,6 +3267,7 @@ typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
+      Value<String?> reversesId,
       Value<int> rowid,
     });
 
@@ -3003,6 +3344,11 @@ class $$FinancialTransactionsTableFilterComposer
     column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get reversesId => $composableBuilder(
+    column: $table.reversesId,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$FinancialTransactionsTableOrderingComposer
@@ -3073,6 +3419,11 @@ class $$FinancialTransactionsTableOrderingComposer
     column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get reversesId => $composableBuilder(
+    column: $table.reversesId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FinancialTransactionsTableAnnotationComposer
@@ -3130,6 +3481,11 @@ class $$FinancialTransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get reversesId => $composableBuilder(
+    column: $table.reversesId,
+    builder: (column) => column,
+  );
 }
 
 class $$FinancialTransactionsTableTableManager
@@ -3190,6 +3546,7 @@ class $$FinancialTransactionsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> reversesId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialTransactionsCompanion(
                 id: id,
@@ -3204,6 +3561,7 @@ class $$FinancialTransactionsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
+                reversesId: reversesId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3220,6 +3578,7 @@ class $$FinancialTransactionsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> reversesId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialTransactionsCompanion.insert(
                 id: id,
@@ -3234,6 +3593,7 @@ class $$FinancialTransactionsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
+                reversesId: reversesId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3274,6 +3634,8 @@ typedef $$SyncOutboxTableCreateCompanionBuilder =
       required String payload,
       Value<DateTime?> syncedAt,
       Value<int> retryCount,
+      Value<DateTime?> rejectedAt,
+      Value<String?> rejectReason,
       Value<int> rowid,
     });
 typedef $$SyncOutboxTableUpdateCompanionBuilder =
@@ -3285,6 +3647,8 @@ typedef $$SyncOutboxTableUpdateCompanionBuilder =
       Value<String> payload,
       Value<DateTime?> syncedAt,
       Value<int> retryCount,
+      Value<DateTime?> rejectedAt,
+      Value<String?> rejectReason,
       Value<int> rowid,
     });
 
@@ -3332,6 +3696,16 @@ class $$SyncOutboxTableFilterComposer
     column: $table.retryCount,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get rejectedAt => $composableBuilder(
+    column: $table.rejectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rejectReason => $composableBuilder(
+    column: $table.rejectReason,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SyncOutboxTableOrderingComposer
@@ -3377,6 +3751,16 @@ class $$SyncOutboxTableOrderingComposer
     column: $table.retryCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get rejectedAt => $composableBuilder(
+    column: $table.rejectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rejectReason => $composableBuilder(
+    column: $table.rejectReason,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SyncOutboxTableAnnotationComposer
@@ -3410,6 +3794,16 @@ class $$SyncOutboxTableAnnotationComposer
 
   GeneratedColumn<int> get retryCount => $composableBuilder(
     column: $table.retryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get rejectedAt => $composableBuilder(
+    column: $table.rejectedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rejectReason => $composableBuilder(
+    column: $table.rejectReason,
     builder: (column) => column,
   );
 }
@@ -3452,6 +3846,8 @@ class $$SyncOutboxTableTableManager
                 Value<String> payload = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
+                Value<DateTime?> rejectedAt = const Value.absent(),
+                Value<String?> rejectReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncOutboxCompanion(
                 id: id,
@@ -3461,6 +3857,8 @@ class $$SyncOutboxTableTableManager
                 payload: payload,
                 syncedAt: syncedAt,
                 retryCount: retryCount,
+                rejectedAt: rejectedAt,
+                rejectReason: rejectReason,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3472,6 +3870,8 @@ class $$SyncOutboxTableTableManager
                 required String payload,
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
+                Value<DateTime?> rejectedAt = const Value.absent(),
+                Value<String?> rejectReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncOutboxCompanion.insert(
                 id: id,
@@ -3481,6 +3881,8 @@ class $$SyncOutboxTableTableManager
                 payload: payload,
                 syncedAt: syncedAt,
                 retryCount: retryCount,
+                rejectedAt: rejectedAt,
+                rejectReason: rejectReason,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

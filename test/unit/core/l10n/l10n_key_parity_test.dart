@@ -69,6 +69,11 @@ const _pinLockKeys = [
   'pinSetupContinueAction',
 ];
 
+/// Keys added by the transaction corrections feature (delete, edit and reverse
+/// a saved transaction, the notices of the sync layer). Checked exactly like
+/// [_securityFeatureKeys].
+const _correctionKeys = ['syncBalanceMismatchNotice'];
+
 Map<String, dynamic> _readArb(String name) {
   final file = File('lib/core/l10n/$name');
   return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -112,6 +117,7 @@ void main() {
       ..._securityFeatureKeys,
       ..._adaptiveWebFeatureKeys,
       ..._pinLockKeys,
+      ..._correctionKeys,
     ]) {
       expect(vi.containsKey(key), isTrue, reason: 'app_vi.arb is missing $key');
       expect(en.containsKey(key), isTrue, reason: 'app_en.arb is missing $key');

@@ -1555,6 +1555,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tiếp tục'**
   String get pinSetupContinueAction;
+
+  /// Snack bar shown once when, after synchronising and trying once more, an item's balance on this device still differs from the server's (the figure is never silently replaced)
+  ///
+  /// In vi, this message translates to:
+  /// **'Số dư của \"{item}\" chưa khớp với máy chủ. Hãy kết nối mạng và mở lại ứng dụng để đồng bộ.'**
+  String syncBalanceMismatchNotice(String item);
 }
 
 class _AppLocalizationsDelegate

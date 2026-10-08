@@ -7,6 +7,8 @@ import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/app_database_provider.dart';
 import 'package:finance/core/sync/pull_service.dart';
 import 'package:finance/core/sync/pull_service_provider.dart';
+import 'package:finance/core/sync/sync_notice.dart';
+import 'package:finance/core/sync/sync_notices_provider.dart';
 
 /// A no-op subscribe closure — none of these tests need to observe live
 /// events/reconnects, only that a PullService gets constructed and
@@ -132,5 +134,64 @@ void main() {
 
     expect(startedForUserIds, ['user-a', 'user-b']);
     expect(secondService, isNot(same(firstService)));
+  });
+
+  group('reconciliation monitor wiring (FR-018)', () {
+    test('builds from the database and the notices, and a check of a database '
+        'without differences does nothing', () async {
+      final container = buildContainer(
+        signedIn: true,
+        userId: 'user-a',
+        startedForUserIds: [],
+      );
+      addTearDown(container.dispose);
+      final received = <SyncNotice>[];
+      container.read(syncNoticesProvider).stream.listen(received.add);
+
+      await container.read(reconciliationMonitorProvider).check();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(received, isEmpty);
+    });
+
+    test('its remedy is the resync of the current user\'s pull service, and '
+        'it tolerates there being none while signed out', () async {
+      final fetches = <String>[];
+      final container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          isSignedInProvider.overrideWithValue(true),
+          currentUserIdProvider.overrideWithValue('user-a'),
+          pullServiceFactoryProvider.overrideWithValue(
+            (db, userId) => PullService(
+              db,
+              userId: userId,
+              subscribe: _noopSubscribe,
+              fetchBatch: (table, userId, cursor) async {
+                fetches.add(table);
+                return const [];
+              },
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Divergent for longer than the settle delay is simulated by calling
+      // the pull service the monitor would call.
+      await container.read(pullServiceProvider)!.resync();
+      expect(fetches, containsAll(syncableTables));
+
+      final signedOut = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          isSignedInProvider.overrideWithValue(false),
+          currentUserIdProvider.overrideWithValue('user-a'),
+        ],
+      );
+      addTearDown(signedOut.dispose);
+      expect(signedOut.read(pullServiceProvider), isNull);
+      await signedOut.read(reconciliationMonitorProvider).check();
+    });
   });
 }

@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-specs/20261007-170025-pin-lock-fallback/plan.md
+specs/20261008-010940-reverse-edit-transactions/plan.md
 <!-- SPECKIT END -->
 
 ## Language convention

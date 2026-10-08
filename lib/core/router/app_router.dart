@@ -9,6 +9,7 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
+import 'package:finance/core/widgets/sync_notice_host.dart';
 import 'package:finance/features/account/account_routes.dart';
 import 'package:finance/features/expense_control/expense_control_routes.dart';
 import 'package:finance/features/expenses/expenses_routes.dart';
@@ -286,7 +287,10 @@ class _AppShellState extends ConsumerState<_AppShell> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SyncNoticeHost(child: _buildShell(context));
+
+  Widget _buildShell(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentIndex = widget.navigationShell.currentIndex;
     final semantic = Theme.of(context).extension<AppSemanticColors>()!;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
@@ -5,6 +7,8 @@ import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/app_database_provider.dart';
 import 'package:finance/core/network/supabase_client_provider.dart';
 import 'pull_service.dart';
+import 'reconciliation_monitor.dart';
+import 'sync_notices_provider.dart';
 
 /// Builds a [PullService] for [userId] against [db] — the real Supabase
 /// wiring by default. Overridable in tests so [pullServiceProvider] can be
@@ -16,7 +20,15 @@ import 'pull_service.dart';
 final pullServiceFactoryProvider =
     Provider<PullService Function(AppDatabase db, String userId)>((ref) {
       final client = ref.watch(supabaseClientProvider);
-      return (db, userId) => PullService(db, client: client, userId: userId);
+      return (db, userId) => PullService(
+        db,
+        client: client,
+        userId: userId,
+        // A catch-up pull that ran to its end is a settled point at which the
+        // derived balances can be checked against the server's (FR-018).
+        onCaughtUp: () =>
+            unawaited(ref.read(reconciliationMonitorProvider).check()),
+      );
     });
 
 /// The active [PullService] for the currently signed-in user, or `null`
@@ -61,3 +73,24 @@ final pullServiceProvider = Provider<PullService?>((ref) {
   });
   return service;
 });
+
+/// Compares each item's derived balance with the one the server reports and
+/// tells the person when they still differ after one new synchronisation
+/// (FR-018, research.md Decision 10). Lives with the pull service because its
+/// remedy is [PullService.resync] on the current user's service, read lazily
+/// so the two providers never wait for each other.
+final Provider<ReconciliationMonitor> reconciliationMonitorProvider =
+    Provider<ReconciliationMonitor>((ref) {
+      final monitor = ReconciliationMonitor.forDatabase(
+        ref.watch(appDatabaseProvider),
+        ref.watch(syncNoticesProvider),
+        resync: () async {
+          final pull = ref.read(pullServiceProvider);
+          if (pull == null) return false; // signed out: nothing to synchronise
+          await pull.resync();
+          return true;
+        },
+      );
+      ref.onDispose(monitor.dispose);
+      return monitor;
+    });

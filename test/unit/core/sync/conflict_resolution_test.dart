@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/core/sync/remote_row_writer.dart';
 import 'package:finance/core/sync/sync_outbox_table.dart';
 import 'package:finance/core/sync/sync_worker.dart';
@@ -20,6 +21,7 @@ ExpenseControlItemRow _itemRow(
   String userId = _userId,
   String name = 'Food',
   int balance = 0,
+  int balanceBase = 0,
   required DateTime updatedAt,
   DateTime? deletedAt,
 }) {
@@ -34,6 +36,7 @@ ExpenseControlItemRow _itemRow(
     allocationMethod: null,
     allocationValue: null,
     balance: balance,
+    balanceBase: balanceBase,
     isSavingsReceiver: false,
     createdAt: updatedAt,
     updatedAt: updatedAt,
@@ -124,10 +127,11 @@ void main() {
       },
     );
 
-    test('(c) a balance field always takes the pulled/live value as-is '
-        'regardless of any pending non-balance edit (constitution\'s '
-        'server-authoritative-balance carve-out, spec.md User Story 2 '
-        'Acceptance Scenario 2)', () async {
+    test('(c) a pulled balance is kept as the server-reported figure but is '
+        'no longer displayed as-is: the displayed balance is the row\'s '
+        'balance_base plus the local live transactions, whatever balance the '
+        'row carries, and a pending non-balance edit is not held back '
+        '(research.md Decision 1 and 10)', () async {
       // A pending, unsynced local edit to a non-balance field exists.
       await db
           .into(db.expenseControlItems)
@@ -153,12 +157,26 @@ void main() {
             ),
           );
 
-      // The server's authoritative balance diverges (e.g. an allocation
-      // on another device).
+      // This device also holds a live local income of 40 for the item.
+      await db
+          .into(db.financialTransactions)
+          .insert(
+            FinancialTransactionsCompanion.insert(
+              id: 'income-1',
+              userId: _userId,
+              expenseControlItemId: 'food',
+              direction: TransactionDirection.income,
+              amount: 40,
+              occurredAt: DateTime.utc(2026, 1, 1),
+            ),
+          );
+
+      // The server reports a different balance (500) for a base of 100.
       final pulledRow = _itemRow(
         'food',
         name: 'Locally Renamed',
         balance: 500,
+        balanceBase: 100,
         updatedAt: DateTime.utc(2026, 1, 2),
       );
       await applyRemoteExpenseControlItem(db, _userId, pulledRow);
@@ -166,9 +184,11 @@ void main() {
       final stored = await (db.select(
         db.expenseControlItems,
       )..where((t) => t.id.equals('food'))).getSingle();
-      // The server-authoritative balance wins as-is — never held back or
-      // merged with local state.
-      expect(stored.balance, 500);
+      // Derived from the base and the local log, not taken from the row.
+      expect(stored.balance, 140);
+      expect(stored.balanceBase, 100);
+      // The server's figure is kept for the reconciliation, not displayed.
+      expect(stored.serverBalance, 500);
     });
   });
 
@@ -205,6 +225,7 @@ void main() {
           'icon_key': 'utensils',
           'sort_order': 0,
           'balance': 0,
+          'balance_base': 0,
           'is_savings_receiver': false,
           'created_at': realT0.toIso8601String(),
           // What the client WOULD send if nothing overrode it — the
@@ -258,6 +279,7 @@ void main() {
           'icon_key': 'utensils',
           'sort_order': 0,
           'balance': 0,
+          'balance_base': 0,
           'is_savings_receiver': false,
           'created_at': realT0.toIso8601String(),
           'updated_at': clock.now().toIso8601String(),
@@ -378,9 +400,10 @@ void main() {
       },
     );
 
-    test('(T029) a pending non-balance local edit does not hold back or '
-        'merge with an incoming pull\'s balance value (Acceptance Scenario '
-        '2 — server-authoritative balance carve-out)', () async {
+    test('(T029) a pending non-balance local edit is neither held back nor '
+        'merged with an incoming pull; the displayed balance stays derived '
+        'from the row\'s balance_base and the local log, and the pulled '
+        'balance is only recorded as server_balance', () async {
       final repository = ExpenseControlRepositoryImpl(db, userId: _userId);
       await db
           .into(db.expenseControlItems)
@@ -425,6 +448,7 @@ void main() {
           'food',
           name: 'Locally Renamed',
           balance: 750,
+          balanceBase: 100,
           updatedAt: DateTime.now().add(const Duration(days: 1)),
         ),
       );
@@ -432,9 +456,9 @@ void main() {
       final stored = await (db.select(
         db.expenseControlItems,
       )..where((t) => t.id.equals('food'))).getSingle();
-      // The pulled balance wins as-is — never held back or merged with
-      // the pending local edit's own balance value.
-      expect(stored.balance, 750);
+      // Derived (base 100, no local transaction), never the pulled 750.
+      expect(stored.balance, 100);
+      expect(stored.serverBalance, 750);
       // The pending outbox entry for the local name edit is untouched.
       final outboxRows = await db.select(db.syncOutbox).get();
       expect(outboxRows, hasLength(1));

@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/database/balance_ledger.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/core/sync/sync_outbox_table.dart' show SyncOperation;
 import 'package:finance/features/expense_control/data/expense_control_repository_impl.dart';
@@ -219,7 +220,7 @@ void main() {
     );
 
     test(
-      'appends one sync_outbox row for the item AND one for its new financial_transactions row, per changed item',
+      'appends one sync_outbox row for its new financial_transactions row, per changed item, and none for the item (balances are derived, never pushed)',
       () async {
         await repository.create(_leaf('a'));
         await repository.create(_leaf('b'));
@@ -228,13 +229,13 @@ void main() {
         await repository.applyIncomeAllocation({'a': 100000, 'b': 200000});
         final after = await db.select(db.syncOutbox).get();
 
-        // 2 items × (1 expense_control_items outbox row + 1
-        // financial_transactions outbox row) = 4 (FR-013).
-        expect(after.length - before.length, 4);
+        // 2 items × 1 financial_transactions outbox row = 2 (FR-013); the
+        // item's balance is derived on every device, so no item row goes.
+        expect(after.length - before.length, 2);
         final newRows = after.skip(before.length);
         expect(
           newRows.where((r) => r.entityTable == 'expense_control_items'),
-          hasLength(2),
+          isEmpty,
         );
         expect(
           newRows.where((r) => r.entityTable == 'financial_transactions'),
@@ -244,15 +245,15 @@ void main() {
     );
 
     test(
-      'the balance increment is a single atomic SQL statement, not a read-then-write pair — two concurrent calls to the same item never lose an increment',
+      'the balance recompute runs inside one database transaction — two concurrent calls to the same item never lose an increment',
       () async {
         await repository.create(_leaf('a'));
 
-        // Simulates a race: if the increment were read-then-write, issuing
-        // both concurrently (same starting balance read by both) would
-        // apply only one of the two deltas. A single atomic
-        // `balance = balance + delta` statement per call makes both land
-        // regardless of interleaving.
+        // Simulates a race: if the balance were read, changed in Dart and
+        // written back, issuing both concurrently (same starting balance
+        // read by both) would apply only one of the two deltas. The balance
+        // is recomputed from the transactions inside the writing database
+        // transaction, so both land regardless of interleaving.
         await Future.wait([
           repository.applyIncomeAllocation({'a': 100000}),
           repository.applyIncomeAllocation({'a': 200000}),
@@ -405,7 +406,7 @@ void main() {
     );
 
     test(
-      'appends one sync_outbox row for the changed expense_control_items row AND one for the new financial_transactions row',
+      'appends one sync_outbox row for the new financial_transactions row and none for the item',
       () async {
         await repository.create(_leaf('a'));
         final before = await db.select(db.syncOutbox).get();
@@ -416,7 +417,7 @@ void main() {
         final newRows = after.skip(before.length);
         expect(
           newRows.where((r) => r.entityTable == 'expense_control_items'),
-          hasLength(1),
+          isEmpty,
         );
         expect(
           newRows.where((r) => r.entityTable == 'financial_transactions'),
@@ -438,7 +439,7 @@ void main() {
     );
 
     test(
-      'the balance decrement is a single atomic SQL statement — two concurrent expenses on the same item never lose a decrement',
+      'the balance recompute runs inside one database transaction — two concurrent expenses on the same item never lose a decrement',
       () async {
         await repository.create(_leaf('a'));
         await repository.applyIncomeAllocation({'a': 1000000});
@@ -660,5 +661,148 @@ void main() {
         expect(recent.map((r) => r.id), ['only']);
       },
     );
+  });
+
+  group('derived balances (research.md Decision 1)', () {
+    Future<ExpenseControlItemRow> readItem(String id) => (db.select(
+      db.expenseControlItems,
+    )..where((t) => t.id.equals(id))).getSingle();
+
+    test(
+      'item payloads never carry balance, balance_base or server_balance',
+      () async {
+        await repository.create(_leaf('a'));
+        await repository.create(_leaf('b', parentId: 'a'));
+        await repository.update(_leaf('b', parentId: 'a'));
+        await repository.reorderTopLevel(['a']);
+        await repository.saveFormulas({
+          'b': const PendingItemEdit(
+            method: ExpenseAllocationMethod.fixed,
+            value: 5,
+          ),
+        });
+        await repository.delete('b');
+
+        final payloads = (await db.select(db.syncOutbox).get())
+            .where((r) => r.entityTable == 'expense_control_items')
+            .map((r) => jsonDecode(r.payload) as Map<String, dynamic>)
+            .toList();
+        expect(payloads, isNotEmpty);
+        for (final payload in payloads) {
+          expect(payload.containsKey('balance'), isFalse);
+          expect(payload.containsKey('balance_base'), isFalse);
+          expect(payload.containsKey('server_balance'), isFalse);
+        }
+      },
+    );
+
+    test('after recordExpense and applyIncomeAllocation the balance equals '
+        'balance_base plus the sum of the effects', () async {
+      await repository.create(_leaf('a'));
+      await (db.update(db.expenseControlItems)..where((t) => t.id.equals('a')))
+          .write(const ExpenseControlItemsCompanion(balanceBase: Value(500)));
+
+      await repository.applyIncomeAllocation({'a': 300});
+      await repository.recordExpense(itemId: 'a', amount: 120);
+
+      expect((await readItem('a')).balance, 500 + 300 - 120);
+    });
+
+    test('the balance stays right after a local transaction row is '
+        'soft-deleted and the item is recomputed', () async {
+      await repository.create(_leaf('a'));
+      await repository.recordExpense(itemId: 'a', amount: 200);
+      final txId = (await db.select(db.financialTransactions).get()).single.id;
+
+      await (db.update(
+        db.financialTransactions,
+      )..where((t) => t.id.equals(txId))).write(
+        FinancialTransactionsCompanion(deletedAt: Value(DateTime.now())),
+      );
+      await BalanceLedger.recomputeBalances(db, ['a']);
+
+      expect((await readItem('a')).balance, 0);
+    });
+
+    test('the transaction payload carries reverses_id', () async {
+      await repository.create(_leaf('a'));
+      await repository.recordExpense(itemId: 'a', amount: 200);
+      final payload =
+          jsonDecode(
+                (await db.select(db.syncOutbox).get())
+                    .firstWhere(
+                      (r) => r.entityTable == 'financial_transactions',
+                    )
+                    .payload,
+              )
+              as Map<String, dynamic>;
+      expect(payload.containsKey('reverses_id'), isTrue);
+      expect(payload['reverses_id'], isNull);
+    });
+
+    test('history records carry reversesId and isReversed (true only while a '
+        'live reversal row exists, in any month)', () async {
+      await repository.create(_leaf('a'));
+      Future<void> insertTx(
+        String id,
+        DateTime occurredAt, {
+        String? reversesId,
+        DateTime? deletedAt,
+      }) {
+        return db
+            .into(db.financialTransactions)
+            .insert(
+              FinancialTransactionsCompanion.insert(
+                id: id,
+                userId: _userId,
+                expenseControlItemId: 'a',
+                direction: TransactionDirection.expense,
+                amount: 100,
+                occurredAt: occurredAt,
+                displayName: const Value('A'),
+                reversesId: Value(reversesId),
+                deletedAt: Value(deletedAt),
+              ),
+            );
+      }
+
+      await insertTx('original', DateTime(2026, 5, 10));
+      await insertTx('plain', DateTime(2026, 5, 11));
+      await insertTx('reversal', DateTime(2026, 6, 20), reversesId: 'original');
+
+      final may = await repository
+          .watchTransactionHistory(
+            start: DateTime(2026, 5),
+            end: DateTime(2026, 6),
+          )
+          .first;
+      final june = await repository
+          .watchTransactionHistory(
+            start: DateTime(2026, 6),
+            end: DateTime(2026, 7),
+          )
+          .first;
+      expect(may.firstWhere((r) => r.id == 'original').isReversed, isTrue);
+      expect(may.firstWhere((r) => r.id == 'plain').isReversed, isFalse);
+      expect(may.firstWhere((r) => r.id == 'original').reversesId, isNull);
+      expect(june.single.reversesId, 'original');
+      expect(june.single.isReversed, isFalse);
+
+      await (db.update(
+        db.financialTransactions,
+      )..where((t) => t.id.equals('reversal'))).write(
+        FinancialTransactionsCompanion(deletedAt: Value(DateTime.now())),
+      );
+      final mayAfter = await repository
+          .watchTransactionHistory(
+            start: DateTime(2026, 5),
+            end: DateTime(2026, 6),
+          )
+          .first;
+      expect(
+        mayAfter.firstWhere((r) => r.id == 'original').isReversed,
+        isFalse,
+      );
+    });
   });
 }

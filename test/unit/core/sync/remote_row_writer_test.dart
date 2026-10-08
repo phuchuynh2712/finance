@@ -26,6 +26,7 @@ ExpenseControlItemRow _itemRow(
     allocationMethod: null,
     allocationValue: null,
     balance: 0,
+    balanceBase: 0,
     isSavingsReceiver: false,
     createdAt: updatedAt,
     updatedAt: updatedAt,
