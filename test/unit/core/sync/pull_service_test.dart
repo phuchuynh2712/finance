@@ -516,6 +516,32 @@ void main() {
       expect(calls, 1);
     });
 
+    test(
+      'onConnected requests an outbox drain whenever realtime is ready',
+      () async {
+        void Function() triggerReady = () {};
+        var calls = 0;
+        final service = PullService(
+          db,
+          userId: _userId,
+          subscribe: (tables, onEvent, onReady) {
+            triggerReady = onReady;
+            return () async {};
+          },
+          fetchBatch: (table, userId, cursor) async => const [],
+          onConnected: () => calls++,
+        );
+        await service.start();
+
+        triggerReady();
+        await service.drainReadyPulls();
+        triggerReady();
+        await service.drainReadyPulls();
+
+        expect(calls, 2);
+      },
+    );
+
     test('resync replaces a stale local row (even one stamped in the future) '
         'but not a row that has a change waiting in the outbox', () async {
       final server = DateTime.utc(2026, 1, 1);

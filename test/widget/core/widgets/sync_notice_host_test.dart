@@ -1,12 +1,17 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finance/core/database/app_database.dart';
+import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/sync_notice.dart';
 import 'package:finance/core/sync/sync_notices_provider.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/widgets/sync_notice_host.dart';
 
@@ -17,6 +22,14 @@ SyncNotice _mismatch(String id, String item) => SyncNotice(
   id: 'mismatch:$id',
   reason: SyncNoticeReason.balanceMismatch,
   itemName: item,
+);
+
+SyncNotice _correctionNotice(String id, SyncNoticeReason reason) => SyncNotice(
+  id: id,
+  reason: reason,
+  itemName: 'Food',
+  transactionId: 'transaction',
+  amount: 25000,
 );
 
 void main() {
@@ -102,6 +115,89 @@ void main() {
       ),
     );
     expect(live, findsWidgets);
+  });
+
+  for (final locale in const [Locale('vi'), Locale('en')]) {
+    for (final reason in [
+      SyncNoticeReason.deleted,
+      SyncNoticeReason.reversed,
+      SyncNoticeReason.alreadyReversed,
+      SyncNoticeReason.editedElsewhere,
+    ]) {
+      testWidgets(
+        'a ${reason.name} correction notice names the item and amount '
+        '(${locale.languageCode})',
+        (tester) async {
+          await pumpHost(tester, locale: locale);
+          notices.report(
+            _correctionNotice('correction:${reason.name}', reason),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+
+          final l10n = await AppLocalizations.delegate.load(locale);
+          final amount = CurrencyFormatter(locale.toString()).format(25000);
+          final message = switch (reason) {
+            SyncNoticeReason.deleted => l10n.syncCorrectionDeletedNotice(
+              'Food',
+              amount,
+            ),
+            SyncNoticeReason.reversed => l10n.syncCorrectionReversedNotice(
+              'Food',
+              amount,
+            ),
+            SyncNoticeReason.alreadyReversed =>
+              l10n.syncCorrectionAlreadyReversedNotice('Food', amount),
+            SyncNoticeReason.editedElsewhere =>
+              l10n.syncCorrectionEditedElsewhereNotice('Food', amount),
+            SyncNoticeReason.balanceMismatch => fail('not a correction notice'),
+          };
+          expect(find.text(message), findsOneWidget);
+        },
+      );
+    }
+  }
+
+  testWidgets('a persisted refusal is acknowledged after it is shown', (
+    tester,
+  ) async {
+    await tester.runAsync(
+      () => db
+          .into(db.syncOutbox)
+          .insert(
+            SyncOutboxCompanion.insert(
+              id: 'rejected',
+              entityTable: 'financial_transactions',
+              rowId: 'transaction',
+              operation: SyncOperation.update,
+              payload: jsonEncode({'display_name': 'Food', 'amount': 25000}),
+              rejectedAt: Value(DateTime.utc(2026, 1, 1)),
+              rejectReason: const Value('already_reversed'),
+            ),
+          ),
+    );
+    await tester.runAsync(() => notices.dispose());
+    notices = SyncNotices(db);
+    await tester.runAsync(() => notices.loaded);
+    await pumpHost(tester);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+    final amount = CurrencyFormatter('vi').format(25000);
+    expect(
+      find.text(l10n.syncCorrectionAlreadyReversedNotice('Food', amount)),
+      findsOneWidget,
+    );
+
+    tester
+        .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+        .hideCurrentSnackBar();
+    await tester.pumpAndSettle();
+    final remainingRows = await tester.runAsync(
+      () => db.select(db.syncOutbox).get(),
+    );
+    expect(remainingRows, isEmpty);
   });
 
   testWidgets('a notice is never shown again after it was shown', (

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/database/app_database_provider.dart';
+import 'package:finance/core/sync/sync_worker_provider.dart';
 import 'package:finance/features/expense_control/data/expense_control_repository_impl.dart';
 import 'package:finance/features/expense_control/data/transaction_correction_repository_impl.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
@@ -15,6 +18,8 @@ final transactionCorrectionRepositoryProvider =
       return TransactionCorrectionRepositoryImpl(
         ref.watch(appDatabaseProvider),
         userId: ref.watch(currentUserIdProvider),
+        onCommitted: () =>
+            unawaited(ref.read(syncWorkerProvider).requestDrain()),
       );
     });
 
