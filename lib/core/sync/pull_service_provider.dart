@@ -6,9 +6,10 @@ import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/app_database_provider.dart';
 import 'package:finance/core/network/supabase_client_provider.dart';
-import 'pull_service.dart';
-import 'reconciliation_monitor.dart';
-import 'sync_notices_provider.dart';
+import 'package:finance/core/sync/sync_worker_provider.dart';
+import 'package:finance/core/sync/pull_service.dart';
+import 'package:finance/core/sync/reconciliation_monitor.dart';
+import 'package:finance/core/sync/sync_notices_provider.dart';
 
 /// Builds a [PullService] for [userId] against [db] — the real Supabase
 /// wiring by default. Overridable in tests so [pullServiceProvider] can be
@@ -28,6 +29,9 @@ final pullServiceFactoryProvider =
         // derived balances can be checked against the server's (FR-018).
         onCaughtUp: () =>
             unawaited(ref.read(reconciliationMonitorProvider).check()),
+        notices: ref.read(syncNoticesProvider),
+        onConnected: () =>
+            unawaited(ref.read(syncWorkerProvider).requestDrain()),
       );
     });
 

@@ -16,6 +16,7 @@ import 'package:finance/features/expense_control/domain/transaction_history_reco
 import 'package:finance/features/expenses/application/overview_recent_transactions.dart';
 import 'package:finance/features/expenses/application/overview_summary_service.dart';
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
+import 'package:finance/features/expenses/presentation/transaction_actions_sheet.dart';
 
 /// Home dashboard shown on the "Tổng quan" tab (FR-001). Read-only (FR-013);
 /// composes two independent data sources — the shared balance+accounts
@@ -417,8 +418,10 @@ class _RecentTransactionsSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
-            itemBuilder: (context, index) =>
-                _RecentTransactionRow(item: items[index]),
+            itemBuilder: (context, index) => _RecentTransactionRow(
+              item: items[index],
+              onTap: () => showTransactionActions(context, records[index]),
+            ),
           ),
       ],
     );
@@ -426,9 +429,10 @@ class _RecentTransactionsSection extends StatelessWidget {
 }
 
 class _RecentTransactionRow extends StatelessWidget {
-  const _RecentTransactionRow({required this.item});
+  const _RecentTransactionRow({required this.item, required this.onTap});
 
   final OverviewTransactionItem item;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -438,73 +442,116 @@ class _RecentTransactionRow extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final currency = CurrencyFormatter(locale);
     final isIncome = item.direction == TransactionHistoryDirection.income;
-    final amountColor = isIncome
+    final isPositive = item.reversesId != null ? !isIncome : isIncome;
+    final amountColor = item.reversesId != null && isPositive
+        ? semantic.successFg
+        : isPositive
         ? theme.colorScheme.primary
         : theme.colorScheme.error;
-    final amountText = '${isIncome ? '+' : '-'}${currency.format(item.amount)}';
+    final amountText =
+        '${isPositive ? '+' : '-'}${currency.format(item.amount)}';
+    final stateTag = item.reversesId != null
+        ? l10n.historyTagReversal
+        : item.isReversed
+        ? l10n.historyTagReversed
+        : null;
     final relativeLabel = switch (item.relativeDay) {
       OverviewRelativeDayToday() => l10n.overviewToday,
       OverviewRelativeDayYesterday() => l10n.overviewYesterday,
       OverviewRelativeDayDaysAgo(:final days) => l10n.overviewDaysAgo(days),
     };
-    final subtitle = item.groupLabel != null
-        ? '${item.groupLabel} · $relativeLabel'
-        : relativeLabel;
+    final subtitle = [
+      if (item.groupLabel != null) item.groupLabel!,
+      relativeLabel,
+    ].join(' · ');
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: semantic.border1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
+    return Semantics(
+      button: true,
+      label:
+          '${item.displayName}, ${item.groupLabel ?? ''}, $amountText, ${stateTag ?? ''}',
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: semantic.primarySoft,
-              borderRadius: BorderRadius.circular(4),
+              border: Border(bottom: BorderSide(color: semantic.border1)),
             ),
-            child: Icon(
-              isIncome ? LucideIcons.banknote : LucideIcons.receipt,
-              size: 18,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: semantic.primarySoft,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Icon(
+                    isIncome ? LucideIcons.banknote : LucideIcons.receipt,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: semantic.fg2,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          if (stateTag != null) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              stateTag,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: semantic.fg2,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  item.displayName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  amountText,
                   style: TextStyle(
-                    color: theme.colorScheme.onSurface,
+                    color: amountColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: semantic.fg2, fontSize: 12),
-                ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Text(
-            amountText,
-            style: TextStyle(
-              color: amountColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

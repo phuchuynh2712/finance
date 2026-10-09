@@ -72,7 +72,45 @@ const _pinLockKeys = [
 /// Keys added by the transaction corrections feature (delete, edit and reverse
 /// a saved transaction, the notices of the sync layer). Checked exactly like
 /// [_securityFeatureKeys].
-const _correctionKeys = ['syncBalanceMismatchNotice'];
+const _correctionKeys = [
+  'syncBalanceMismatchNotice',
+  'syncCorrectionDeletedNotice',
+  'syncCorrectionReversedNotice',
+  'syncCorrectionAlreadyReversedNotice',
+  'syncCorrectionEditedElsewhereNotice',
+  'correctionActionDelete',
+  'correctionIncomeEventNote',
+  'correctionDeleteTitle',
+  'correctionDeleteMessage',
+  'correctionBalanceLine',
+  'correctionNegativeBalanceWarning',
+  'correctionItemRemovedNote',
+  'correctionDoneDeleted',
+  'correctionErrorWindowEnded',
+  'correctionErrorNoLongerAvailable',
+  'correctionActionEdit',
+  'correctionEditTitle',
+  'correctionEditAmountLabel',
+  'correctionEditItemLabel',
+  'correctionEditBalanceTitle',
+  'correctionEditSave',
+  'correctionErrorAmount',
+  'correctionErrorItemRemoved',
+  'correctionDoneEdited',
+  'correctionEditBalancePreview',
+  'correctionActionReverse',
+  'correctionReverseTitle',
+  'correctionReverseMessage',
+  'correctionResultingBalancesLabel',
+  'correctionSheetReversedTag',
+  'correctionSheetReversalOf',
+  'correctionSheetNoActionReversed',
+  'correctionDoneReversed',
+  'historyTagReversed',
+  'historyTagReversal',
+  'reportRefundedExpense',
+  'reportWithdrawnIncome',
+];
 
 Map<String, dynamic> _readArb(String name) {
   final file = File('lib/core/l10n/$name');

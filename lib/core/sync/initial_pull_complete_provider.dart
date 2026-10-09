@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/database/app_database_provider.dart';
-import 'pull_service.dart';
+import 'package:finance/core/sync/pull_service.dart';
 
 /// Whether the signed-in user's initial catch-up pull has completed for
 /// EVERY syncable table (research.md Decision 6) — the logical AND across

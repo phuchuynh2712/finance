@@ -55,6 +55,9 @@ class OverviewTransactionItem {
     required this.relativeDay,
     required this.direction,
     required this.amount,
+    this.reversesId,
+    this.isReversed = false,
+    this.reversedById,
   });
 
   final String id;
@@ -63,6 +66,9 @@ class OverviewTransactionItem {
   final OverviewRelativeDay relativeDay;
   final TransactionHistoryDirection direction;
   final int amount;
+  final String? reversesId;
+  final bool isReversed;
+  final String? reversedById;
 }
 
 DateTime _dateOnly(DateTime value) =>
@@ -93,6 +99,9 @@ List<OverviewTransactionItem> buildOverviewRecentItems(
         relativeDay: _relativeDayOf(record.occurredAt, now),
         direction: record.direction,
         amount: record.amount,
+        reversesId: record.reversesId,
+        isReversed: record.isReversed,
+        reversedById: record.reversedById,
       ),
   ];
 }

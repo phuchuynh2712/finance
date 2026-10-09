@@ -12,6 +12,7 @@ class TransactionHistoryRecord {
     required this.displayIconKey,
     this.reversesId,
     this.isReversed = false,
+    this.reversedById,
   });
 
   final String id;
@@ -31,6 +32,9 @@ class TransactionHistoryRecord {
   /// Whether a live reversing entry cancels this transaction. A reversed
   /// transaction stays in the history and can no longer be changed (FR-007).
   final bool isReversed;
+
+  /// The live reversal row cancelling this record, when one exists.
+  final String? reversedById;
 
   /// Whether this record is itself a reversing entry.
   bool get isReversal => reversesId != null;

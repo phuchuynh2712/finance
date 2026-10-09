@@ -1561,6 +1561,222 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Số dư của \"{item}\" chưa khớp với máy chủ. Hãy kết nối mạng và mở lại ứng dụng để đồng bộ.'**
   String syncBalanceMismatchNotice(String item);
+
+  /// Notice shown when another device deleted the transaction being corrected
+  ///
+  /// In vi, this message translates to:
+  /// **'Thay đổi giao dịch {item} ({amount}) không được áp dụng vì giao dịch đã bị xóa trên thiết bị khác.'**
+  String syncCorrectionDeletedNotice(String item, String amount);
+
+  /// Notice shown when another device reversed the transaction being corrected
+  ///
+  /// In vi, this message translates to:
+  /// **'Thay đổi giao dịch {item} ({amount}) không được áp dụng vì giao dịch đã được đảo trên thiết bị khác.'**
+  String syncCorrectionReversedNotice(String item, String amount);
+
+  /// Notice shown when another device already reversed the same transaction
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch {item} ({amount}) đã được đảo trên thiết bị khác.'**
+  String syncCorrectionAlreadyReversedNotice(String item, String amount);
+
+  /// Notice shown when a transaction correction from another device was kept
+  ///
+  /// In vi, this message translates to:
+  /// **'Thay đổi mới hơn của giao dịch {item} ({amount}) từ thiết bị khác đã được giữ.'**
+  String syncCorrectionEditedElsewhereNotice(String item, String amount);
+
+  /// Action to delete a recent transaction
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa giao dịch'**
+  String get correctionActionDelete;
+
+  /// Explains that deleting one income entry deletes the complete allocation event
+  ///
+  /// In vi, this message translates to:
+  /// **'Thao tác này sẽ xóa toàn bộ khoản thu gồm {count} mục.'**
+  String correctionIncomeEventNote(int count);
+
+  /// Title of the delete confirmation dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa giao dịch này?'**
+  String get correctionDeleteTitle;
+
+  /// Short summary of the transaction being deleted
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa giao dịch {amount} của {item}?'**
+  String correctionDeleteMessage(String amount, String item);
+
+  /// Resulting balance line for an item affected by an income event correction
+  ///
+  /// In vi, this message translates to:
+  /// **'{item}: {balance}'**
+  String correctionBalanceLine(String item, String balance);
+
+  /// Warning shown when a correction results in a negative item balance
+  ///
+  /// In vi, this message translates to:
+  /// **'Số dư sau thao tác này sẽ âm.'**
+  String get correctionNegativeBalanceWarning;
+
+  /// Explains why the correction cannot restore a balance for a removed item
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản này đã được gỡ khỏi kế hoạch; không có số dư nào được khôi phục.'**
+  String get correctionItemRemovedNote;
+
+  /// Snack bar shown after a transaction is deleted
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa giao dịch'**
+  String get correctionDoneDeleted;
+
+  /// Error shown when deletion is attempted after the correction window
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã quá 24 giờ. Bạn chỉ có thể đảo giao dịch này.'**
+  String get correctionErrorWindowEnded;
+
+  /// General error shown when a transaction changed before the correction was confirmed
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch không còn có thể thay đổi.'**
+  String get correctionErrorNoLongerAvailable;
+
+  /// Action to edit a recent expense
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉnh sửa'**
+  String get correctionActionEdit;
+
+  /// Title of the expense edit dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉnh sửa giao dịch'**
+  String get correctionEditTitle;
+
+  /// Amount field label in the expense edit dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền'**
+  String get correctionEditAmountLabel;
+
+  /// Destination expense item selector label in the edit dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản chi'**
+  String get correctionEditItemLabel;
+
+  /// Heading for the balance preview in the expense edit dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Số dư sau khi lưu'**
+  String get correctionEditBalanceTitle;
+
+  /// Save button in the expense edit dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu thay đổi'**
+  String get correctionEditSave;
+
+  /// Validation error for a zero or empty edited transaction amount
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập số tiền lớn hơn 0.'**
+  String get correctionErrorAmount;
+
+  /// Error shown when the selected expense item was removed or is not a leaf
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản chi này không còn trong kế hoạch.'**
+  String get correctionErrorItemRemoved;
+
+  /// Snack bar shown after an expense edit succeeds
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu thay đổi'**
+  String get correctionDoneEdited;
+
+  /// Action to reverse an older transaction
+  ///
+  /// In vi, this message translates to:
+  /// **'Đảo giao dịch'**
+  String get correctionActionReverse;
+
+  /// Title of the reversal confirmation dialog
+  ///
+  /// In vi, this message translates to:
+  /// **'Đảo giao dịch?'**
+  String get correctionReverseTitle;
+
+  /// Short summary of the transaction being reversed
+  ///
+  /// In vi, this message translates to:
+  /// **'Đảo giao dịch {amount} của {item}?'**
+  String correctionReverseMessage(String amount, String item);
+
+  /// Heading for resulting item balances in transaction confirmations
+  ///
+  /// In vi, this message translates to:
+  /// **'Số dư sau thao tác'**
+  String get correctionResultingBalancesLabel;
+
+  /// Link shown for an original transaction that has been reversed
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đảo'**
+  String get correctionSheetReversedTag;
+
+  /// Link shown for a reversal transaction
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch đảo của {item}'**
+  String correctionSheetReversalOf(String item);
+
+  /// Explanation shown when a transaction has no available actions
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch này không thể thay đổi.'**
+  String get correctionSheetNoActionReversed;
+
+  /// Snack bar shown after a transaction reversal succeeds
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đảo giao dịch'**
+  String get correctionDoneReversed;
+
+  /// Tag for an original transaction that was reversed
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đảo'**
+  String get historyTagReversed;
+
+  /// Tag for a transaction that reverses an earlier one
+  ///
+  /// In vi, this message translates to:
+  /// **'Giao dịch đảo'**
+  String get historyTagReversal;
+
+  /// Monthly total of reversed expenses
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản chi được hoàn'**
+  String get reportRefundedExpense;
+
+  /// Monthly total of reversed income
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoản thu đã rút lại'**
+  String get reportWithdrawnIncome;
+
+  /// Shows an item's balance before and after an expense edit
+  ///
+  /// In vi, this message translates to:
+  /// **'{item}: {before} → {after}'**
+  String correctionEditBalancePreview(String item, String before, String after);
 }
 
 class _AppLocalizationsDelegate

@@ -11,6 +11,7 @@ TransactionHistoryRecord _record({
   required int amount,
   String displayName = 'Item',
   String? displayGroupName,
+  String? reversesId,
 }) {
   return TransactionHistoryRecord(
     id: id,
@@ -21,6 +22,7 @@ TransactionHistoryRecord _record({
     displayName: displayName,
     displayGroupName: displayGroupName,
     displayIconKey: null,
+    reversesId: reversesId,
   );
 }
 
@@ -107,6 +109,42 @@ void main() {
       final totals = computeReportTotals(const []);
       expect(totals.totalIncome, 0);
       expect(totals.totalExpense, 0);
+    });
+
+    test('reversals are reported separately, not as negative totals', () {
+      final totals = computeReportTotals([
+        _record(
+          id: 'expense',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.expense,
+          amount: 500,
+        ),
+        _record(
+          id: 'refund',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.expense,
+          amount: 200,
+          reversesId: 'expense',
+        ),
+        _record(
+          id: 'income',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.income,
+          amount: 1000,
+        ),
+        _record(
+          id: 'withdrawal',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.income,
+          amount: 300,
+          reversesId: 'income',
+        ),
+      ]);
+
+      expect(totals.totalIncome, 1000);
+      expect(totals.totalExpense, 500);
+      expect(totals.refundedExpense, 200);
+      expect(totals.withdrawnIncome, 300);
     });
   });
 
@@ -237,6 +275,46 @@ void main() {
       ], tree);
 
       expect(entries.map((e) => e.itemId), ['a']);
+    });
+
+    test('reversal rows are excluded from spent and allocated activity', () {
+      final tree = [
+        ExpenseControlNode(
+          item: _item(id: 'a'),
+          children: const [],
+        ),
+      ];
+      final entries = computeReportBreakdown([
+        _record(
+          id: 'expense',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.expense,
+          amount: 500,
+        ),
+        _record(
+          id: 'refund',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.expense,
+          amount: 200,
+          reversesId: 'expense',
+        ),
+        _record(
+          id: 'income',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.income,
+          amount: 1000,
+        ),
+        _record(
+          id: 'withdrawal',
+          sourceItemId: 'a',
+          direction: TransactionHistoryDirection.income,
+          amount: 300,
+          reversesId: 'income',
+        ),
+      ], tree);
+
+      expect(entries.single.spent, 500);
+      expect(entries.single.allocated, 1000);
     });
 
     test('results are sorted by spent descending', () {

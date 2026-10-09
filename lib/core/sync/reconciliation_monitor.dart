@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/balance_ledger.dart';
-import 'sync_notice.dart';
+import 'package:finance/core/sync/sync_notice.dart';
 
 /// Checks that the balance a device derives from its transactions agrees with
 /// the balance the server reports for the same item (constitution,

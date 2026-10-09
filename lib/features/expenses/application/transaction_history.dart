@@ -94,7 +94,9 @@ TransactionHistoryView buildTransactionHistoryView({
   return TransactionHistoryView(
     expenseTotal: records
         .where(
-          (record) => record.direction == TransactionHistoryDirection.expense,
+          (record) =>
+              record.direction == TransactionHistoryDirection.expense &&
+              !record.isReversal,
         )
         .fold(0, (sum, record) => sum + record.amount),
     groupFilters: groupFilters,

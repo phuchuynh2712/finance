@@ -99,6 +99,7 @@ TransactionHistoryRecord _record({
   required int amount,
   required DateTime occurredAt,
   String displayName = 'Item',
+  String? reversesId,
 }) {
   return TransactionHistoryRecord(
     id: '$sourceItemId-${occurredAt.microsecondsSinceEpoch}-$amount',
@@ -109,6 +110,7 @@ TransactionHistoryRecord _record({
     displayName: displayName,
     displayGroupName: null,
     displayIconKey: null,
+    reversesId: reversesId,
   );
 }
 
@@ -226,6 +228,52 @@ void main() {
 
       expect(find.textContaining('25.000.000'), findsOneWidget);
       expect(find.textContaining('5.730.000'), findsOneWidget);
+    });
+
+    testWidgets('shows positive refund and withdrawn-income figures', (
+      tester,
+    ) async {
+      final records = [
+        _record(
+          sourceItemId: 'food',
+          direction: TransactionHistoryDirection.expense,
+          amount: 500,
+          occurredAt: currentMonth.add(const Duration(days: 1)),
+        ),
+        _record(
+          sourceItemId: 'food',
+          direction: TransactionHistoryDirection.expense,
+          amount: 200,
+          occurredAt: currentMonth.add(const Duration(days: 2)),
+          reversesId: 'expense',
+        ),
+        _record(
+          sourceItemId: 'food',
+          direction: TransactionHistoryDirection.income,
+          amount: 1000,
+          occurredAt: currentMonth.add(const Duration(days: 3)),
+        ),
+        _record(
+          sourceItemId: 'food',
+          direction: TransactionHistoryDirection.income,
+          amount: 300,
+          occurredAt: currentMonth.add(const Duration(days: 4)),
+          reversesId: 'income',
+        ),
+      ];
+      await tester.pumpWidget(
+        _harness(
+          selectedMonth: currentMonth,
+          records: records,
+          items: [_leaf('food')],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+      expect(find.text(l10n.reportRefundedExpense), findsOneWidget);
+      expect(find.text(l10n.reportWithdrawnIncome), findsOneWidget);
+      expect(find.textContaining('-200'), findsNothing);
     });
   });
 

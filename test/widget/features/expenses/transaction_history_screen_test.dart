@@ -6,12 +6,14 @@ import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/initial_pull_complete_provider.dart';
 import 'package:finance/core/theme/app_layout.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
+import 'package:finance/features/expenses/presentation/transaction_actions_sheet.dart';
 
 import '../../../support/pull_complete_override.dart';
 
@@ -52,6 +54,52 @@ void main() {
   );
 
   testWidgets(
+    'shows reversal tags, opposite sign and excludes refund from total',
+    (tester) async {
+      final now = DateTime.now();
+      await tester.pumpWidget(
+        _harness([
+          _record(
+            'Coffee',
+            TransactionHistoryDirection.expense,
+            25000,
+            now.subtract(const Duration(days: 1)),
+            group: 'Food',
+            isReversed: true,
+            reversedById: 'refund',
+          ),
+          _record(
+            'Refund',
+            TransactionHistoryDirection.expense,
+            25000,
+            now,
+            group: 'Food',
+            reversesId: 'Coffee',
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+
+      expect(find.text(l10n.historyTagReversed), findsOneWidget);
+      expect(find.text(l10n.historyTagReversal), findsOneWidget);
+      expect(
+        find.text(l10n.transactionHistoryExpenseTotal('25.000 ₫')),
+        findsOneWidget,
+      );
+      final refundAmount = tester.widget<Text>(find.text('+25.000 ₫'));
+      expect(
+        refundAmount.style?.color,
+        AppTheme.light.extension<AppSemanticColors>()!.successFg,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('Refund.*Giao dịch đảo')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
     'shows an empty state when the selected previous month has no transactions',
     (tester) async {
       final now = DateTime.now();
@@ -77,6 +125,35 @@ void main() {
       expect(find.text(l10n.transactionHistoryEmpty), findsOneWidget);
     },
   );
+
+  testWidgets('transaction rows open the correction action sheet', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      _harness([
+        _record(
+          'Coffee',
+          TransactionHistoryDirection.expense,
+          25000,
+          now,
+          group: 'Food',
+        ),
+      ]),
+    );
+    await tester.pumpAndSettle();
+
+    final coffee = find.text('Coffee');
+    final row = find.ancestor(of: coffee, matching: find.byType(InkWell)).first;
+    expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
+    expect(tester.widget<InkWell>(row).onTap, isNotNull);
+
+    await tester.tap(coffee);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TransactionActionsSheet), findsOneWidget);
+    expect(find.text('Coffee'), findsNWidgets(2));
+  });
 
   testWidgets(
     'at a compact width (<840dp), controls and rows render at full width, '
@@ -578,6 +655,9 @@ TransactionHistoryRecord _record(
   int amount,
   DateTime occurredAt, {
   String? group,
+  String? reversesId,
+  bool isReversed = false,
+  String? reversedById,
 }) {
   return TransactionHistoryRecord(
     id: name,
@@ -588,6 +668,9 @@ TransactionHistoryRecord _record(
     displayName: name,
     displayGroupName: group,
     displayIconKey: 'home',
+    reversesId: reversesId,
+    isReversed: isReversed,
+    reversedById: reversedById,
   );
 }
 

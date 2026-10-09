@@ -291,5 +291,218 @@
   "pinOfferAcceptAction": "Set PIN",
   "pinOfferDeclineAction": "Not now",
   "pinSetupContinueAction": "Continue",
-  "syncBalanceMismatchNotice": "The balance of \"{item}\" does not match the server's. Connect to the internet and reopen the app to synchronise."
+  "syncBalanceMismatchNotice": "The balance of \"{item}\" does not match the server's. Connect to the internet and reopen the app to synchronise.",
+  "syncCorrectionDeletedNotice": "Your change to {item} ({amount}) could not be applied because the transaction was deleted on another device.",
+  "@syncCorrectionDeletedNotice": {
+    "description": "Notice shown when another device deleted the transaction being corrected",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionReversedNotice": "Your change to {item} ({amount}) could not be applied because the transaction was reversed on another device.",
+  "@syncCorrectionReversedNotice": {
+    "description": "Notice shown when another device reversed the transaction being corrected",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionAlreadyReversedNotice": "The transaction for {item} ({amount}) was already reversed on another device.",
+  "@syncCorrectionAlreadyReversedNotice": {
+    "description": "Notice shown when another device already reversed the same transaction",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionEditedElsewhereNotice": "A newer change to the transaction for {item} ({amount}) was kept from another device.",
+  "@syncCorrectionEditedElsewhereNotice": {
+    "description": "Notice shown when a transaction correction from another device was kept",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionActionDelete": "Delete transaction",
+  "@correctionActionDelete": {
+    "description": "Action to delete a recent transaction"
+  },
+  "correctionIncomeEventNote": "This will delete the entire income allocation of {count} entries.",
+  "@correctionIncomeEventNote": {
+    "description": "Explains that deleting one income entry deletes the complete allocation event",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "correctionDeleteTitle": "Delete this transaction?",
+  "@correctionDeleteTitle": {
+    "description": "Title of the delete confirmation dialog"
+  },
+  "correctionDeleteMessage": "Delete the {amount} transaction from {item}?",
+  "@correctionDeleteMessage": {
+    "description": "Short summary of the transaction being deleted",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionBalanceLine": "{item}: {balance}",
+  "@correctionBalanceLine": {
+    "description": "Resulting balance line for an item affected by an income event correction",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionNegativeBalanceWarning": "This will leave the balance below zero.",
+  "@correctionNegativeBalanceWarning": {
+    "description": "Warning shown when a correction results in a negative item balance"
+  },
+  "correctionItemRemovedNote": "This item has been removed from the plan; no balance will be restored.",
+  "@correctionItemRemovedNote": {
+    "description": "Explains why the correction cannot restore a balance for a removed item"
+  },
+  "correctionDoneDeleted": "Transaction deleted",
+  "@correctionDoneDeleted": {
+    "description": "Snack bar shown after a transaction is deleted"
+  },
+  "correctionErrorWindowEnded": "More than 24 hours have passed. You can only reverse this transaction.",
+  "@correctionErrorWindowEnded": {
+    "description": "Error shown when deletion is attempted after the correction window"
+  },
+  "correctionErrorNoLongerAvailable": "This transaction can no longer be changed.",
+  "@correctionErrorNoLongerAvailable": {
+    "description": "General error shown when a transaction changed before the correction was confirmed"
+  },
+  "correctionActionEdit": "Edit",
+  "@correctionActionEdit": {
+    "description": "Action to edit a recent expense"
+  },
+  "correctionEditTitle": "Edit transaction",
+  "@correctionEditTitle": {
+    "description": "Title of the expense edit dialog"
+  },
+  "correctionEditAmountLabel": "Amount",
+  "@correctionEditAmountLabel": {
+    "description": "Amount field label in the expense edit dialog"
+  },
+  "correctionEditItemLabel": "Expense item",
+  "@correctionEditItemLabel": {
+    "description": "Destination expense item selector label in the edit dialog"
+  },
+  "correctionEditBalanceTitle": "Balance after saving",
+  "@correctionEditBalanceTitle": {
+    "description": "Heading for the balance preview in the expense edit dialog"
+  },
+  "correctionEditSave": "Save changes",
+  "@correctionEditSave": {
+    "description": "Save button in the expense edit dialog"
+  },
+  "correctionErrorAmount": "Enter an amount greater than zero.",
+  "@correctionErrorAmount": {
+    "description": "Validation error for a zero or empty edited transaction amount"
+  },
+  "correctionErrorItemRemoved": "This item is no longer in the plan.",
+  "@correctionErrorItemRemoved": {
+    "description": "Error shown when the selected expense item was removed or is not a leaf"
+  },
+  "correctionDoneEdited": "Changes saved",
+  "@correctionDoneEdited": {
+    "description": "Snack bar shown after an expense edit succeeds"
+  },
+  "correctionActionReverse": "Reverse transaction",
+  "@correctionActionReverse": {
+    "description": "Action to reverse an older transaction"
+  },
+  "correctionReverseTitle": "Reverse transaction?",
+  "@correctionReverseTitle": {
+    "description": "Title of the reversal confirmation dialog"
+  },
+  "correctionReverseMessage": "Reverse the {amount} transaction from {item}?",
+  "@correctionReverseMessage": {
+    "description": "Short summary of the transaction being reversed",
+    "placeholders": {
+      "amount": { "type": "String" },
+      "item": { "type": "String" }
+    }
+  },
+  "correctionResultingBalancesLabel": "Balances after this change",
+  "@correctionResultingBalancesLabel": {
+    "description": "Heading for resulting item balances in transaction confirmations"
+  },
+  "correctionSheetReversedTag": "Reversed",
+  "@correctionSheetReversedTag": {
+    "description": "Link shown for an original transaction that has been reversed"
+  },
+  "correctionSheetReversalOf": "Reversal of {item}",
+  "@correctionSheetReversalOf": {
+    "description": "Link shown for a reversal transaction",
+    "placeholders": { "item": { "type": "String" } }
+  },
+  "correctionSheetNoActionReversed": "This transaction can no longer be changed.",
+  "@correctionSheetNoActionReversed": {
+    "description": "Explanation shown when a transaction has no available actions"
+  },
+  "correctionDoneReversed": "Transaction reversed",
+  "@correctionDoneReversed": {
+    "description": "Snack bar shown after a transaction reversal succeeds"
+  },
+  "historyTagReversed": "Reversed",
+  "@historyTagReversed": {
+    "description": "Tag for an original transaction that was reversed"
+  },
+  "historyTagReversal": "Reversal",
+  "@historyTagReversal": {
+    "description": "Tag for a transaction that reverses an earlier one"
+  },
+  "reportRefundedExpense": "Refunded expenses",
+  "@reportRefundedExpense": {
+    "description": "Monthly total of reversed expenses"
+  },
+  "reportWithdrawnIncome": "Withdrawn income",
+  "@reportWithdrawnIncome": {
+    "description": "Monthly total of reversed income"
+  },
+  "correctionEditBalancePreview": "{item}: {before} → {after}",
+  "@correctionEditBalancePreview": {
+    "description": "Shows an item's balance before and after an expense edit",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  }
 }

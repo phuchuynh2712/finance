@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:finance/core/database/app_database_provider.dart';
-import 'sync_notice.dart';
+import 'package:finance/core/sync/sync_notice.dart';
 
 /// The notices of the sync layer waiting to be shown once (refusals the server
 /// made, changes it replaced, balances that do not match its own). Read by the
