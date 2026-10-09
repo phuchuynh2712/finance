@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'package:finance/core/theme/app_colors.dart';
 
 /// Semantic colors with no native [ColorScheme] slot (success, warning, and
 /// their soft/tint/foreground variants). Registered on [ThemeData.extensions]

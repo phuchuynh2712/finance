@@ -4,15 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
-import 'presentation/account_screen.dart';
-import 'presentation/change_password_screen.dart';
-import 'presentation/forgot_password_screen.dart';
-import 'presentation/pin_flow_controller.dart';
-import 'presentation/pin_flow_screen.dart';
-import 'presentation/reset_password_screen.dart';
-import 'presentation/security_screen.dart';
-import 'presentation/sign_in_screen.dart';
-import 'presentation/sign_up_screen.dart';
+import 'package:finance/features/account/presentation/account_screen.dart';
+import 'package:finance/features/account/presentation/change_password_screen.dart';
+import 'package:finance/features/account/presentation/forgot_password_screen.dart';
+import 'package:finance/features/account/presentation/pin_flow_controller.dart';
+import 'package:finance/features/account/presentation/pin_flow_screen.dart';
+import 'package:finance/features/account/presentation/reset_password_screen.dart';
+import 'package:finance/features/account/presentation/security_screen.dart';
+import 'package:finance/features/account/presentation/sign_in_screen.dart';
+import 'package:finance/features/account/presentation/sign_up_screen.dart';
 
 Widget accountScreenRoute(BuildContext context, GoRouterState state) =>
     const AccountScreen();

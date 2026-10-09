@@ -6,8 +6,8 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
-import 'change_password_controller.dart';
-import 'widgets/password_field.dart';
+import 'package:finance/features/account/presentation/change_password_controller.dart';
+import 'package:finance/features/account/presentation/widgets/password_field.dart';
 
 /// "Đổi mật khẩu": current password, new password and its confirmation.
 ///

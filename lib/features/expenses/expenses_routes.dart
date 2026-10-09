@@ -5,14 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
-import 'application/transaction_history.dart';
-import 'presentation/expense_screen.dart';
-import 'presentation/income_screen.dart';
-import 'presentation/overview_screen.dart';
-import 'presentation/report_screen.dart';
-import 'presentation/spending_screen.dart';
-import 'presentation/transaction_history_providers.dart';
-import 'presentation/transaction_history_screen.dart';
+import 'package:finance/features/expenses/application/transaction_history.dart';
+import 'package:finance/features/expenses/presentation/expense_screen.dart';
+import 'package:finance/features/expenses/presentation/income_screen.dart';
+import 'package:finance/features/expenses/presentation/overview_screen.dart';
+import 'package:finance/features/expenses/presentation/report_screen.dart';
+import 'package:finance/features/expenses/presentation/spending_screen.dart';
+import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
+import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 
 Widget spendingRoute(BuildContext context, GoRouterState state) =>
     const SpendingScreen();

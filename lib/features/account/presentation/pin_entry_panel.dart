@@ -7,8 +7,8 @@ import 'package:finance/core/auth/pin_rules.dart';
 import 'package:finance/core/error/error_mapper.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
-import 'widgets/pin_dots.dart';
-import 'widgets/pin_keypad.dart';
+import 'package:finance/features/account/presentation/widgets/pin_dots.dart';
+import 'package:finance/features/account/presentation/widgets/pin_keypad.dart';
 
 /// The PIN half of the lock screen (`contracts/pin-ui.md` §2): a title, the
 /// dots, one live message line, the number pad and the two ways out ("Dùng mật

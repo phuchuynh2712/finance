@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-import 'app_semantic_colors.dart';
+import 'package:finance/core/theme/app_colors.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
 
 /// Light and dark [ThemeData], built from the "Kiểm Soát" brand palette.
 /// Hex values, WCAG AA contrast verification, and usage constraints are

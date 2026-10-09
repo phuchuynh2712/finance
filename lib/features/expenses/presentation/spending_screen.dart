@@ -11,7 +11,7 @@ import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/core/widgets/page_title.dart';
 import 'package:finance/features/expenses/application/balance_view_service.dart';
-import 'widgets/balance_group_card.dart';
+import 'package:finance/features/expenses/presentation/widgets/balance_group_card.dart';
 
 /// Read-only balance hub (FR-001–FR-012): shows every Kiểm soát chi tiêu
 /// item/group's actual current balance, plus scaffolded entry points for

@@ -5,18 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/auth/app_lifecycle_observer.dart';
-import 'core/auth/auth_state_provider.dart';
-import 'core/database/app_database_provider.dart';
-import 'core/l10n/app_localizations.dart';
-import 'core/l10n/locale_notifier.dart';
-import 'core/network/supabase_client_provider.dart';
-import 'core/router/app_router.dart';
-import 'core/storage/app_preferences_storage.dart';
-import 'core/sync/pull_service_provider.dart';
-import 'core/sync/sync_worker_provider.dart';
-import 'core/theme/app_theme.dart';
-import 'core/theme/theme_mode_notifier.dart';
+import 'package:finance/core/auth/app_lifecycle_observer.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
+import 'package:finance/core/database/app_database_provider.dart';
+import 'package:finance/core/l10n/app_localizations.dart';
+import 'package:finance/core/l10n/locale_notifier.dart';
+import 'package:finance/core/network/supabase_client_provider.dart';
+import 'package:finance/core/router/app_router.dart';
+import 'package:finance/core/storage/app_preferences_storage.dart';
+import 'package:finance/core/sync/pull_service_provider.dart';
+import 'package:finance/core/sync/sync_worker_provider.dart';
+import 'package:finance/core/theme/app_theme.dart';
+import 'package:finance/core/theme/theme_mode_notifier.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +38,7 @@ Future<void> main() async {
     await SharedPreferences.getInstance(),
   );
   final initialThemeMode =
-      await preferencesStorage.getThemeMode() ?? ThemeMode.system;
+      await preferencesStorage.getThemeMode() ?? ThemeMode.light;
   final initialLocale =
       await preferencesStorage.getLocale() ?? const Locale('vi');
 
