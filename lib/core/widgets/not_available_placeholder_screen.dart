@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'adaptive_body.dart';
-import 'empty_state_view.dart';
-import 'page_title.dart';
+import 'package:finance/core/widgets/adaptive_body.dart';
+import 'package:finance/core/widgets/empty_state_view.dart';
+import 'package:finance/core/widgets/page_title.dart';
 
 /// Generalized "not yet available" placeholder, reused by every entry
 /// point whose real destination is a separate, unspecified future feature

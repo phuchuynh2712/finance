@@ -12,9 +12,9 @@ import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
-import 'biometric_enable_prompt.dart';
-import 'pin_entry_panel.dart';
-import 'pin_offer_prompt.dart';
+import 'package:finance/features/account/presentation/biometric_enable_prompt.dart';
+import 'package:finance/features/account/presentation/pin_entry_panel.dart';
+import 'package:finance/features/account/presentation/pin_offer_prompt.dart';
 
 /// Login screen (FR-003) — also reused, unchanged, as the app's cold-start
 /// / background-resume re-entry gate (FR-020/FR-021): when the router

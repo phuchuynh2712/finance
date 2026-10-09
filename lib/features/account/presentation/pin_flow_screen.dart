@@ -7,10 +7,10 @@ import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
-import 'pin_flow_controller.dart';
-import 'widgets/password_field.dart';
-import 'widgets/pin_dots.dart';
-import 'widgets/pin_keypad.dart';
+import 'package:finance/features/account/presentation/pin_flow_controller.dart';
+import 'package:finance/features/account/presentation/widgets/password_field.dart';
+import 'package:finance/features/account/presentation/widgets/pin_dots.dart';
+import 'package:finance/features/account/presentation/widgets/pin_keypad.dart';
 
 /// Sets up, changes or turns off the PIN (`contracts/pin-ui.md` §3): the account
 /// password (set-up) or the current PIN (change, turn off), then the new PIN

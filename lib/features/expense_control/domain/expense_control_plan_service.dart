@@ -1,4 +1,4 @@
-import 'expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 
 /// Presentation-facing tree shape: a top-level item paired with its direct
 /// children (data-model.md).

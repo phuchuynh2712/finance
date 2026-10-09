@@ -39,7 +39,7 @@ void main() {
         await SharedPreferences.getInstance(),
       );
       final restoredThemeMode =
-          await storage2.getThemeMode() ?? ThemeMode.system;
+          await storage2.getThemeMode() ?? ThemeMode.light;
       final restoredLocale = await storage2.getLocale() ?? const Locale('vi');
 
       expect(restoredThemeMode, ThemeMode.dark);
@@ -62,7 +62,7 @@ void main() {
       final storage = SharedPreferencesAppPreferencesStorage(
         await SharedPreferences.getInstance(),
       );
-      final themeNotifier = ThemeModeNotifier(storage, ThemeMode.system);
+      final themeNotifier = ThemeModeNotifier(storage, ThemeMode.light);
       final localeNotifier = LocaleNotifier(storage, const Locale('vi'));
       await themeNotifier.setThemeMode(ThemeMode.dark);
       await localeNotifier.setLocale(const Locale('en'));

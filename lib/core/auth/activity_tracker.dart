@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'app_lock_policy.dart';
-import 'lock_channel.dart';
+import 'package:finance/core/auth/app_lock_policy.dart';
+import 'package:finance/core/auth/lock_channel.dart';
 
 /// Locks the app after [AppLockPolicy.inactivityPeriod] without interaction
 /// (FR-001) and, on the web, shares the timer and the lock across browser tabs

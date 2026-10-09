@@ -13,9 +13,9 @@ import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expenses/application/expense_control_gateway.dart';
-import 'expense_entry_layout.dart';
-import 'expense_key_mapping.dart';
-import 'expense_providers.dart';
+import 'package:finance/features/expenses/presentation/expense_entry_layout.dart';
+import 'package:finance/features/expenses/presentation/expense_key_mapping.dart';
+import 'package:finance/features/expenses/presentation/expense_providers.dart';
 
 const _keypadKeys = [
   '1', '2', '3', //

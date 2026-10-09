@@ -1,4 +1,4 @@
-import 'lock_channel.dart';
+import 'package:finance/core/auth/lock_channel.dart';
 
 /// The channel of every platform that has exactly one window: it hears
 /// nothing and says nothing.

@@ -9,9 +9,10 @@ import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/page_title.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/theme_mode_notifier.dart';
-import 'account_controller.dart';
-import '../account_routes.dart' show AccountPlaceholderFeature;
-import 'widgets/account_menu.dart';
+import 'package:finance/features/account/presentation/account_controller.dart';
+import 'package:finance/features/account/account_routes.dart'
+    show AccountPlaceholderFeature;
+import 'package:finance/features/account/presentation/widgets/account_menu.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});

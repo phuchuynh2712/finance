@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'password_change_gateway.dart';
+import 'package:finance/core/auth/password_change_gateway.dart';
 
 /// The two tokens of a session created by [SupabaseAuthRest.signInWithPassword].
 /// Held in memory only, for a few seconds, and never logged.
