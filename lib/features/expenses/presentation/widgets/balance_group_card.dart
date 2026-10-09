@@ -6,7 +6,7 @@ import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/core/widgets/expense_control_icons.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
-import 'balance_item_row.dart';
+import 'package:finance/features/expenses/presentation/widgets/balance_item_row.dart';
 
 /// One top-level card on "Thu chi" — a leaf (its own balance) or a group
 /// (expandable children list, live-summed balance). Read-only throughout:

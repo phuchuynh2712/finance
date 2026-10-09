@@ -21,7 +21,7 @@ class SharedPreferencesAppPreferencesStorage implements AppPreferencesStorage {
 
   /// A read failure (malformed stored value) is treated as "never set"
   /// rather than rethrown, so a corrupted preference falls back to the
-  /// system default instead of crashing the app at launch (spec.md Edge
+  /// app's default appearance instead of crashing the app at launch (spec.md Edge
   /// Cases).
   @override
   Future<ThemeMode?> getThemeMode() async {

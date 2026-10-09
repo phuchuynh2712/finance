@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'app_database.dart';
+import 'package:finance/core/database/app_database.dart';
 
 /// Shared Drift database instance, injected via Riverpod per the
 /// constitution's Dependency Injection rule.

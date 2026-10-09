@@ -11,14 +11,15 @@ import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
-import 'expense_control_form_controller.dart';
-import 'expense_control_providers.dart';
-import 'widgets/allocation_mode_toggle.dart';
-import 'widgets/allocation_summary_banner.dart';
+import 'package:finance/features/expense_control/presentation/expense_control_form_controller.dart';
+import 'package:finance/features/expense_control/presentation/expense_control_providers.dart';
+import 'package:finance/features/expense_control/presentation/widgets/allocation_mode_toggle.dart';
+import 'package:finance/features/expense_control/presentation/widgets/allocation_summary_banner.dart';
 import 'package:finance/core/widgets/dashed_border.dart';
-import 'widgets/expense_group_card.dart';
-import 'widgets/expense_item_row.dart' show useInlineFormulaLabel;
-import 'widgets/icon_picker.dart';
+import 'package:finance/features/expense_control/presentation/widgets/expense_group_card.dart';
+import 'package:finance/features/expense_control/presentation/widgets/expense_item_row.dart'
+    show useInlineFormulaLabel;
+import 'package:finance/features/expense_control/presentation/widgets/icon_picker.dart';
 
 class ExpenseControlScreen extends ConsumerWidget {
   const ExpenseControlScreen({super.key});
@@ -195,12 +196,10 @@ class _ScreenContent extends ConsumerWidget {
                     : null,
               );
             },
-            onReorder: (oldIndex, newIndex) {
-              var adjustedNewIndex = newIndex;
-              if (oldIndex < newIndex) adjustedNewIndex -= 1;
+            onReorderItem: (oldIndex, newIndex) {
               final orderedIds = [for (final node in tree) node.item.id];
               final movedId = orderedIds.removeAt(oldIndex);
-              orderedIds.insert(adjustedNewIndex, movedId);
+              orderedIds.insert(newIndex, movedId);
               ref
                   .read(expenseControlRepositoryProvider)
                   .reorderTopLevel(orderedIds);

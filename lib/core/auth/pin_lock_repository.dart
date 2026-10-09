@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'pin_hasher.dart';
-import 'pin_rules.dart';
+import 'package:finance/core/auth/pin_hasher.dart';
+import 'package:finance/core/auth/pin_rules.dart';
 
 /// Whether the signed-in account has a PIN on this device, and if it still
 /// counts.

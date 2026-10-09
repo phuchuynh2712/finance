@@ -1,4 +1,4 @@
-import 'expense_control_item.dart';
+import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 
 /// See contracts/expense_control_repository.md for the full contract.
 abstract interface class ExpenseControlRepository {

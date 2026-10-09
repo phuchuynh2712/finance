@@ -5,7 +5,7 @@ import 'package:finance/core/auth/auth_repository.dart';
 import 'package:finance/core/auth/auth_state_provider.dart';
 import 'package:finance/core/auth/biometric_login_repository.dart';
 import 'package:finance/core/auth/pin_lock_repository.dart';
-import 'account_controller.dart';
+import 'package:finance/features/account/presentation/account_controller.dart';
 
 /// What the biometric switch shows (data-model.md §4): the stored preference
 /// for this account on this device, and whether the device can use it at all.

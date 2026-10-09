@@ -41,7 +41,7 @@ Widget _harness(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     home: Scaffold(
       body: ReorderableListView(
-        onReorder: (_, _) {},
+        onReorderItem: (_, _) {},
         children: [
           ExpenseGroupCard(
             key: const ValueKey('card'),

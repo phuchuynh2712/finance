@@ -91,7 +91,7 @@ class _FakeAppPreferencesStorage implements AppPreferencesStorage {
 
 Widget _harness(
   _FakeAccountAuthActions fake, {
-  ThemeMode initialThemeMode = ThemeMode.system,
+  ThemeMode initialThemeMode = ThemeMode.light,
   Locale initialLocale = const Locale('vi'),
 }) {
   return ProviderScope(
@@ -142,6 +142,29 @@ Widget _harness(
 
 void main() {
   group('Appearance toggle (US1)', () {
+    testWidgets('defaults to the light appearance', (tester) async {
+      final fake = _FakeAccountAuthActions();
+      await tester.pumpWidget(_harness(fake));
+      await tester.pumpAndSettle();
+
+      final lightChip = find
+          .ancestor(of: find.text('Sáng'), matching: find.byType(Material))
+          .first;
+      final darkChip = find
+          .ancestor(of: find.text('Tối'), matching: find.byType(Material))
+          .first;
+
+      expect(
+        tester.widget<Material>(lightChip).color,
+        AppTheme.light.colorScheme.primary,
+      );
+      expect(tester.widget<Material>(darkChip).color, Colors.transparent);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AccountScreen)),
+      );
+      expect(container.read(themeModeProvider), ThemeMode.light);
+    });
+
     testWidgets(
       'tapping "Tối" calls setThemeMode(dark) and reflects the new active state',
       (tester) async {

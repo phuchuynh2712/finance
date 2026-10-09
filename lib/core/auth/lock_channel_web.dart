@@ -3,7 +3,7 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-import 'lock_channel.dart';
+import 'package:finance/core/auth/lock_channel.dart';
 
 /// The browser's `BroadcastChannel` between the tabs of this origin, which is
 /// delivered to hidden tabs too and needs no polling.
