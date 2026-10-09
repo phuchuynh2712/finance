@@ -10,9 +10,9 @@ import 'package:finance/core/theme/app_layout.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/account/application/auth_error_mapper.dart';
-import 'biometric_enable_prompt.dart';
-import 'pin_offer_prompt.dart';
-import 'sign_up_validation.dart';
+import 'package:finance/features/account/presentation/biometric_enable_prompt.dart';
+import 'package:finance/features/account/presentation/pin_offer_prompt.dart';
+import 'package:finance/features/account/presentation/sign_up_validation.dart';
 
 /// Sign Up screen (FR-004). Signs the account in immediately on success —
 /// no email-confirmation step (FR-019).

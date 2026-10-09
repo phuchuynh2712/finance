@@ -10,10 +10,10 @@ import 'package:finance/core/theme/app_icons.dart';
 import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/features/account/application/change_password_service.dart';
-import 'other_devices_notice_controller.dart';
-import 'pin_flow_controller.dart';
-import 'security_controller.dart';
-import 'widgets/account_menu.dart';
+import 'package:finance/features/account/presentation/other_devices_notice_controller.dart';
+import 'package:finance/features/account/presentation/pin_flow_controller.dart';
+import 'package:finance/features/account/presentation/security_controller.dart';
+import 'package:finance/features/account/presentation/widgets/account_menu.dart';
 
 /// "Bảo mật", opened from the Bảo mật row on Hồ sơ at `/account/security`.
 /// Hosts the change-password entry, the biometric sign-in switch and, after a

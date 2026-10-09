@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/config/app_environment.dart';
-import 'password_change_gateway.dart';
-import 'pin_lock_repository.dart';
-import 'temporary_password_session.dart';
+import 'package:finance/core/auth/password_change_gateway.dart';
+import 'package:finance/core/auth/pin_lock_repository.dart';
+import 'package:finance/core/auth/temporary_password_session.dart';
 
 /// FR-004/FR-005/FR-006: picks which password-reset redirect to use.
 /// A plain, side-effect-free function (no [BuildContext], no platform

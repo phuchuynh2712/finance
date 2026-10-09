@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'auth_state_provider.dart';
+import 'package:finance/core/auth/auth_state_provider.dart';
 
 /// Tells the [ActivityTracker] when the app is back in front, so it can lock
 /// at once instead of waiting for its next periodic check (FR-001, FR-003).

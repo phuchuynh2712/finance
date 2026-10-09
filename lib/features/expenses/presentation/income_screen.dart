@@ -12,7 +12,7 @@ import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/core/widgets/adaptive_body.dart';
 import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
-import 'income_providers.dart';
+import 'package:finance/features/expenses/presentation/income_providers.dart';
 
 /// Income entry (FR-001–FR-019): lets the user record one or more named
 /// income line items, then distributes their sum across every leaf item's

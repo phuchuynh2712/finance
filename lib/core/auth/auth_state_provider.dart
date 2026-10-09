@@ -5,12 +5,12 @@ import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/network/supabase_client_provider.dart';
-import 'activity_tracker.dart';
-import 'auth_repository.dart';
-import 'biometric_login_repository.dart';
-import 'lock_channel.dart';
-import 'password_change_gateway.dart';
-import 'pin_lock_repository.dart';
+import 'package:finance/core/auth/activity_tracker.dart';
+import 'package:finance/core/auth/auth_repository.dart';
+import 'package:finance/core/auth/biometric_login_repository.dart';
+import 'package:finance/core/auth/lock_channel.dart';
+import 'package:finance/core/auth/password_change_gateway.dart';
+import 'package:finance/core/auth/pin_lock_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(

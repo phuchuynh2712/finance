@@ -8,7 +8,7 @@ import 'package:finance/core/widgets/dashed_border.dart';
 import 'package:finance/core/widgets/expense_control_icons.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
 import 'package:finance/features/expense_control/domain/expense_control_plan_service.dart';
-import 'expense_item_row.dart';
+import 'package:finance/features/expense_control/presentation/widgets/expense_item_row.dart';
 
 /// One top-level card — a leaf (its own formula row) or a group (children
 /// list + "Thêm khoản trong [Tên nhóm]"). The header (grip/icon/name/
