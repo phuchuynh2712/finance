@@ -783,10 +783,18 @@ void main() {
           )
           .first;
       expect(may.firstWhere((r) => r.id == 'original').isReversed, isTrue);
+      expect(
+        may.firstWhere((r) => r.id == 'original').reversedById,
+        'reversal',
+      );
       expect(may.firstWhere((r) => r.id == 'plain').isReversed, isFalse);
       expect(may.firstWhere((r) => r.id == 'original').reversesId, isNull);
       expect(june.single.reversesId, 'original');
       expect(june.single.isReversed, isFalse);
+
+      final original = await repository.getTransactionById('original');
+      expect(original?.isReversed, isTrue);
+      expect(original?.reversedById, 'reversal');
 
       await (db.update(
         db.financialTransactions,

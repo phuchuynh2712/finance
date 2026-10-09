@@ -838,4 +838,142 @@ class AppLocalizationsVi extends AppLocalizations {
   String syncBalanceMismatchNotice(String item) {
     return 'Số dư của \"$item\" chưa khớp với máy chủ. Hãy kết nối mạng và mở lại ứng dụng để đồng bộ.';
   }
+
+  @override
+  String syncCorrectionDeletedNotice(String item, String amount) {
+    return 'Thay đổi giao dịch $item ($amount) không được áp dụng vì giao dịch đã bị xóa trên thiết bị khác.';
+  }
+
+  @override
+  String syncCorrectionReversedNotice(String item, String amount) {
+    return 'Thay đổi giao dịch $item ($amount) không được áp dụng vì giao dịch đã được đảo trên thiết bị khác.';
+  }
+
+  @override
+  String syncCorrectionAlreadyReversedNotice(String item, String amount) {
+    return 'Giao dịch $item ($amount) đã được đảo trên thiết bị khác.';
+  }
+
+  @override
+  String syncCorrectionEditedElsewhereNotice(String item, String amount) {
+    return 'Thay đổi mới hơn của giao dịch $item ($amount) từ thiết bị khác đã được giữ.';
+  }
+
+  @override
+  String get correctionActionDelete => 'Xóa giao dịch';
+
+  @override
+  String correctionIncomeEventNote(int count) {
+    return 'Thao tác này sẽ xóa toàn bộ khoản thu gồm $count mục.';
+  }
+
+  @override
+  String get correctionDeleteTitle => 'Xóa giao dịch này?';
+
+  @override
+  String correctionDeleteMessage(String amount, String item) {
+    return 'Xóa giao dịch $amount của $item?';
+  }
+
+  @override
+  String correctionBalanceLine(String item, String balance) {
+    return '$item: $balance';
+  }
+
+  @override
+  String get correctionNegativeBalanceWarning =>
+      'Số dư sau thao tác này sẽ âm.';
+
+  @override
+  String get correctionItemRemovedNote =>
+      'Khoản này đã được gỡ khỏi kế hoạch; không có số dư nào được khôi phục.';
+
+  @override
+  String get correctionDoneDeleted => 'Đã xóa giao dịch';
+
+  @override
+  String get correctionErrorWindowEnded =>
+      'Đã quá 24 giờ. Bạn chỉ có thể đảo giao dịch này.';
+
+  @override
+  String get correctionErrorNoLongerAvailable =>
+      'Giao dịch không còn có thể thay đổi.';
+
+  @override
+  String get correctionActionEdit => 'Chỉnh sửa';
+
+  @override
+  String get correctionEditTitle => 'Chỉnh sửa giao dịch';
+
+  @override
+  String get correctionEditAmountLabel => 'Số tiền';
+
+  @override
+  String get correctionEditItemLabel => 'Khoản chi';
+
+  @override
+  String get correctionEditBalanceTitle => 'Số dư sau khi lưu';
+
+  @override
+  String get correctionEditSave => 'Lưu thay đổi';
+
+  @override
+  String get correctionErrorAmount => 'Nhập số tiền lớn hơn 0.';
+
+  @override
+  String get correctionErrorItemRemoved =>
+      'Khoản chi này không còn trong kế hoạch.';
+
+  @override
+  String get correctionDoneEdited => 'Đã lưu thay đổi';
+
+  @override
+  String get correctionActionReverse => 'Đảo giao dịch';
+
+  @override
+  String get correctionReverseTitle => 'Đảo giao dịch?';
+
+  @override
+  String correctionReverseMessage(String amount, String item) {
+    return 'Đảo giao dịch $amount của $item?';
+  }
+
+  @override
+  String get correctionResultingBalancesLabel => 'Số dư sau thao tác';
+
+  @override
+  String get correctionSheetReversedTag => 'Đã đảo';
+
+  @override
+  String correctionSheetReversalOf(String item) {
+    return 'Giao dịch đảo của $item';
+  }
+
+  @override
+  String get correctionSheetNoActionReversed =>
+      'Giao dịch này không thể thay đổi.';
+
+  @override
+  String get correctionDoneReversed => 'Đã đảo giao dịch';
+
+  @override
+  String get historyTagReversed => 'Đã đảo';
+
+  @override
+  String get historyTagReversal => 'Giao dịch đảo';
+
+  @override
+  String get reportRefundedExpense => 'Khoản chi được hoàn';
+
+  @override
+  String get reportWithdrawnIncome => 'Khoản thu đã rút lại';
+
+  @override
+  String correctionEditBalancePreview(
+    String item,
+    String before,
+    String after,
+  ) {
+    return '$item: $before → $after';
+  }
 }

@@ -920,5 +920,218 @@
         "type": "String"
       }
     }
+  },
+  "syncCorrectionDeletedNotice": "Thay đổi giao dịch {item} ({amount}) không được áp dụng vì giao dịch đã bị xóa trên thiết bị khác.",
+  "@syncCorrectionDeletedNotice": {
+    "description": "Notice shown when another device deleted the transaction being corrected",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionReversedNotice": "Thay đổi giao dịch {item} ({amount}) không được áp dụng vì giao dịch đã được đảo trên thiết bị khác.",
+  "@syncCorrectionReversedNotice": {
+    "description": "Notice shown when another device reversed the transaction being corrected",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionAlreadyReversedNotice": "Giao dịch {item} ({amount}) đã được đảo trên thiết bị khác.",
+  "@syncCorrectionAlreadyReversedNotice": {
+    "description": "Notice shown when another device already reversed the same transaction",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCorrectionEditedElsewhereNotice": "Thay đổi mới hơn của giao dịch {item} ({amount}) từ thiết bị khác đã được giữ.",
+  "@syncCorrectionEditedElsewhereNotice": {
+    "description": "Notice shown when a transaction correction from another device was kept",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionActionDelete": "Xóa giao dịch",
+  "@correctionActionDelete": {
+    "description": "Action to delete a recent transaction"
+  },
+  "correctionIncomeEventNote": "Thao tác này sẽ xóa toàn bộ khoản thu gồm {count} mục.",
+  "@correctionIncomeEventNote": {
+    "description": "Explains that deleting one income entry deletes the complete allocation event",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "correctionDeleteTitle": "Xóa giao dịch này?",
+  "@correctionDeleteTitle": {
+    "description": "Title of the delete confirmation dialog"
+  },
+  "correctionDeleteMessage": "Xóa giao dịch {amount} của {item}?",
+  "@correctionDeleteMessage": {
+    "description": "Short summary of the transaction being deleted",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionBalanceLine": "{item}: {balance}",
+  "@correctionBalanceLine": {
+    "description": "Resulting balance line for an item affected by an income event correction",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "correctionNegativeBalanceWarning": "Số dư sau thao tác này sẽ âm.",
+  "@correctionNegativeBalanceWarning": {
+    "description": "Warning shown when a correction results in a negative item balance"
+  },
+  "correctionItemRemovedNote": "Khoản này đã được gỡ khỏi kế hoạch; không có số dư nào được khôi phục.",
+  "@correctionItemRemovedNote": {
+    "description": "Explains why the correction cannot restore a balance for a removed item"
+  },
+  "correctionDoneDeleted": "Đã xóa giao dịch",
+  "@correctionDoneDeleted": {
+    "description": "Snack bar shown after a transaction is deleted"
+  },
+  "correctionErrorWindowEnded": "Đã quá 24 giờ. Bạn chỉ có thể đảo giao dịch này.",
+  "@correctionErrorWindowEnded": {
+    "description": "Error shown when deletion is attempted after the correction window"
+  },
+  "correctionErrorNoLongerAvailable": "Giao dịch không còn có thể thay đổi.",
+  "@correctionErrorNoLongerAvailable": {
+    "description": "General error shown when a transaction changed before the correction was confirmed"
+  },
+  "correctionActionEdit": "Chỉnh sửa",
+  "@correctionActionEdit": {
+    "description": "Action to edit a recent expense"
+  },
+  "correctionEditTitle": "Chỉnh sửa giao dịch",
+  "@correctionEditTitle": {
+    "description": "Title of the expense edit dialog"
+  },
+  "correctionEditAmountLabel": "Số tiền",
+  "@correctionEditAmountLabel": {
+    "description": "Amount field label in the expense edit dialog"
+  },
+  "correctionEditItemLabel": "Khoản chi",
+  "@correctionEditItemLabel": {
+    "description": "Destination expense item selector label in the edit dialog"
+  },
+  "correctionEditBalanceTitle": "Số dư sau khi lưu",
+  "@correctionEditBalanceTitle": {
+    "description": "Heading for the balance preview in the expense edit dialog"
+  },
+  "correctionEditSave": "Lưu thay đổi",
+  "@correctionEditSave": {
+    "description": "Save button in the expense edit dialog"
+  },
+  "correctionErrorAmount": "Nhập số tiền lớn hơn 0.",
+  "@correctionErrorAmount": {
+    "description": "Validation error for a zero or empty edited transaction amount"
+  },
+  "correctionErrorItemRemoved": "Khoản chi này không còn trong kế hoạch.",
+  "@correctionErrorItemRemoved": {
+    "description": "Error shown when the selected expense item was removed or is not a leaf"
+  },
+  "correctionDoneEdited": "Đã lưu thay đổi",
+  "@correctionDoneEdited": {
+    "description": "Snack bar shown after an expense edit succeeds"
+  },
+  "correctionActionReverse": "Đảo giao dịch",
+  "@correctionActionReverse": {
+    "description": "Action to reverse an older transaction"
+  },
+  "correctionReverseTitle": "Đảo giao dịch?",
+  "@correctionReverseTitle": {
+    "description": "Title of the reversal confirmation dialog"
+  },
+  "correctionReverseMessage": "Đảo giao dịch {amount} của {item}?",
+  "@correctionReverseMessage": {
+    "description": "Short summary of the transaction being reversed",
+    "placeholders": {
+      "amount": { "type": "String" },
+      "item": { "type": "String" }
+    }
+  },
+  "correctionResultingBalancesLabel": "Số dư sau thao tác",
+  "@correctionResultingBalancesLabel": {
+    "description": "Heading for resulting item balances in transaction confirmations"
+  },
+  "correctionSheetReversedTag": "Đã đảo",
+  "@correctionSheetReversedTag": {
+    "description": "Link shown for an original transaction that has been reversed"
+  },
+  "correctionSheetReversalOf": "Giao dịch đảo của {item}",
+  "@correctionSheetReversalOf": {
+    "description": "Link shown for a reversal transaction",
+    "placeholders": { "item": { "type": "String" } }
+  },
+  "correctionSheetNoActionReversed": "Giao dịch này không thể thay đổi.",
+  "@correctionSheetNoActionReversed": {
+    "description": "Explanation shown when a transaction has no available actions"
+  },
+  "correctionDoneReversed": "Đã đảo giao dịch",
+  "@correctionDoneReversed": {
+    "description": "Snack bar shown after a transaction reversal succeeds"
+  },
+  "historyTagReversed": "Đã đảo",
+  "@historyTagReversed": {
+    "description": "Tag for an original transaction that was reversed"
+  },
+  "historyTagReversal": "Giao dịch đảo",
+  "@historyTagReversal": {
+    "description": "Tag for a transaction that reverses an earlier one"
+  },
+  "reportRefundedExpense": "Khoản chi được hoàn",
+  "@reportRefundedExpense": {
+    "description": "Monthly total of reversed expenses"
+  },
+  "reportWithdrawnIncome": "Khoản thu đã rút lại",
+  "@reportWithdrawnIncome": {
+    "description": "Monthly total of reversed income"
+  },
+  "correctionEditBalancePreview": "{item}: {before} → {after}",
+  "@correctionEditBalancePreview": {
+    "description": "Shows an item's balance before and after an expense edit",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
   }
 }

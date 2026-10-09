@@ -11,10 +11,13 @@ import 'package:finance/features/expense_control/domain/expense_control_item.dar
 import 'package:finance/features/expense_control/domain/expense_control_repository.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_repository.dart';
-import 'ledger_writes.dart';
+import 'package:finance/features/expense_control/data/ledger_writes.dart';
 
 class ExpenseControlRepositoryImpl
-    implements ExpenseControlRepository, TransactionHistoryRepository {
+    implements
+        ExpenseControlRepository,
+        TransactionHistoryRepository,
+        TransactionHistoryLookup {
   ExpenseControlRepositoryImpl(this._db, {required String userId})
     : _userId = userId;
 
@@ -76,6 +79,7 @@ class ExpenseControlRepositoryImpl
   TransactionHistoryRecord _toHistoryRecord(
     FinancialTransactionRow row, {
     required bool isReversed,
+    String? reversedById,
   }) {
     return TransactionHistoryRecord(
       id: row.id,
@@ -91,6 +95,35 @@ class ExpenseControlRepositoryImpl
       displayIconKey: row.displayIconKey,
       reversesId: row.reversesId,
       isReversed: isReversed,
+      reversedById: reversedById,
+    );
+  }
+
+  @override
+  Future<TransactionHistoryRecord?> getTransactionById(
+    String transactionId,
+  ) async {
+    final row =
+        await (_db.select(_db.financialTransactions)..where(
+              (record) =>
+                  record.id.equals(transactionId) &
+                  record.userId.equals(_userId) &
+                  record.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    if (row == null) return null;
+    final reversal =
+        await (_db.select(_db.financialTransactions)..where(
+              (record) =>
+                  record.reversesId.equals(transactionId) &
+                  record.userId.equals(_userId) &
+                  record.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    return _toHistoryRecord(
+      row,
+      isReversed: reversal != null,
+      reversedById: reversal?.id,
     );
   }
 
@@ -104,22 +137,34 @@ class ExpenseControlRepositoryImpl
   }) {
     final transactions = _db.financialTransactions;
     final reversal = _db.alias(_db.financialTransactions, 'reversal');
+    final reversalLink = _db.alias(_db.financialTransactions, 'reversal_link');
     final isReversed = existsQuery(
       _db.select(reversal)..where(
-        (r) => r.reversesId.equalsExp(transactions.id) & r.deletedAt.isNull(),
+        (r) =>
+            r.reversesId.equalsExp(transactions.id) &
+            r.userId.equals(_userId) &
+            r.deletedAt.isNull(),
       ),
     );
-    final query = _db.select(transactions).join([])
-      ..addColumns([isReversed])
-      ..where(
-        transactions.userId.equals(_userId) &
-            transactions.deletedAt.isNull() &
-            filter(transactions),
-      )
-      ..orderBy([
-        OrderingTerm.desc(transactions.occurredAt),
-        OrderingTerm.desc(transactions.createdAt),
-      ]);
+    final query =
+        _db.select(transactions).join([
+            leftOuterJoin(
+              reversalLink,
+              reversalLink.reversesId.equalsExp(transactions.id) &
+                  reversalLink.userId.equals(_userId) &
+                  reversalLink.deletedAt.isNull(),
+            ),
+          ])
+          ..addColumns([isReversed])
+          ..where(
+            transactions.userId.equals(_userId) &
+                transactions.deletedAt.isNull() &
+                filter(transactions),
+          )
+          ..orderBy([
+            OrderingTerm.desc(transactions.occurredAt),
+            OrderingTerm.desc(transactions.createdAt),
+          ]);
     if (limit != null) query.limit(limit);
     return query.watch().map(
       (rows) => [
@@ -127,6 +172,7 @@ class ExpenseControlRepositoryImpl
           _toHistoryRecord(
             r.readTable(transactions),
             isReversed: r.read(isReversed) ?? false,
+            reversedById: r.readTableOrNull(reversalLink)?.id,
           ),
       ],
     );
