@@ -842,4 +842,142 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncBalanceMismatchNotice(String item) {
     return 'The balance of \"$item\" does not match the server\'s. Connect to the internet and reopen the app to synchronise.';
   }
+
+  @override
+  String syncCorrectionDeletedNotice(String item, String amount) {
+    return 'Your change to $item ($amount) could not be applied because the transaction was deleted on another device.';
+  }
+
+  @override
+  String syncCorrectionReversedNotice(String item, String amount) {
+    return 'Your change to $item ($amount) could not be applied because the transaction was reversed on another device.';
+  }
+
+  @override
+  String syncCorrectionAlreadyReversedNotice(String item, String amount) {
+    return 'The transaction for $item ($amount) was already reversed on another device.';
+  }
+
+  @override
+  String syncCorrectionEditedElsewhereNotice(String item, String amount) {
+    return 'A newer change to the transaction for $item ($amount) was kept from another device.';
+  }
+
+  @override
+  String get correctionActionDelete => 'Delete transaction';
+
+  @override
+  String correctionIncomeEventNote(int count) {
+    return 'This will delete the entire income allocation of $count entries.';
+  }
+
+  @override
+  String get correctionDeleteTitle => 'Delete this transaction?';
+
+  @override
+  String correctionDeleteMessage(String amount, String item) {
+    return 'Delete the $amount transaction from $item?';
+  }
+
+  @override
+  String correctionBalanceLine(String item, String balance) {
+    return '$item: $balance';
+  }
+
+  @override
+  String get correctionNegativeBalanceWarning =>
+      'This will leave the balance below zero.';
+
+  @override
+  String get correctionItemRemovedNote =>
+      'This item has been removed from the plan; no balance will be restored.';
+
+  @override
+  String get correctionDoneDeleted => 'Transaction deleted';
+
+  @override
+  String get correctionErrorWindowEnded =>
+      'More than 24 hours have passed. You can only reverse this transaction.';
+
+  @override
+  String get correctionErrorNoLongerAvailable =>
+      'This transaction can no longer be changed.';
+
+  @override
+  String get correctionActionEdit => 'Edit';
+
+  @override
+  String get correctionEditTitle => 'Edit transaction';
+
+  @override
+  String get correctionEditAmountLabel => 'Amount';
+
+  @override
+  String get correctionEditItemLabel => 'Expense item';
+
+  @override
+  String get correctionEditBalanceTitle => 'Balance after saving';
+
+  @override
+  String get correctionEditSave => 'Save changes';
+
+  @override
+  String get correctionErrorAmount => 'Enter an amount greater than zero.';
+
+  @override
+  String get correctionErrorItemRemoved =>
+      'This item is no longer in the plan.';
+
+  @override
+  String get correctionDoneEdited => 'Changes saved';
+
+  @override
+  String get correctionActionReverse => 'Reverse transaction';
+
+  @override
+  String get correctionReverseTitle => 'Reverse transaction?';
+
+  @override
+  String correctionReverseMessage(String amount, String item) {
+    return 'Reverse the $amount transaction from $item?';
+  }
+
+  @override
+  String get correctionResultingBalancesLabel => 'Balances after this change';
+
+  @override
+  String get correctionSheetReversedTag => 'Reversed';
+
+  @override
+  String correctionSheetReversalOf(String item) {
+    return 'Reversal of $item';
+  }
+
+  @override
+  String get correctionSheetNoActionReversed =>
+      'This transaction can no longer be changed.';
+
+  @override
+  String get correctionDoneReversed => 'Transaction reversed';
+
+  @override
+  String get historyTagReversed => 'Reversed';
+
+  @override
+  String get historyTagReversal => 'Reversal';
+
+  @override
+  String get reportRefundedExpense => 'Refunded expenses';
+
+  @override
+  String get reportWithdrawnIncome => 'Withdrawn income';
+
+  @override
+  String correctionEditBalancePreview(
+    String item,
+    String before,
+    String after,
+  ) {
+    return '$item: $before → $after';
+  }
 }

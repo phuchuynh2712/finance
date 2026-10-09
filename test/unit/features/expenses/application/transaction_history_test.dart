@@ -94,6 +94,33 @@ void main() {
     expect(canAdvanceMonth(DateTime(2026, 9), DateTime(2026, 9, 24)), isFalse);
     expect(canAdvanceMonth(DateTime(2026, 8), DateTime(2026, 9, 24)), isTrue);
   });
+
+  test('reversal rows stay visible but are excluded from expense total', () {
+    final view = buildTransactionHistoryView(
+      records: [
+        _record(
+          'expense',
+          TransactionHistoryDirection.expense,
+          100,
+          DateTime(2026, 6, 2),
+        ),
+        _record(
+          'refund',
+          TransactionHistoryDirection.expense,
+          100,
+          DateTime(2026, 6, 3),
+          reversesId: 'expense',
+        ),
+      ],
+      filter: const TransactionHistoryFilter.all(),
+    );
+
+    expect(view.expenseTotal, 100);
+    expect(
+      view.groups.expand((group) => group.items).map((item) => item.id),
+      containsAll(['expense', 'refund']),
+    );
+  });
 }
 
 TransactionHistoryRecord _record(
@@ -102,6 +129,7 @@ TransactionHistoryRecord _record(
   int amount,
   DateTime occurredAt, {
   String? group,
+  String? reversesId,
 }) {
   return TransactionHistoryRecord(
     id: id,
@@ -112,5 +140,6 @@ TransactionHistoryRecord _record(
     displayName: id,
     displayGroupName: group,
     displayIconKey: 'home',
+    reversesId: reversesId,
   );
 }

@@ -13,6 +13,7 @@ import 'package:finance/core/di/expense_dependencies.dart';
 import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/theme/app_icons.dart';
+import 'package:finance/core/theme/app_semantic_colors.dart';
 import 'package:finance/core/theme/app_theme.dart';
 import 'package:finance/core/widgets/not_available_placeholder_screen.dart';
 import 'package:finance/features/expense_control/domain/expense_control_item.dart';
@@ -24,6 +25,7 @@ import 'package:finance/features/expenses/expenses_routes.dart'
     show overviewFilteredHistoryRoute, overviewNotificationsPlaceholderRoute;
 import 'package:finance/features/expenses/presentation/overview_providers.dart';
 import 'package:finance/features/expenses/presentation/overview_screen.dart';
+import 'package:finance/features/expenses/presentation/transaction_actions_sheet.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_screen.dart';
 
@@ -567,6 +569,77 @@ void main() {
       final incomeText = tester.widget<Text>(find.textContaining('25.000.000'));
       expect(expenseText.style?.color, theme.colorScheme.error);
       expect(incomeText.style?.color, theme.colorScheme.primary);
+    });
+
+    testWidgets('recent transaction rows open the correction action sheet', (
+      tester,
+    ) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      final record = TransactionHistoryRecord(
+        id: 't1',
+        sourceItemId: 'a',
+        direction: TransactionHistoryDirection.expense,
+        amount: 450000,
+        occurredAt: DateTime.now(),
+        displayName: 'Recent expense',
+        displayGroupName: 'Food',
+        displayIconKey: 'home',
+      );
+      await tester.pumpWidget(
+        _harness(
+          repository,
+          historyRepository: _FakeHistoryRepository([record]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final rowText = find.text('Recent expense');
+      final row = find
+          .ancestor(of: rowText, matching: find.byType(InkWell))
+          .first;
+      expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
+      expect(tester.widget<InkWell>(row).onTap, isNotNull);
+      await tester.tap(rowText);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TransactionActionsSheet), findsOneWidget);
+      expect(find.text('Food'), findsOneWidget);
+    });
+
+    testWidgets('reversal rows show their tag and opposite sign color', (
+      tester,
+    ) async {
+      final repository = _FakeExpenseControlRepository([_leaf('a')]);
+      final record = TransactionHistoryRecord(
+        id: 'refund',
+        sourceItemId: 'a',
+        direction: TransactionHistoryDirection.expense,
+        amount: 450000,
+        occurredAt: DateTime.now(),
+        displayName: 'Refunded expense',
+        displayGroupName: 'Food',
+        displayIconKey: 'home',
+        reversesId: 'expense',
+      );
+      await tester.pumpWidget(
+        _harness(
+          repository,
+          historyRepository: _FakeHistoryRepository([record]),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final l10n = await AppLocalizations.delegate.load(const Locale('vi'));
+
+      expect(find.text(l10n.historyTagReversal), findsOneWidget);
+      expect(find.text('+450.000 ₫'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text('+450.000 ₫')).style?.color,
+        AppTheme.light.extension<AppSemanticColors>()!.successFg,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('Refunded expense.*Giao dịch đảo')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows an empty state when there are no transactions', (

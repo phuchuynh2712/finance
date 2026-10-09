@@ -12,6 +12,7 @@ import 'package:finance/core/widgets/adaptive_gutters.dart';
 import 'package:finance/core/widgets/empty_state_view.dart';
 import 'package:finance/features/expense_control/domain/transaction_history_record.dart';
 import 'package:finance/features/expenses/application/transaction_history.dart';
+import 'package:finance/features/expenses/presentation/transaction_actions_sheet.dart';
 import 'package:finance/features/expenses/presentation/transaction_history_providers.dart';
 
 class TransactionHistoryScreen extends ConsumerWidget {
@@ -170,6 +171,10 @@ class TransactionHistoryScreen extends ConsumerWidget {
                                                 .transactionHistoryIncomeClassification,
                                             archivedLabel: l10n
                                                 .transactionHistoryArchivedItem,
+                                            onTap: () => showTransactionActions(
+                                              context,
+                                              group.items[index],
+                                            ),
                                           ),
                                     ),
                                   ),
@@ -463,82 +468,114 @@ class _TransactionRow extends StatelessWidget {
     required this.currency,
     required this.incomeLabel,
     required this.archivedLabel,
+    required this.onTap,
   });
 
   final TransactionHistoryRecord record;
   final CurrencyFormatter currency;
   final String incomeLabel;
   final String archivedLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final semantic = theme.extension<AppSemanticColors>()!;
     final isIncome = record.direction == TransactionHistoryDirection.income;
+    final isPositive = record.isReversal ? !isIncome : isIncome;
     final name = record.displayName.isEmpty
         ? archivedLabel
         : record.displayName;
     final classification = isIncome
         ? incomeLabel
         : record.displayGroupName ?? archivedLabel;
-    final amountColor = isIncome ? semantic.successFg : theme.colorScheme.error;
-    final sign = isIncome ? '+' : '-';
+    final amountColor = isPositive
+        ? semantic.successFg
+        : theme.colorScheme.error;
+    final sign = isPositive ? '+' : '-';
+    final stateTag = record.isReversal
+        ? AppLocalizations.of(context).historyTagReversal
+        : record.isReversed
+        ? AppLocalizations.of(context).historyTagReversed
+        : null;
     return Semantics(
-      label: '$name, $classification, $sign${currency.format(record.amount)}',
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: semantic.border1)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: semantic.primarySoft,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                _iconFor(record.displayIconKey),
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
+      button: true,
+      label:
+          '$name, $classification, $sign${currency.format(record.amount)}, ${stateTag ?? ''}',
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: semantic.border1)),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: semantic.primarySoft,
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    classification,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: semantic.fg2,
-                    ),
+                  child: Icon(
+                    _iconFor(record.displayIconKey),
+                    size: 18,
+                    color: theme.colorScheme.primary,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 0,
+                        children: [
+                          Text(
+                            classification,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: semantic.fg2,
+                            ),
+                          ),
+                          if (stateTag != null)
+                            Text(
+                              stateTag,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: semantic.fg2,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$sign${currency.format(record.amount)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: amountColor,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              '$sign${currency.format(record.amount)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: amountColor,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

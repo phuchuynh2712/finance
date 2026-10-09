@@ -26,7 +26,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/balance_ledger.dart';
-import 'remote_row_writer.dart';
+import 'package:finance/core/sync/remote_row_writer.dart';
+import 'package:finance/core/sync/sync_notice.dart';
 
 /// The two syncable tables this feature pulls (spec.md Assumptions — scope
 /// is limited to these two; no generic multi-table abstraction ahead of
@@ -92,6 +93,8 @@ class PullService {
     FetchBatch? fetchBatch,
     int batchSize = 500,
     void Function()? onCaughtUp,
+    SyncNotices? notices,
+    void Function()? onConnected,
   }) {
     assert(
       client != null || (subscribe != null && fetchBatch != null),
@@ -105,6 +108,8 @@ class PullService {
       fetchBatch: fetchBatch ?? _defaultFetchBatch(client!, batchSize),
       batchSize: batchSize,
       onCaughtUp: onCaughtUp,
+      notices: notices,
+      onConnected: onConnected,
     );
   }
 
@@ -115,11 +120,15 @@ class PullService {
     required FetchBatch fetchBatch,
     required int batchSize,
     required void Function()? onCaughtUp,
+    required SyncNotices? notices,
+    required void Function()? onConnected,
   }) : _userId = userId,
        _subscribe = subscribe,
        _fetchBatch = fetchBatch,
        _batchSize = batchSize,
-       _onCaughtUp = onCaughtUp;
+       _onCaughtUp = onCaughtUp,
+       _notices = notices,
+       _onConnected = onConnected;
 
   final AppDatabase _db;
   final String _userId;
@@ -131,6 +140,8 @@ class PullService {
   /// point at which the reconciliation of the derived balances against the
   /// server's can look (FR-018). Never called by [resync].
   final void Function()? _onCaughtUp;
+  final SyncNotices? _notices;
+  final void Function()? _onConnected;
 
   /// Real subscription: `RealtimeChannelConfig(replicationReady: true)`,
   /// firing [onReady] every time `onSystemEvents` reports "ok" — including
@@ -240,6 +251,7 @@ class PullService {
   Future<void> _readyTail = Future<void>.value();
 
   void _handleReady() {
+    _onConnected?.call();
     _readyTail = _readyTail.then((_) => runInitialPull()).catchError((_) {});
   }
 
@@ -267,7 +279,7 @@ class PullService {
   /// of which mechanism (fetch or live event) delivered it.
   void _handleLiveEvent(String table, Map<String, dynamic> row) {
     _liveWriteTail = _liveWriteTail
-        .then((_) => applyRemoteRowJson(_db, table, row))
+        .then((_) => applyRemoteRowJson(_db, table, row, notices: _notices))
         .catchError((_) {});
   }
 
@@ -345,6 +357,7 @@ class PullService {
             row,
             touchedItemIds: touchedItemIds,
             overwrite: fromTheBeginning && !waiting.contains(row['id']),
+            notices: _notices,
           );
         }
         await BalanceLedger.recomputeBalances(_db, touchedItemIds);

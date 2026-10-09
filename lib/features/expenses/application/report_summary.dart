@@ -6,16 +6,34 @@ import 'package:finance/features/expense_control/domain/transaction_history_reco
 /// filtering happens here — that's `transactionHistoryRecordsProvider`'s
 /// job, per research.md Decision 1).
 class ReportTotals {
-  const ReportTotals({required this.totalIncome, required this.totalExpense});
+  const ReportTotals({
+    required this.totalIncome,
+    required this.totalExpense,
+    required this.refundedExpense,
+    required this.withdrawnIncome,
+  });
 
   final int totalIncome;
   final int totalExpense;
+  final int refundedExpense;
+  final int withdrawnIncome;
 }
 
 ReportTotals computeReportTotals(List<TransactionHistoryRecord> records) {
   var totalIncome = 0;
   var totalExpense = 0;
+  var refundedExpense = 0;
+  var withdrawnIncome = 0;
   for (final record in records) {
+    if (record.isReversal) {
+      switch (record.direction) {
+        case TransactionHistoryDirection.income:
+          withdrawnIncome += record.amount;
+        case TransactionHistoryDirection.expense:
+          refundedExpense += record.amount;
+      }
+      continue;
+    }
     switch (record.direction) {
       case TransactionHistoryDirection.income:
         totalIncome += record.amount;
@@ -23,7 +41,12 @@ ReportTotals computeReportTotals(List<TransactionHistoryRecord> records) {
         totalExpense += record.amount;
     }
   }
-  return ReportTotals(totalIncome: totalIncome, totalExpense: totalExpense);
+  return ReportTotals(
+    totalIncome: totalIncome,
+    totalExpense: totalExpense,
+    refundedExpense: refundedExpense,
+    withdrawnIncome: withdrawnIncome,
+  );
 }
 
 /// data-model.md's three per-item display states — mutually exclusive and
@@ -77,6 +100,7 @@ List<ReportItemEntry> computeReportBreakdown(
   final fallbackNameByItem = <String, String>{};
 
   for (final record in records) {
+    if (record.isReversal) continue;
     final itemId = record.sourceItemId;
     fallbackNameByItem[itemId] = record.displayName;
     switch (record.direction) {

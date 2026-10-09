@@ -6,6 +6,8 @@ import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/balance_ledger.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
 import 'package:finance/core/sync/remote_row_writer.dart';
+import 'package:finance/core/sync/sync_notice.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 
 const _userId = 'test-user';
 
@@ -194,6 +196,143 @@ void main() {
 
       expect((await read('food')).balance, 1000);
     });
+
+    test(
+      'a remote reversal replaces an unsynced local reversal collision',
+      () async {
+        await db
+            .into(db.financialTransactions)
+            .insert(_tx('original', updatedAt: t1));
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              _tx('local-reversal', updatedAt: t2, reversesId: 'original'),
+            );
+        await db
+            .into(db.syncOutbox)
+            .insert(
+              SyncOutboxCompanion.insert(
+                id: 'local-reversal-outbox',
+                entityTable: 'financial_transactions',
+                rowId: 'local-reversal',
+                operation: SyncOperation.insert,
+                payload: '{}',
+              ),
+            );
+        final notices = SyncNotices(db);
+        await notices.loaded;
+        final noticeFuture = notices.stream.first;
+
+        await applyRemoteFinancialTransaction(
+          db,
+          _userId,
+          _tx('server-reversal', updatedAt: t3, reversesId: 'original'),
+          notices: notices,
+        );
+
+        expect(
+          await (db.select(
+            db.financialTransactions,
+          )..where((row) => row.id.equals('local-reversal'))).getSingleOrNull(),
+          isNull,
+        );
+        expect(
+          await (db.select(db.financialTransactions)
+                ..where((row) => row.id.equals('server-reversal')))
+              .getSingleOrNull(),
+          isNotNull,
+        );
+        expect(await db.select(db.syncOutbox).get(), isEmpty);
+        expect((await read('food')).balance, 1000);
+        expect((await noticeFuture).reason, SyncNoticeReason.alreadyReversed);
+        await notices.dispose();
+      },
+    );
+
+    test(
+      'deleting an original remotely cascades to its pending reversal',
+      () async {
+        await db
+            .into(db.financialTransactions)
+            .insert(_tx('original', updatedAt: t1));
+        await db
+            .into(db.financialTransactions)
+            .insert(
+              _tx('local-reversal', updatedAt: t2, reversesId: 'original'),
+            );
+        await db
+            .into(db.syncOutbox)
+            .insert(
+              SyncOutboxCompanion.insert(
+                id: 'local-reversal-outbox',
+                entityTable: 'financial_transactions',
+                rowId: 'local-reversal',
+                operation: SyncOperation.insert,
+                payload: '{}',
+              ),
+            );
+        final notices = SyncNotices(db);
+        await notices.loaded;
+        final noticeFuture = notices.stream.first;
+
+        await applyRemoteFinancialTransaction(
+          db,
+          _userId,
+          _tx('original', updatedAt: t3, deletedAt: t3),
+          notices: notices,
+        );
+
+        final reversal = await (db.select(
+          db.financialTransactions,
+        )..where((row) => row.id.equals('local-reversal'))).getSingle();
+        expect(reversal.deletedAt, t3);
+        expect(await db.select(db.syncOutbox).get(), isEmpty);
+        expect((await read('food')).balance, 1000);
+        expect((await noticeFuture).reason, SyncNoticeReason.deleted);
+        await notices.dispose();
+      },
+    );
+
+    test(
+      'a recent local edit overridden by a pulled row is reported once',
+      () async {
+        await db
+            .into(db.financialTransactions)
+            .insert(_tx('t', amount: 250, updatedAt: t2));
+        await db
+            .into(db.syncOutbox)
+            .insert(
+              SyncOutboxCompanion.insert(
+                id: 'synced-edit',
+                entityTable: 'financial_transactions',
+                rowId: 't',
+                operation: SyncOperation.update,
+                payload: '{}',
+                syncedAt: Value(t2),
+              ),
+            );
+        final notices = SyncNotices(db);
+        await notices.loaded;
+        final noticeFuture = notices.stream.first;
+
+        await applyRemoteFinancialTransaction(
+          db,
+          _userId,
+          _tx('t', amount: 300, updatedAt: t3),
+          notices: notices,
+          now: t3,
+        );
+
+        final notice = await noticeFuture;
+        expect(notice.reason, SyncNoticeReason.editedElsewhere);
+        expect(notice.amount, 250);
+        expect(
+          (await db.select(db.financialTransactions).getSingle()).amount,
+          300,
+        );
+        await notices.dispose();
+      },
+    );
 
     test('applying the same row twice, or two rows in either order, gives the '
         'same balances', () async {

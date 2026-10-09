@@ -10,6 +10,9 @@ TransactionHistoryRecord _record({
   String displayName = 'Item',
   String? displayGroupName = 'Group',
   int amount = 1000,
+  String? reversesId,
+  bool isReversed = false,
+  String? reversedById,
 }) {
   return TransactionHistoryRecord(
     id: id,
@@ -20,6 +23,9 @@ TransactionHistoryRecord _record({
     displayName: displayName,
     displayGroupName: displayGroupName,
     displayIconKey: 'home',
+    reversesId: reversesId,
+    isReversed: isReversed,
+    reversedById: reversedById,
   );
 }
 
@@ -86,6 +92,22 @@ void main() {
     expect(item.groupLabel, 'Thu nhập');
     expect(item.direction, TransactionHistoryDirection.income);
     expect(item.amount, 25000000);
+  });
+
+  test('passes through reversal state', () {
+    final items = buildOverviewRecentItems([
+      _record(id: 'reversal', occurredAt: now, reversesId: 'original'),
+      _record(
+        id: 'original',
+        occurredAt: now,
+        isReversed: true,
+        reversedById: 'reversal',
+      ),
+    ], now: now);
+
+    expect(items.first.reversesId, 'original');
+    expect(items.last.isReversed, isTrue);
+    expect(items.last.reversedById, 'reversal');
   });
 
   test('preserves the input order rather than re-sorting', () {

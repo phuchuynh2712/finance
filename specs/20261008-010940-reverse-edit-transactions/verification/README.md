@@ -192,3 +192,20 @@ sync worker, rows `zz-tc-…`, hard-deleted afterwards; nothing left over). All 
   Background sync, and therefore the monitor, keeps running while the app is locked.
 - **Not checked here:** a Chrome window (done in the PR 2 and PR 3 manual checks, where the new screens exist), and the
   iOS simulator.
+
+## Current implementation run
+
+- The complete Flutter test suite passes: **2122 tests, 0 failures**.
+- `flutter analyze`: no issues found after the package-import/deprecation cleanup.
+- `flutter build web --release` succeeds. Flutter reports the existing WebAssembly dry-run incompatibilities in
+  `flutter_secure_storage_web` (`dart:html`, `dart:js_util`, `package:js`) and an icon-font discovery warning; neither
+  prevents the regular Web build.
+- `flutter build apk --debug` succeeds. The Android build emits existing upcoming-support warnings for Gradle 8.14.0,
+  AGP 8.11.1 and Kotlin 2.2.20.
+- The debug app was installed and launched on the connected Android emulator, and the app was launched in Chrome. These
+  are launch/build checks only; no manual UI verification was performed here.
+- The editor and reconnect drain callbacks are now wired (`T083`/`T084`); `PullService` coverage asserts a drain request
+  on each ready/reconnect callback. The full sync two-device scenarios are still outstanding because the planned
+  `FakeServerLedger` and `two_device_corrections_test.dart` have not been implemented.
+- No emulator-to-emulator reconnect latency was measured; SC-004's under-10-second push-direction measurement remains
+  for manual verification. Do not treat the manual checks or the overall PR 3 gate as complete.

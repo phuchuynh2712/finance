@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:finance/core/formatting/currency_formatter.dart';
 import 'package:finance/core/l10n/app_localizations.dart';
 import 'package:finance/core/sync/sync_notice.dart';
 import 'package:finance/core/sync/sync_notices_provider.dart';
@@ -55,14 +56,32 @@ class _SyncNoticeHostState extends ConsumerState<SyncNoticeHost> {
   /// The sentence for [notice]. The reasons of the refusal and override
   /// notices come with their strings (transaction corrections).
   String? _messageFor(AppLocalizations l10n, SyncNotice notice) {
+    if (notice.reason == SyncNoticeReason.balanceMismatch) {
+      return l10n.syncBalanceMismatchNotice(notice.itemName);
+    }
+    final amount = notice.amount;
+    if (amount == null) {
+      throw StateError(
+        'Correction notice ${notice.id} is missing its transaction amount.',
+      );
+    }
+    final amountText = CurrencyFormatter(
+      Localizations.localeOf(context).toString(),
+    ).format(amount);
     return switch (notice.reason) {
-      SyncNoticeReason.balanceMismatch => l10n.syncBalanceMismatchNotice(
+      SyncNoticeReason.balanceMismatch => null,
+      SyncNoticeReason.deleted => l10n.syncCorrectionDeletedNotice(
         notice.itemName,
+        amountText,
       ),
-      SyncNoticeReason.deleted ||
-      SyncNoticeReason.reversed ||
-      SyncNoticeReason.alreadyReversed ||
-      SyncNoticeReason.editedElsewhere => null,
+      SyncNoticeReason.reversed => l10n.syncCorrectionReversedNotice(
+        notice.itemName,
+        amountText,
+      ),
+      SyncNoticeReason.alreadyReversed =>
+        l10n.syncCorrectionAlreadyReversedNotice(notice.itemName, amountText),
+      SyncNoticeReason.editedElsewhere =>
+        l10n.syncCorrectionEditedElsewhereNotice(notice.itemName, amountText),
     };
   }
 

@@ -15,12 +15,14 @@
 /// push would create an infinite pull→outbox→push→pull loop.
 library;
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart';
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/balance_ledger.dart';
 import 'package:finance/core/database/tables/expense_control_items_table.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
+import 'package:finance/core/sync/sync_notice.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 
 /// Idempotency (FR-004, research.md Decision 8 step 1): if [row]'s
 /// `updatedAt` is less than or equal to the local row's current
@@ -85,9 +87,13 @@ Future<void> applyRemoteFinancialTransaction(
   FinancialTransactionRow row, {
   Set<String>? touchedItemIds,
   bool overwrite = false,
+  SyncNotices? notices,
+  bool detectOverrides = true,
+  DateTime? now,
 }) async {
   if (row.userId != userId) return;
 
+  final reportedNotices = <SyncNotice>[];
   await db.transaction(() async {
     final existing = await (db.select(
       db.financialTransactions,
@@ -98,15 +104,142 @@ Future<void> applyRemoteFinancialTransaction(
       return;
     }
 
+    final touchedIds = <String>{
+      row.expenseControlItemId,
+      if (existing != null) existing.expenseControlItemId,
+    };
+    if (row.reversesId case final reversesId?) {
+      final collision =
+          await (db.select(db.financialTransactions)..where(
+                (t) =>
+                    t.reversesId.equals(reversesId) &
+                    t.id.equals(row.id).not() &
+                    t.deletedAt.isNull(),
+              ))
+              .getSingleOrNull();
+      if (collision != null) {
+        touchedIds.add(collision.expenseControlItemId);
+        await (db.delete(db.syncOutbox)..where(
+              (o) =>
+                  o.entityTable.equals('financial_transactions') &
+                  o.rowId.equals(collision.id),
+            ))
+            .go();
+        await (db.delete(
+          db.financialTransactions,
+        )..where((t) => t.id.equals(collision.id))).go();
+        reportedNotices.add(
+          SyncNotice(
+            id: 'reversal-collision:${collision.id}',
+            reason: SyncNoticeReason.alreadyReversed,
+            itemName: collision.displayName ?? '',
+            transactionId: collision.id,
+            amount: collision.amount,
+          ),
+        );
+      }
+    }
+
+    if (notices != null &&
+        detectOverrides &&
+        existing != null &&
+        _correctionFieldsDiffer(existing, row)) {
+      final cutoff = (now ?? DateTime.now()).subtract(
+        const Duration(hours: 24),
+      );
+      final recentLocalEdit =
+          await (db.select(db.syncOutbox)
+                ..where(
+                  (o) =>
+                      o.entityTable.equals('financial_transactions') &
+                      o.rowId.equals(row.id) &
+                      o.operation.equals(SyncOperation.update.name) &
+                      o.syncedAt.isNotNull() &
+                      o.syncedAt.isBiggerOrEqualValue(cutoff),
+                )
+                ..orderBy([(o) => OrderingTerm.desc(o.syncedAt)])
+                ..limit(1))
+              .getSingleOrNull();
+      if (recentLocalEdit != null) {
+        final deletedByOtherDevice =
+            row.deletedAt != null && existing.deletedAt == null;
+        reportedNotices.add(
+          SyncNotice(
+            id: 'pull-override:${recentLocalEdit.id}',
+            reason: deletedByOtherDevice
+                ? SyncNoticeReason.deleted
+                : SyncNoticeReason.editedElsewhere,
+            itemName: existing.displayName ?? row.displayName ?? '',
+            transactionId: row.id,
+            amount: existing.amount,
+          ),
+        );
+      }
+    }
+
     await db
         .into(db.financialTransactions)
         .insertOnConflictUpdate(row.toCompanion(true));
-    await _settleBalances(db, touchedItemIds, [
-      row.expenseControlItemId,
-      if (existing != null) existing.expenseControlItemId,
-    ]);
+
+    if (row.deletedAt != null && row.reversesId == null) {
+      final liveReversals =
+          await (db.select(db.financialTransactions)..where(
+                (t) => t.reversesId.equals(row.id) & t.deletedAt.isNull(),
+              ))
+              .get();
+      for (final reversal in liveReversals) {
+        touchedIds.add(reversal.expenseControlItemId);
+        final pendingOutbox =
+            await (db.select(db.syncOutbox)..where(
+                  (o) =>
+                      o.entityTable.equals('financial_transactions') &
+                      o.rowId.equals(reversal.id) &
+                      o.syncedAt.isNull() &
+                      o.rejectedAt.isNull(),
+                ))
+                .get();
+        if (pendingOutbox.isNotEmpty) {
+          reportedNotices.add(
+            SyncNotice(
+              id: 'deleted-original:${reversal.id}',
+              reason: SyncNoticeReason.deleted,
+              itemName: reversal.displayName ?? '',
+              transactionId: reversal.id,
+              amount: reversal.amount,
+            ),
+          );
+        }
+        await (db.update(
+          db.financialTransactions,
+        )..where((t) => t.id.equals(reversal.id))).write(
+          FinancialTransactionsCompanion(
+            deletedAt: Value(row.deletedAt),
+            updatedAt: Value(row.updatedAt),
+          ),
+        );
+        await (db.delete(db.syncOutbox)..where(
+              (o) =>
+                  o.entityTable.equals('financial_transactions') &
+                  o.rowId.equals(reversal.id),
+            ))
+            .go();
+      }
+    }
+
+    await _settleBalances(db, touchedItemIds, touchedIds);
   });
+  for (final notice in reportedNotices) {
+    notices?.report(notice);
+  }
 }
+
+bool _correctionFieldsDiffer(
+  FinancialTransactionRow local,
+  FinancialTransactionRow remote,
+) =>
+    local.amount != remote.amount ||
+    local.expenseControlItemId != remote.expenseControlItemId ||
+    local.deletedAt != remote.deletedAt;
 
 /// Either hands [itemIds] to the caller's collector (to recompute once per
 /// batch) or recomputes them now.
@@ -136,6 +269,9 @@ Future<void> applyRemoteRowJson(
   Map<String, dynamic> json, {
   Set<String>? touchedItemIds,
   bool overwrite = false,
+  SyncNotices? notices,
+  bool detectOverrides = true,
+  DateTime? now,
 }) async {
   final userId = json['user_id'] as String;
   switch (entityTable) {
@@ -196,6 +332,9 @@ Future<void> applyRemoteRowJson(
         ),
         touchedItemIds: touchedItemIds,
         overwrite: overwrite,
+        notices: notices,
+        detectOverrides: detectOverrides,
+        now: now,
       );
   }
 }

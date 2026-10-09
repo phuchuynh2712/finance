@@ -270,27 +270,78 @@ class _TotalsCards extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final currency = CurrencyFormatter(locale);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _TotalCard(
-            label: l10n.reportIncomeLabel,
-            amountText: currency.format(totals.totalIncome),
-            background: semantic.successSoft,
-            foreground: semantic.successFg,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _TotalCard(
+                label: l10n.reportIncomeLabel,
+                amountText: currency.format(totals.totalIncome),
+                background: semantic.successSoft,
+                foreground: semantic.successFg,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _TotalCard(
+                label: l10n.reportExpenseLabel,
+                amountText: currency.format(totals.totalExpense),
+                background: semantic.dangerSoft,
+                foreground: semantic.dangerFg,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _TotalCard(
-            label: l10n.reportExpenseLabel,
-            amountText: currency.format(totals.totalExpense),
-            background: semantic.dangerSoft,
-            foreground: semantic.dangerFg,
-          ),
-        ),
+        if (totals.refundedExpense != 0 || totals.withdrawnIncome != 0) ...[
+          const SizedBox(height: 12),
+          if (totals.refundedExpense != 0)
+            _NeutralReportTotal(
+              label: l10n.reportRefundedExpense,
+              amount: currency.format(totals.refundedExpense),
+            ),
+          if (totals.withdrawnIncome != 0)
+            _NeutralReportTotal(
+              label: l10n.reportWithdrawnIncome,
+              amount: currency.format(totals.withdrawnIncome),
+            ),
+        ],
       ],
+    );
+  }
+}
+
+class _NeutralReportTotal extends StatelessWidget {
+  const _NeutralReportTotal({required this.label, required this.amount});
+
+  final String label;
+  final String amount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = theme.extension<AppSemanticColors>()!;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(label, style: TextStyle(color: semantic.fg2)),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            amount,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

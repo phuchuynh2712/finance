@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart' show Value;
@@ -7,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/database/app_database.dart';
 import 'package:finance/core/database/tables/financial_transactions_table.dart';
+import 'package:finance/core/sync/sync_notice.dart';
 import 'package:finance/core/sync/sync_outbox_table.dart';
 import 'package:finance/core/sync/sync_worker.dart';
 
@@ -110,6 +112,10 @@ void main() {
     db.financialTransactions,
   )..where((t) => t.id.equals('txn'))).getSingle();
 
+  Future<FinancialTransactionRow?> readTxOrNull() => (db.select(
+    db.financialTransactions,
+  )..where((t) => t.id.equals('txn'))).getSingleOrNull();
+
   group('a push response is applied unconditionally', () {
     test('a transaction row replaces a local row whose updated_at is in the '
         'future (a device clock running fast), and takes the server\'s '
@@ -187,6 +193,167 @@ void main() {
       expect(rows.firstWhere((r) => r.id == 'o2').retryCount, 1);
     });
   });
+
+  group('permanent push refusals', () {
+    test(
+      'a refused insert is rejected, removed locally and not retried',
+      () async {
+        await seedItem(updatedAt: _t0);
+        await seedTx(amount: 100, updatedAt: _fast);
+        await outbox(
+          'o1',
+          'financial_transactions',
+          _txPayload(amount: 100, updatedAt: _fast),
+          op: SyncOperation.insert,
+        );
+        final notices = SyncNotices(db);
+        await notices.loaded;
+        final noticeFuture = notices.stream.first;
+        var pushes = 0;
+        final worker = SyncWorker(
+          db,
+          _unusedClient(),
+          push: (table, payload) async {
+            pushes++;
+            throw const PostgrestException(
+              message: 'invalid reversal',
+              code: 'TX001',
+            );
+          },
+          notices: notices,
+          now: () => _server,
+        );
+
+        await worker.drainOutbox();
+
+        expect(await readTxOrNull(), isNull);
+        final rejected = (await db.select(db.syncOutbox).get()).single;
+        expect(rejected.rejectedAt, _server);
+        expect(rejected.rejectReason, 'invalid_reversal');
+        expect(rejected.retryCount, 0);
+        expect((await noticeFuture).reason, SyncNoticeReason.deleted);
+        await worker.requestDrain();
+        expect(pushes, 1);
+        await notices.dispose();
+      },
+    );
+
+    test(
+      'a refused update restores the current server row despite local time',
+      () async {
+        await seedTx(amount: 200, updatedAt: _fast);
+        await outbox(
+          'o1',
+          'financial_transactions',
+          _txPayload(amount: 200, updatedAt: _fast),
+        );
+        final notices = SyncNotices(db);
+        await notices.loaded;
+        final noticeFuture = notices.stream.first;
+        final worker = SyncWorker(
+          db,
+          _unusedClient(),
+          push: (table, payload) async => throw const PostgrestException(
+            message: 'transaction already reversed',
+            code: 'TX003',
+          ),
+          fetchRow: (table, id) async =>
+              _txPayload(amount: 100, updatedAt: _server),
+          notices: notices,
+          now: () => _server,
+        );
+
+        await worker.drainOutbox();
+
+        final stored = await readTx();
+        expect(stored.amount, 100);
+        expect(stored.updatedAt, _server);
+        expect(
+          (await db.select(db.syncOutbox).get()).single.rejectReason,
+          'transaction_reversed',
+        );
+        expect((await noticeFuture).reason, SyncNoticeReason.reversed);
+        await notices.dispose();
+      },
+    );
+
+    test('a push-time server override is applied and reported once', () async {
+      await seedTx(amount: 100, updatedAt: _fast);
+      await outbox(
+        'o1',
+        'financial_transactions',
+        _txPayload(amount: 100, updatedAt: _fast),
+      );
+      final notices = SyncNotices(db);
+      await notices.loaded;
+      final noticeFuture = notices.stream.first;
+      final worker = SyncWorker(
+        db,
+        _unusedClient(),
+        push: (table, payload) async => {
+          ...payload,
+          'amount': 150,
+          'updated_at': _server.toIso8601String(),
+        },
+        notices: notices,
+        now: () => _server,
+      );
+
+      await worker.drainOutbox();
+
+      expect((await readTx()).amount, 150);
+      expect((await noticeFuture).reason, SyncNoticeReason.editedElsewhere);
+      expect((await db.select(db.syncOutbox).get()).single.syncedAt, _server);
+      await notices.dispose();
+    });
+  });
+
+  test(
+    'requestDrain coalesces requests made during the active drain',
+    () async {
+      await seedItem(updatedAt: _t0);
+      await outbox('o1', 'expense_control_items', _itemPayload());
+      final pushGate = Completer<void>();
+      final enteredPush = Completer<void>();
+      var pushes = 0;
+      final worker = SyncWorker(
+        db,
+        _unusedClient(),
+        push: (table, payload) async {
+          pushes++;
+          if (pushes == 1) {
+            enteredPush.complete();
+            await pushGate.future;
+            await outbox(
+              'o2',
+              'expense_control_items',
+              _itemPayload(name: 'Updated'),
+            );
+          }
+          return {...payload, 'updated_at': _server.toIso8601String()};
+        },
+        now: () => _server,
+      );
+
+      final drain = worker.drainOutbox();
+      await enteredPush.future;
+      final requested = [
+        worker.requestDrain(),
+        worker.requestDrain(),
+        worker.requestDrain(),
+      ];
+      pushGate.complete();
+      await Future.wait([drain, ...requested]);
+
+      expect(pushes, 2);
+      expect(
+        (await db.select(db.syncOutbox).get()).every(
+          (row) => row.syncedAt != null,
+        ),
+        isTrue,
+      );
+    },
+  );
 
   group('onIdle', () {
     test('is called at the end of a drain of an empty outbox', () async {

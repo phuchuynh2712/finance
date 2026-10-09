@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:finance/core/database/app_database.dart';
-import 'remote_row_writer.dart';
-import 'sync_outbox_table.dart';
+import 'package:finance/core/database/balance_ledger.dart';
+import 'package:finance/core/sync/push_failure.dart';
+import 'package:finance/core/sync/remote_row_writer.dart';
+import 'package:finance/core/sync/sync_notice.dart';
+import 'package:finance/core/sync/sync_outbox_table.dart';
 
 /// Drains the local outbox to Supabase on a periodic timer.
 ///
@@ -38,20 +42,32 @@ typedef PushRow =
       Map<String, dynamic> payload,
     );
 
+typedef FetchRow =
+    Future<Map<String, dynamic>?> Function(String table, String id);
+
 class SyncWorker {
   SyncWorker(
     this._db,
     SupabaseClient client, {
     Duration interval = const Duration(seconds: 30),
     PushRow? push,
+    FetchRow? fetchRow,
+    SyncNotices? notices,
+    DateTime Function()? now,
     FutureOr<void> Function()? onIdle,
   }) : _interval = interval,
        _push = push ?? _defaultPush(client),
+       _fetchRow = fetchRow ?? _defaultFetchRow(client),
+       _notices = notices,
+       _now = now ?? DateTime.now,
        _onIdle = onIdle;
 
   final AppDatabase _db;
   final Duration _interval;
   final PushRow _push;
+  final FetchRow _fetchRow;
+  final SyncNotices? _notices;
+  final DateTime Function() _now;
 
   /// Called at the end of every drain that leaves no entry waiting (even a
   /// drain of an empty outbox): a settled point for the reconciliation of the
@@ -59,10 +75,19 @@ class SyncWorker {
   /// breaks the drain.
   final FutureOr<void> Function()? _onIdle;
   Timer? _timer;
+  Future<void>? _activeDrain;
+  bool _drainRequested = false;
 
   static PushRow _defaultPush(SupabaseClient client) {
     return (table, payload) async {
       return client.from(table).upsert(payload).select().single();
+    };
+  }
+
+  static FetchRow _defaultFetchRow(SupabaseClient client) {
+    return (table, id) async {
+      final row = await client.from(table).select().eq('id', id).maybeSingle();
+      return row == null ? null : Map<String, dynamic>.from(row);
     };
   }
 
@@ -75,14 +100,40 @@ class SyncWorker {
     _timer = null;
   }
 
-  Future<void> drainOutbox() async {
+  Future<void> requestDrain() => drainOutbox();
+
+  Future<void> drainOutbox() {
+    final activeDrain = _activeDrain;
+    if (activeDrain != null) {
+      _drainRequested = true;
+      return activeDrain;
+    }
+
+    final drain = _runDrains();
+    _activeDrain = drain;
+    return drain;
+  }
+
+  Future<void> _runDrains() async {
+    try {
+      do {
+        _drainRequested = false;
+        await _drainOnce();
+      } while (_drainRequested);
+    } finally {
+      _activeDrain = null;
+    }
+  }
+
+  Future<void> _drainOnce() async {
     final pending = await (_db.select(
       _db.syncOutbox,
     )..where((row) => row.syncedAt.isNull() & row.rejectedAt.isNull())).get();
 
     for (final row in pending) {
+      Map<String, dynamic> payload = {};
       try {
-        final payload = jsonDecode(row.payload) as Map<String, dynamic>;
+        payload = jsonDecode(row.payload) as Map<String, dynamic>;
         switch (row.operation) {
           case SyncOperation.insert:
           case SyncOperation.update:
@@ -113,27 +164,163 @@ class SyncWorker {
             // response settles the row, so the newer local edit is not
             // rolled back in between.
             final response = await _push(row.entityTable, payload);
+            _reportPushOverride(row, payload, response);
             if (!await _hasOtherEntryWaiting(row)) {
               await applyRemoteRowJson(
                 _db,
                 row.entityTable,
                 response,
                 overwrite: true,
+                detectOverrides: false,
               );
             }
         }
         await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id)))
-            .write(SyncOutboxCompanion(syncedAt: Value(DateTime.now())));
-      } catch (_) {
-        // Network/server failure: leave the row unsynced and back off via
-        // retry_count. The next periodic drain will retry it.
-        await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id)))
-            .write(SyncOutboxCompanion(retryCount: Value(row.retryCount + 1)));
+            .write(SyncOutboxCompanion(syncedAt: Value(_now())));
+      } catch (error, stackTrace) {
+        final failure = PushFailure.classify(
+          error,
+          entityTable: row.entityTable,
+        );
+        if (failure case final PushRefused refusal) {
+          try {
+            await _handleRefusal(row, payload, refusal);
+            continue;
+          } catch (repairError, stackTrace) {
+            // Keep the refusal retryable if its authoritative row could not
+            // be fetched or its local repair could not be committed.
+            developer.log(
+              'Could not repair refused outbox row ${row.id}; it will retry.',
+              name: 'SyncWorker',
+              error: repairError,
+              stackTrace: stackTrace,
+              level: 1000,
+            );
+          }
+        }
+        developer.log(
+          'Outbox push for row ${row.id} was deferred for retry.',
+          name: 'SyncWorker',
+          error: error,
+          stackTrace: stackTrace,
+          level: 800,
+        );
+        await _incrementRetryCount(row);
       }
     }
 
     await _notifyIfIdle();
   }
+
+  Future<void> _handleRefusal(
+    SyncOutboxRow outboxRow,
+    Map<String, dynamic> payload,
+    PushRefused refusal,
+  ) async {
+    final hasLaterEntry = await _hasOtherEntryWaiting(outboxRow);
+    final serverRow =
+        !hasLaterEntry && outboxRow.operation != SyncOperation.insert
+        ? await _fetchRow(outboxRow.entityTable, outboxRow.rowId)
+        : null;
+
+    await _db.transaction(() async {
+      if (!hasLaterEntry && outboxRow.entityTable == 'financial_transactions') {
+        if (outboxRow.operation == SyncOperation.insert || serverRow == null) {
+          final local =
+              await (_db.select(_db.financialTransactions)..where(
+                    (transaction) => transaction.id.equals(outboxRow.rowId),
+                  ))
+                  .getSingleOrNull();
+          final itemId =
+              local?.expenseControlItemId ??
+              payload['expense_control_item_id'] as String?;
+          await (_db.delete(
+                _db.financialTransactions,
+              )..where((transaction) => transaction.id.equals(outboxRow.rowId)))
+              .go();
+          if (itemId != null) {
+            await BalanceLedger.recomputeBalances(_db, [itemId]);
+          }
+        } else {
+          await applyRemoteRowJson(
+            _db,
+            outboxRow.entityTable,
+            serverRow,
+            overwrite: true,
+            detectOverrides: false,
+          );
+        }
+      } else if (!hasLaterEntry && serverRow != null) {
+        await applyRemoteRowJson(
+          _db,
+          outboxRow.entityTable,
+          serverRow,
+          overwrite: true,
+          detectOverrides: false,
+        );
+      }
+
+      await (_db.update(
+        _db.syncOutbox,
+      )..where((row) => row.id.equals(outboxRow.id))).write(
+        SyncOutboxCompanion(
+          rejectedAt: Value(_now()),
+          rejectReason: Value(refusal.rejectReason),
+        ),
+      );
+    });
+
+    final reason = refusal.noticeReason;
+    if (reason != null) {
+      _notices?.report(
+        SyncNotice(
+          id: 'outbox:${outboxRow.id}',
+          reason: reason,
+          itemName: payload['display_name'] as String? ?? '',
+          transactionId: outboxRow.rowId,
+          amount: (payload['amount'] as num?)?.toInt(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _incrementRetryCount(SyncOutboxRow row) async {
+    await (_db.update(_db.syncOutbox)..where((r) => r.id.equals(row.id))).write(
+      SyncOutboxCompanion(retryCount: Value(row.retryCount + 1)),
+    );
+  }
+
+  void _reportPushOverride(
+    SyncOutboxRow outboxRow,
+    Map<String, dynamic> pushed,
+    Map<String, dynamic> response,
+  ) {
+    if (outboxRow.entityTable != 'financial_transactions') return;
+    final changed =
+        pushed['amount'] != response['amount'] ||
+        pushed['expense_control_item_id'] !=
+            response['expense_control_item_id'] ||
+        _dateValue(pushed['deleted_at']) != _dateValue(response['deleted_at']);
+    if (!changed) return;
+
+    _notices?.report(
+      SyncNotice(
+        id: 'push-override:${outboxRow.id}',
+        reason: response['deleted_at'] == null
+            ? SyncNoticeReason.editedElsewhere
+            : SyncNoticeReason.deleted,
+        itemName:
+            response['display_name'] as String? ??
+            pushed['display_name'] as String? ??
+            '',
+        transactionId: outboxRow.rowId,
+        amount: (response['amount'] as num?)?.toInt(),
+      ),
+    );
+  }
+
+  DateTime? _dateValue(Object? value) =>
+      value is String ? DateTime.tryParse(value)?.toUtc() : null;
 
   /// Whether another entry for the same row (any operation) is still waiting
   /// to be pushed: unsynced and not refused.
